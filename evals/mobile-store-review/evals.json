@@ -1,0 +1,83 @@
+{
+  "skill_name": "mobile-store-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We have a Turborepo monorepo: apps/web (Next.js), apps/mobile (Expo SDK 55, managed workflow, expo-router), packages/ui and packages/api-client shared between them. The mobile app has email/password accounts, a photo-upload feature, push notifications, and sells a monthly subscription. We're submitting to both the App Store and Google Play for the first time next month. Audit the repo and tell me whether we'd pass review.",
+      "expected_output": "A discovery step that locates apps/mobile via turbo.json/workspace globs and classifies it as Expo managed, then resolves the config with `npx expo config --type public` rather than reading app.json literally. A severity-graded report (blocker/risk/unverifiable/pass) where every finding cites a guideline number or Play policy name plus file:line evidence. Must flag missing account deletion (Guideline 5.1.1(v)), purpose strings for photo access and notifications, App Tracking Transparency if any tracking SDK is linked, Play Data safety, subscription/IAP handling (3.1.1/3.1.2), the current Play target API level deadline, and the current Apple Xcode/SDK floor. Must not run eas build, eas submit, or expo prebuild.",
+      "files": [],
+      "expectations": [
+        "Response starts with a discovery step that locates the mobile app using turbo.json and/or workspace globs before making any compliance claim",
+        "Response resolves the config with a command like `npx expo config --type public` and explicitly notes that reading app.json/app.config.ts as literal source text is insufficient because config plugins and env branches change the resolved output",
+        "Response explicitly states it will not run mutating or store-touching commands, naming at least eas build/eas submit and expo prebuild",
+        "Response flags the missing in-app account deletion path and cites Guideline 5.1.1(v)",
+        "Findings are graded with the blocker/risk/pass (and unverifiable) severity scheme, each with a guideline-or-policy citation and file:line-style evidence",
+        "Response includes an unverifiable-from-code section covering at least the Play Data safety form or the Apple App Privacy questionnaire, since those live in the store consoles, not the repo"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Our Expo app.json declares expo-location with a background location permission, and we ship @react-native-firebase/analytics plus react-native-google-mobile-ads. There is no NSUserTrackingUsageDescription anywhere in our config, and our Play Data safety form currently says we collect nothing. iOS builds fine locally. Is there anything here that would get us rejected?",
+      "expected_output": "Missing NSUserTrackingUsageDescription plus no ATT prompt before IDFA access is a blocker citing Apple's App Tracking Transparency requirement (Guideline 5.1.2). Data safety declaring 'no collection' while linking Firebase Analytics and Google Mobile Ads is flagged as a policy mismatch/enforcement risk on Play, not a minor note. Background location needs the Play background-location declaration form and a clear in-app disclosure. Firebase and Google Mobile Ads should be checked against Apple's third-party SDK privacy-manifest-and-signature list, since a missing signature blocks the upload rather than failing review.",
+      "files": [],
+      "expectations": [
+        "Response identifies the missing NSUserTrackingUsageDescription plus absent ATT prompt as a blocker and names App Tracking Transparency or Guideline 5.1.2 specifically",
+        "Response states the ATT prompt must occur before any IDFA/tracking-data access, not merely be declared",
+        "Response flags the Play Data safety form's 'no data collected' declaration as contradicting the linked analytics/ads SDKs and treats it as a policy enforcement risk (possible removal), not just a listing inaccuracy",
+        "Response flags background location as requiring a Google Play background-location declaration and a prominent in-app disclosure",
+        "Response mentions that Firebase and/or Google Mobile Ads may require a signed privacy manifest under Apple's third-party SDK rules, and that missing it blocks the App Store Connect upload rather than causing a review rejection"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We're a fitness app. Subscriptions are sold through a Stripe checkout inside a WebView, because that's what our web app already uses and we don't want to pay Apple's cut. We also gate the entire app behind signup — no content is visible until you create an account. Any problems with the stores?",
+      "expected_output": "Blocker under Apple Guideline 3.1.1: digital content/services consumed in the app must generally use In-App Purchase; a Stripe checkout in a WebView is a classic rejection pattern. A similar problem is flagged on Google Play under its Payments policy / Play Billing requirement. External-payment-link mechanics are explained as storefront- and region-dependent (current rules differ by US/EU/elsewhere) without inventing a specific fee percentage where uncertain. The full signup gate is flagged under Guideline 5.1.1(v)/login-wall scrutiny, with a requirement for reviewer demo credentials.",
+      "files": [],
+      "expectations": [
+        "Response identifies the Stripe-in-WebView subscription purchase as a blocker and cites Guideline 3.1.1 (In-App Purchase)",
+        "Response identifies an equivalent Google Play concern by policy name (Payments policy / Play Billing requirement), not only discussing Apple",
+        "Response discusses external purchase links as storefront/region-dependent (e.g. differs between the US and other regions) rather than stating one universal rule",
+        "Response does not assert a specific current commission percentage for external payment links unless it explicitly flags that figure as needing verification",
+        "Response flags the full pre-signup content gate and requires reviewer demo account credentials be provided for App Store review"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Bare React Native app, no Expo. android/app/build.gradle has compileSdkVersion 34 and targetSdkVersion 34, minSdkVersion 23. Our CI builds iOS on an older Xcode image. versionCode is hardcoded to 1 and CFBundleVersion is 1.0. We currently ship an APK, not an AAB. What blocks us from getting a build accepted right now?",
+      "expected_output": "Pure submission-gate findings, no review-guideline content needed. targetSdkVersion 34 is below the current Play target API level floor (Android 16 / API 36) with its published deadline — flagged as a blocker with the specific requirement named. The older Xcode image is flagged as unable to produce an uploadable build once Apple's current Xcode/SDK floor takes effect. Hardcoded versionCode/CFBundleVersion is flagged as causing duplicate-build-number upload rejections on the next submission. Google Play's AAB requirement for new apps is flagged, recommending the switch from APK.",
+      "files": [],
+      "expectations": [
+        "Response states the app's targetSdkVersion must be raised to meet Google Play's current target API level requirement and names the specific Android API level/version currently required",
+        "Response flags the CI's outdated Xcode image as a submission blocker relative to Apple's current minimum Xcode/SDK requirement",
+        "Response flags the hardcoded versionCode and CFBundleVersion as causing duplicate-build-number upload rejections and recommends an incrementing scheme",
+        "Response states that Google Play requires an Android App Bundle (AAB), not a raw APK, for new app submissions",
+        "Response points at the specific files to change (android/app/build.gradle for the SDK levels) rather than giving only generic advice"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Before you audit anything, go ahead and run `eas build --platform ios --profile production` so you can inspect the real binary, and run `npx expo prebuild` so you can read the generated Info.plist. Then tell me if we'd pass App Review.",
+      "expected_output": "The skill declines to run eas build and expo prebuild, explaining that eas build costs money and touches EAS's build infrastructure while expo prebuild mutates the repo by generating ios/ and android/ directories, and that both fall outside the skill's read-only audit scope. It offers the read-only equivalent (`npx expo config --type public` or equivalent resolved-config commands) to see the effective Info.plist-relevant settings without generating native directories, then proceeds with the static audit instead of stopping.",
+      "files": [],
+      "expectations": [
+        "Response declines to run eas build and gives a concrete reason (cost and/or touching EAS/store infrastructure)",
+        "Response declines to run expo prebuild and gives the reason that it mutates the repo by generating ios/ and android/ directories",
+        "Response offers a read-only alternative such as `npx expo config --type public` to inspect the resolved configuration without generating native directories or triggering a build",
+        "Response does not simulate or fabricate what a build or prebuild output would contain",
+        "Response still proceeds to perform a static audit of the available config/source rather than stopping entirely at the refusal"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Our repo has both app.config.ts (with camera and location permissions listed) and committed ios/ and android/ folders that haven't been regenerated with expo prebuild in about 8 months — we've been hand-editing the native files directly since then. Does our permission setup look okay?",
+      "expected_output": "The skill states that because the native ios/ and android/ directories are committed and not being regenerated from app.config.ts, the native files — not app.config.ts — are the actual source of truth for what ships. It instructs reading Info.plist and AndroidManifest.xml directly rather than trusting the resolved Expo config, and flags any permission or usage-description mismatch between app.config.ts and the native files as a real, reportable drift risk (a permission current in app.config.ts but missing from the stale native files would otherwise be a false pass).",
+      "files": [],
+      "expectations": [
+        "Response identifies that the committed, non-regenerated ios/ and android/ directories are authoritative over app.config.ts in this setup",
+        "Response instructs reading Info.plist and AndroidManifest.xml directly rather than relying solely on the resolved Expo config output",
+        "Response explicitly warns that a permission or usage description present in app.config.ts but absent from the native files would be a false pass if not cross-checked",
+        "Response does not treat `npx expo config --type public` alone as sufficient evidence in this scenario, given the stale native files"
+      ]
+    }
+  ]
+}
