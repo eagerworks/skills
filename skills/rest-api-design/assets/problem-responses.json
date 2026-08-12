@@ -1,0 +1,73 @@
+{
+  "_comment": "Canonical RFC 9457 (application/problem+json) response bodies for common status codes. Copy the one you need and fill in `detail`/`instance`. See references/payloads-and-errors.md.",
+
+  "400": {
+    "type": "about:blank",
+    "title": "Malformed Request",
+    "status": 400,
+    "detail": "The request body could not be parsed as JSON.",
+    "instance": "/invoices"
+  },
+
+  "401": {
+    "type": "about:blank",
+    "title": "Unauthorized",
+    "status": 401,
+    "detail": "The request is missing valid credentials.",
+    "instance": "/invoices"
+  },
+
+  "403": {
+    "type": "about:blank",
+    "title": "Forbidden",
+    "status": 403,
+    "detail": "You do not have permission to access this resource.",
+    "instance": "/invoices/inv_01H8X3Z9QK7N2M4P"
+  },
+
+  "404": {
+    "type": "about:blank",
+    "title": "Not Found",
+    "status": 404,
+    "detail": "No invoice exists with id inv_01H8X3Z9QK7N2M4P.",
+    "instance": "/invoices/inv_01H8X3Z9QK7N2M4P"
+  },
+
+  "409": {
+    "type": "about:blank",
+    "title": "Conflict",
+    "status": 409,
+    "detail": "The invoice has already been sent and cannot be modified.",
+    "instance": "/invoices/inv_01H8X3Z9QK7N2M4P"
+  },
+
+  "422": {
+    "type": "https://api.example.com/errors/validation-failed",
+    "title": "Validation Failed",
+    "status": 422,
+    "detail": "The request body failed validation.",
+    "instance": "/invoices",
+    "errors": [
+      { "field": "email", "message": "must be a valid email address" },
+      { "field": "amountCents", "message": "must be a positive integer" }
+    ]
+  },
+
+  "429": {
+    "type": "about:blank",
+    "title": "Rate Limit Exceeded",
+    "status": 429,
+    "detail": "Too many requests. Retry after the window resets.",
+    "instance": "/invoices",
+    "_headers_reminder": "Also set Retry-After, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset — see references/auth-and-security.md."
+  },
+
+  "500": {
+    "type": "about:blank",
+    "title": "Internal Server Error",
+    "status": 500,
+    "detail": "An unexpected error occurred.",
+    "instance": "/invoices",
+    "_reminder": "Never include stack traces, SQL fragments, or file paths in `detail` — log them server-side instead."
+  }
+}
