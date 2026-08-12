@@ -9,6 +9,7 @@ Each skill is plain markdown and works with Claude Code, Cursor, GitHub Copilot,
 | Skill | What it does |
 |---|---|
 | [**kamal**](skills/kamal/) | Zero-downtime [Kamal](https://kamal-deploy.org) deployments (v2.x + 1.9.x): first-time setup, deploys, rollbacks, rolling deploys, `kamal-proxy` + Let's Encrypt SSL, secrets & vault adapters, accessories, builders/multiarch, troubleshooting, and the v1→v2 upgrade. |
+| [**soc2**](skills/soc2/) | SOC 2 readiness planning: a structured intake interview, Trust Services Criteria scoping (Type I/II, system boundary, subservice orgs), a gap analysis and phased roadmap, required policy skeletons, DIY evidence collection, and the CPA audit process. |
 
 ## Install
 
@@ -174,9 +175,16 @@ skills/
     references/                 # in-depth docs, loaded on demand
     assets/                     # copyable starter files / templates
     README.md                   # human-facing overview of the skill
+  soc2/                         # another skill, same shape
+    SKILL.md
+    references/
+    assets/
+    README.md
 evals/
   kamal/
     evals.json                  # per-skill eval cases (repo-level harness, not shipped)
+  soc2/
+    evals.json
 ```
 
 ## Adding a new skill

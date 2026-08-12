@@ -26,9 +26,13 @@ The boundary is the rule: **anything users should receive goes inside `skills/<n
 
 `SKILL.md` is loaded up front, so it must stay **lean** — it's a hub: when-to-use frontmatter, a version-detection step, a table pointing to `references/*.md`, and critical gotchas. Depth belongs in `references/*.md`, which the agent opens only when relevant. When editing, push detail down into `references/` rather than growing `SKILL.md`.
 
-## The kamal skill (the only skill so far)
+## The kamal skill
 
 Deploys Dockerized apps with Kamal. **Version-aware**: defaults to **Kamal 2.x**; all Kamal 1.9.x content lives *exclusively* in `references/kamal-v1.md`. `SKILL.md` opens with a version-detection step (`kamal version`, or infer from `traefik:`/`.env` → v1 vs `proxy:`/`.kamal/secrets` → v2). When adding version-specific examples, mark them (`# Kamal 2.x only` / `# Kamal 1.x only`) and never mix v1 syntax into the v2 references.
+
+## The soc2 skill
+
+Plans and runs a SOC 2 readiness effort. Two behaviors define it and must not be diluted when editing: it **asks a batched intake interview before recommending anything** (`SKILL.md`'s "The Intake Interview" section — never dump the full question bank at once), and it **always outputs a fixed plan shape** (scope statement → gap matrix → five-phase roadmap → top-5 priorities → stated assumptions, per "Producing the Plan"). It defaults to a **DIY-first** tooling stance — no assumption of a compliance platform (Vanta/Drata/Secureframe); `references/tooling.md` covers those only as a closing "when it's worth it" note. `SKILL.md` opens with an engagement-framing step (own company vs. client engagement; Type I vs. Type II; current stage) analogous to kamal's version detection.
 
 ## Authoring conventions (from CONTRIBUTING.md)
 
