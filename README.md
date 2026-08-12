@@ -9,6 +9,7 @@ Each skill is plain markdown and works with Claude Code, Cursor, GitHub Copilot,
 | Skill | What it does |
 |---|---|
 | [**kamal**](skills/kamal/) | Zero-downtime [Kamal](https://kamal-deploy.org) deployments (v2.x + 1.9.x): first-time setup, deploys, rollbacks, rolling deploys, `kamal-proxy` + Let's Encrypt SSL, secrets & vault adapters, accessories, builders/multiarch, troubleshooting, and the v1→v2 upgrade. |
+| [**mobile-store-review**](skills/mobile-store-review/) | Audits an Expo/React Native or native mobile app — standalone or inside a Turborepo — against the [Apple App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) and [Google Play Developer Program Policies](https://play.google.com/about/developer-content-policy/): permissions & usage descriptions, privacy manifests & App Tracking Transparency, App Privacy vs. Data safety, account deletion, IAP & external payments, SDK/target-API floors, versioning & credentials, and EAS/monorepo build config — output as a severity-graded audit report. |
 
 ## Install
 
