@@ -26,9 +26,11 @@ The boundary is the rule: **anything users should receive goes inside `skills/<n
 
 `SKILL.md` is loaded up front, so it must stay **lean** — it's a hub: when-to-use frontmatter, a version-detection step, a table pointing to `references/*.md`, and critical gotchas. Depth belongs in `references/*.md`, which the agent opens only when relevant. When editing, push detail down into `references/` rather than growing `SKILL.md`.
 
-## The kamal skill (the only skill so far)
+## The skills
 
-Deploys Dockerized apps with Kamal. **Version-aware**: defaults to **Kamal 2.x**; all Kamal 1.9.x content lives *exclusively* in `references/kamal-v1.md`. `SKILL.md` opens with a version-detection step (`kamal version`, or infer from `traefik:`/`.env` → v1 vs `proxy:`/`.kamal/secrets` → v2). When adding version-specific examples, mark them (`# Kamal 2.x only` / `# Kamal 1.x only`) and never mix v1 syntax into the v2 references.
+**kamal** deploys Dockerized apps with Kamal. **Version-aware**: defaults to **Kamal 2.x**; all Kamal 1.9.x content lives *exclusively* in `references/kamal-v1.md`. `SKILL.md` opens with a version-detection step (`kamal version`, or infer from `traefik:`/`.env` → v1 vs `proxy:`/`.kamal/secrets` → v2). When adding version-specific examples, mark them (`# Kamal 2.x only` / `# Kamal 1.x only`) and never mix v1 syntax into the v2 references.
+
+**pr-review** reviews a diff (branch, PR, staged, or working-tree changes) against a fixed four-lens rubric — correctness, security & data integrity, repo-convention conformance, test coverage — ported from the `dizenz/agent-skills` `code-reviewer` subagent and its review rubric, generalized to be plugin-free and stack-agnostic (Rails + Node/TypeScript). `references/rubric.md` is the single source of truth for the rubric and severity ladder; `SKILL.md` only summarizes it — never duplicate rubric detail back into `SKILL.md`. Read-only by default: the standard review never edits, commits, or pushes; the optional fix loop only runs when a user explicitly asks for it (see `references/workflow.md`).
 
 ## Authoring conventions (from CONTRIBUTING.md)
 
