@@ -1,0 +1,84 @@
+{
+  "skill_name": "rest-api-design",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We're starting a brand-new service with no existing API yet. Design the endpoints for a 'projects' resource: list projects, get one, create one, partially update one, delete one, and an action to archive a project. Give me the paths, HTTP methods, status codes, and example request/response bodies.",
+      "expected_output": "Greenfield design using the house style: plural noun path /projects, GET (list, paginated) and POST (create) on the collection, GET/PATCH/DELETE on /projects/{id}, a separate POST /projects/{id}/archive action endpoint (not a PATCH status field), 201 with Location on create, 204 on delete, cursor-based pagination on the list endpoint, and RFC 9457 problem+json error examples.",
+      "files": [],
+      "expectations": [
+        "Response uses plural noun paths (/projects, /projects/{id}) with no verbs in the path",
+        "Response models archiving as its own action endpoint, e.g. POST /projects/{id}/archive, rather than a PATCH with a status field",
+        "The create endpoint returns 201 Created with a Location header",
+        "The delete endpoint returns 204 No Content",
+        "The list endpoint uses cursor-based pagination (e.g. a cursor or nextCursor parameter), not offset/page numbers, as the default",
+        "Error examples use application/problem+json with RFC 9457 members (type, title, status, detail)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Our existing API has this pattern already shipped everywhere (see routes/orders.js):\n\n```javascript\n// GET /api/orders?page=2&per_page=20\nrouter.get('/api/orders', (req, res) => {\n  res.json({\n    orders: [{ order_id: 1042, customer_name: 'Jane Doe', total_amount: 49.99, created_at: '2026-08-01 10:00:00' }],\n    total_pages: 8\n  })\n})\n```\n\nNotice it uses snake_case keys, offset/page pagination, and a bare `orders` array key (no `data` wrapper). Now add a new endpoint to list a single order's shipments: GET /api/orders/{id}/shipments. Follow our existing conventions.",
+      "expected_output": "The agent surveys the given existing code first and matches its established conventions: snake_case JSON keys, offset/page-based pagination (page/per_page, total_pages), and the bare-collection-key envelope style (e.g. shipments: [...]) rather than imposing camelCase, cursor pagination, or a generic data/pagination envelope. Any preference for cursor pagination or camelCase is raised as a separate suggestion for future consideration, not applied to this new endpoint.",
+      "files": [],
+      "expectations": [
+        "The new endpoint's example response uses snake_case keys (e.g. order_id, created_at), matching the existing code, not camelCase",
+        "The new endpoint uses offset/page-based pagination (page/per_page or similar) to match the existing pattern, not a cursor parameter",
+        "The response envelope mirrors the existing bare-collection-key style (e.g. a shipments array key) rather than switching to a generic data/pagination wrapper",
+        "The response explicitly acknowledges it is matching existing conventions rather than applying a different default style",
+        "If the agent prefers cursor pagination or camelCase, it states this as a separate recommendation/observation rather than silently changing the new endpoint's style"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I have PATCH /users/{id} that currently accepts a full user object and replaces every field, nulling out anything the client omits. Is that correct? Also, what's the difference in when I'd return 409 vs 422 if the update fails?",
+      "expected_output": "Explains that full-replace-on-omission is PUT semantics, not PATCH; PATCH must leave omitted fields untouched (JSON Merge Patch or JSON Patch). Explains 409 is for state conflicts (e.g. stale version, duplicate unique field) while 422 is for the request content itself being invalid/failing business validation regardless of current state.",
+      "files": [],
+      "expectations": [
+        "Response identifies the current /users/{id} behavior as PUT semantics being used under a PATCH method, which is incorrect",
+        "Response explains that correct PATCH behavior leaves fields omitted from the request body unchanged",
+        "Response mentions JSON Merge Patch (or JSON Patch) as the standard way to define partial-update semantics",
+        "Response distinguishes 409 (conflict with current state, e.g. stale version or duplicate) from 422 (the request content itself fails validation)",
+        "Response gives a concrete example for each of 409 and 422"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Our API currently returns `{ \"total\": 49.99 }` on GET /invoices/{id}. Product wants to rename `total` to `totalAmount` for clarity. This API already has real external clients. How should I roll this out?",
+      "expected_output": "Identifies renaming a field as a breaking change. Recommends an additive-first approach: add totalAmount alongside the existing total field, deprecate total with Deprecation/Sunset headers and a documented migration window, and only remove total in a new major version (or after the sunset date) rather than renaming in place.",
+      "files": [],
+      "expectations": [
+        "Response explicitly states that renaming an existing field is a breaking change",
+        "Response recommends adding the new field (totalAmount) alongside the old one rather than renaming in place",
+        "Response mentions Deprecation and/or Sunset headers for marking the old field/endpoint as deprecated",
+        "Response describes a migration window/grace period before removing the old field",
+        "Response does not recommend silently changing the field name on the existing endpoint without a version or deprecation strategy"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Design the error response for POST /invoices when the request body has an invalid `amountCents` (negative number) and a missing `currency` field. What status code and body should this return?",
+      "expected_output": "422 Unprocessable Content (not 400, since the JSON is well-formed but fails business/field validation) with an application/problem+json body containing RFC 9457 members plus a field-level errors array identifying both the amountCents and currency problems by field name.",
+      "files": [],
+      "expectations": [
+        "Response specifies 422 as the status code, and explains why it's 422 rather than 400 (well-formed JSON that fails validation, not malformed JSON)",
+        "Response uses application/problem+json as the content type",
+        "Response includes core RFC 9457 members (type, title, status, detail)",
+        "Response includes a field-level errors array with distinct entries for amountCents and currency, each naming the field",
+        "The error body does not leak internal details like stack traces or database error text"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Please review this endpoint for security issues:\n\n```\nGET /api/accounts/{accountId}/invoices/{invoiceId}\n```\n\nThe handler authenticates the request (valid JWT required) and then does: `Invoice.findById(invoiceId)` and returns it — it never checks that the invoice's account matches `accountId` in the path, or that the caller belongs to that account at all.",
+      "expected_output": "Identifies this as an IDOR (Insecure Direct Object Reference) vulnerability: authentication is checked but object-level/tenant-level authorization is not, so any authenticated user can read any other account's invoice by supplying a different accountId/invoiceId. Recommends adding an explicit check that the invoice belongs to accountId and that the caller is authorized for that account, and recommends returning 404 (not 403) for both the not-found and not-authorized cases to avoid confirming existence to unauthorized callers.",
+      "files": [],
+      "expectations": [
+        "Response identifies the issue by name as IDOR (Insecure Direct Object Reference) or clearly describes the equivalent object-level authorization gap",
+        "Response explains that authentication alone was checked but not whether the invoice belongs to the caller's account",
+        "Response recommends an explicit check that the invoice's account matches both the path's accountId and the authenticated caller's account/tenant",
+        "Response addresses whether to return 404 vs 403 for unauthorized access so the response doesn't confirm existence of resources the caller can't see",
+        "Response treats this as a high-severity finding to fix, not a minor style suggestion"
+      ]
+    }
+  ]
+}
