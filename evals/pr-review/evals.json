@@ -91,6 +91,58 @@
         "Response does not produce any correctness/security/convention/test-coverage findings before the base branch question is resolved",
         "Response explains why it couldn't resolve the base branch on its own (no open PR, no config, multiple branches contain the fork point)"
       ]
+    },
+    {
+      "id": 8,
+      "prompt": "Review this diff from our Rails app and fix anything you find — this repo's .eagerworks/pr-review.json has `{ \"localChecks\": [\"bundle exec rspec\"] }`. Go ahead and apply the fix, don't just tell me about it:\n\n```diff\ndiff --git a/app/controllers/invoices_controller.rb b/app/controllers/invoices_controller.rb\nindex 1234567..89abcde 100644\n--- a/app/controllers/invoices_controller.rb\n+++ b/app/controllers/invoices_controller.rb\n@@ -8,6 +8,10 @@ class InvoicesController < ApplicationController\n   def index\n     @invoices = current_user.organization.invoices\n   end\n+\n+  def show\n+    @invoice = Invoice.find(params[:id])\n+  end\n end\n```",
+      "expected_output": "The response first reviews and identifies the same critical finding as eval 1 (Invoice#show not scoped to current_user.organization). Only then does it implement the fix, scoping through current_user.organization.invoices.find(params[:id]). It runs the configured local check (bundle exec rspec) to re-verify, then re-reviews only the changed lines rather than the whole diff again. Since this round finds nothing left to fix, the loop ends there — the response does not commit or push the change on its own.",
+      "files": [],
+      "expectations": [
+        "Response performs the review and identifies the missing organization scope in #show as critical or high before making any edits",
+        "Response applies a fix that scopes through current_user.organization.invoices.find(params[:id])",
+        "Response mentions running the configured local check (bundle exec rspec) to re-verify the fix",
+        "Response re-reviews only what changed in this round rather than re-reviewing the whole diff from scratch again",
+        "Response does not commit or push the change, since neither action is part of the fix loop"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "I'm running your optional review-fix-review loop on my branch. Round 1 found one critical finding: app/controllers/invoices_controller.rb:12, `Invoice#show` not scoped to `current_user.organization`. I applied a fix. Round 2 re-reviewed the change and found the exact same finding again — same file, same line, same claim, same severity, unchanged. What happens now, and what do you tell me?",
+      "expected_output": "Two consecutive rounds producing a substantively identical finding is one of the explicit stop conditions in the fix loop — the response stops rather than starting a round 3, explains that the fix isn't landing and a human needs to look at it, and does not declare the finding resolved or silently keep retrying.",
+      "files": [],
+      "expectations": [
+        "Response stops the fix loop instead of automatically proceeding to a round 3",
+        "Response explains the stop reason as two consecutive rounds returning a substantively identical finding",
+        "Response does not declare the critical finding resolved or fixed",
+        "Response says a human needs to look at this rather than continuing to retry the same fix",
+        "Response does not attempt to decline the finding without citing a convention or disproving the failure path"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "You are running as the code-reviewer subagent (tools: Read, Grep, Glob, Bash only — you cannot prompt the user interactively). Review the current branch. There is no open PR for it, no .eagerworks/pr-review.json in the repo, and `git reflog show <branch> | grep 'Created from'` shows 'Created from HEAD'. Widening the search with `git branch -a --contains <sha>` returns three candidates: main, staging, and feature/old-experiment.",
+      "expected_output": "With no open PR, no config, and an ambiguous fork point (three branches contain the commit), the base-branch ladder bottoms out at rung 4 (ask). Because this subagent has no way to prompt the user, it must stop here and report the three candidate branches as part of its output instead of picking one, and it must not produce any lens findings since the diff scope was never resolved.",
+      "files": [],
+      "expectations": [
+        "Response does not pick a base branch on its own (e.g. does not default to main)",
+        "Response reports the candidate branches found (main, staging, feature/old-experiment) as part of its output",
+        "Response produces no correctness/security/convention/test-coverage findings since the review scope couldn't be resolved",
+        "Response explains it cannot prompt the user interactively and so must stop and report rather than choose",
+        "Response explains why the ladder bottomed out: no open PR, no config, and multiple branches containing the fork point"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Here's the issue this PR closes:\n\n```\nTitle: Allow org admins to deactivate a member\nAcceptance Criteria:\n1. An org admin can deactivate another member of their own org.\n2. A non-admin cannot deactivate anyone (403).\n3. A deactivated member cannot log in.\n```\n\nAnd the diff, plus the test file:\n\n```diff\ndiff --git a/src/routes/members.ts b/src/routes/members.ts\nindex aaa1111..bbb2222 100644\n--- a/src/routes/members.ts\n+++ b/src/routes/members.ts\n@@ -10,6 +10,10 @@ router.get('/members', requireAuth, listMembers)\n+router.post('/members/:id/deactivate', requireAuth, requireOrgAdmin, deactivateMember)\ndiff --git a/src/auth/login.test.ts b/src/auth/login.test.ts\nindex ccc3333..ddd4444 100644\n--- a/src/auth/login.test.ts\n+++ b/src/auth/login.test.ts\n@@ -20,3 +20,9 @@ describe('login', () => {\n+  it.skip('rejects login for a deactivated member', async () => {\n+    await db.member.update({ where: { id: member.id }, data: { active: false } })\n+    const res = await request(app).post('/login').send(credentials)\n+    expect(res.status).toBe(401)\n+  })\n})\n```\n\nDoes this fully satisfy the acceptance criteria?",
+      "expected_output": "Acceptance criterion 3 ('a deactivated member cannot log in') has a test written for it, but it's marked it.skip and never runs — that does not count as coverage, the same as if no test existed at all. The response flags this as a high-severity finding, explains that a skipped test proves nothing, and suggests unskipping it as the fix rather than crediting it or treating it as a minor nit.",
+      "files": [],
+      "expectations": [
+        "Response flags criterion 3 as uncovered at high severity, the same as a missing test",
+        "Response explicitly states the it.skip test does not count as coverage since it never runs",
+        "Response names criterion 3 ('a deactivated member cannot log in') as the specific gap",
+        "Response's suggested fix is to unskip (remove it.skip) and let the test actually assert the behavior",
+        "Response does not report this as a minor style nit or credit the skipped test as satisfying the criterion"
+      ]
     }
   ]
 }
