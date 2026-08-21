@@ -1,15 +1,10 @@
 # PR Review — Configuration
 
-`.eagerworks/pr-review.json`, at the target repo's root, is **entirely optional**. The skill
-works with no config file at all — it falls back to inferring the base branch and reading
-whatever `AGENTS.md`/`CLAUDE.md` conventions it finds. Add the file only when a repo needs to
-override a default or point at repo-specific risk areas.
+`.eagerworks/pr-review.json`, at the target repo's root, is **entirely optional**. The skill works with no config file at all — it falls back to inferring the base branch and reading whatever `AGENTS.md`/`CLAUDE.md` conventions it finds. Add the file only when a repo needs to override a default or point at repo-specific risk areas.
 
 ## Resolution Order
 
-For any given setting: `.eagerworks/pr-review.json` → conventions stated in
-`AGENTS.md`/`CLAUDE.md` → the skill's built-in default. A later source only fills in what an
-earlier one didn't set.
+For any given setting: `.eagerworks/pr-review.json` → conventions stated in `AGENTS.md`/`CLAUDE.md` → the skill's built-in default. A later source only fills in what an earlier one didn't set.
 
 ## Schema
 
