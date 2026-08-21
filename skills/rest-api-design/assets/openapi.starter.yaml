@@ -1,0 +1,241 @@
+# ============================================================================
+# REST API Design — Annotated OpenAPI 3.1 Starter
+# Copy this into your project and customize.
+# Demonstrates: a paginated collection + item resource, cursor pagination,
+# RFC 9457 problem+json errors reused across every 4xx, and bearer auth.
+# ============================================================================
+openapi: 3.1.0
+
+info:
+  title: Example API
+  version: 1.0.0
+  description: Replace with your API's name and a one-paragraph description.
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production
+  # - url: https://staging-api.example.com/v1
+  #   description: Staging
+
+# Applies to every operation unless overridden with `security: []` (public endpoints).
+security:
+  - bearerAuth: []
+
+paths:
+  # ==========================================================================
+  # COLLECTION — GET (list, cursor-paginated) / POST (create)
+  # ==========================================================================
+  /invoices:
+    get:
+      operationId: listInvoices
+      summary: List invoices
+      parameters:
+        - name: limit
+          in: query
+          description: Max items to return (default 25, max 100).
+          schema: { type: integer, minimum: 1, maximum: 100, default: 25 }
+        - name: cursor
+          in: query
+          description: Opaque pagination cursor from a previous response's nextCursor.
+          schema: { type: string }
+        - name: status
+          in: query
+          description: "Filter by status. Example filter grammar — see references/collections.md."
+          schema: { type: string, enum: [draft, sent, paid] }
+      responses:
+        '200':
+          description: A page of invoices.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Invoice' }
+                  pagination:
+                    type: object
+                    properties:
+                      nextCursor: { type: string, nullable: true }
+                      hasMore: { type: boolean }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+    post:
+      operationId: createInvoice
+      summary: Create an invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvoiceInput' }
+      responses:
+        '201':
+          description: Invoice created.
+          headers:
+            Location:
+              description: URL of the newly created invoice.
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  # ==========================================================================
+  # ITEM — GET / PATCH (partial update, JSON Merge Patch) / DELETE
+  # ==========================================================================
+  /invoices/{invoiceId}:
+    parameters:
+      - name: invoiceId
+        in: path
+        required: true
+        schema: { type: string }
+
+    get:
+      operationId: getInvoice
+      summary: Get an invoice
+      responses:
+        '200':
+          description: Invoice found.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+    patch:
+      operationId: updateInvoice
+      summary: Partially update an invoice (JSON Merge Patch — omitted fields are left untouched)
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema: { $ref: '#/components/schemas/InvoicePatch' }
+      responses:
+        '200':
+          description: Invoice updated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+    delete:
+      operationId: deleteInvoice
+      summary: Delete an invoice
+      responses:
+        '204':
+          description: Invoice deleted. Idempotent — deleting again also returns 204.
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ==========================================================================
+  # ACTION — non-CRUD operation on an existing resource (see resource-modeling.md)
+  # ==========================================================================
+  /invoices/{invoiceId}/send:
+    parameters:
+      - name: invoiceId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      operationId: sendInvoice
+      summary: Send the invoice to the customer (triggers an email — not a plain field update)
+      responses:
+        '200':
+          description: Invoice sent.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Invoice:
+      type: object
+      required: [id, status, amountCents, currency, createdAt]
+      properties:
+        id: { type: string, example: inv_01H8X3Z9QK7N2M4P }
+        status: { type: string, enum: [draft, sent, paid], example: paid }
+        amountCents: { type: integer, example: 1999 }
+        currency: { type: string, example: usd }
+        createdAt: { type: string, format: date-time, example: "2026-08-12T10:00:00Z" }
+
+    InvoiceInput:
+      type: object
+      required: [customerId, amountCents, currency]
+      properties:
+        customerId: { type: string, example: cus_01H8X3Z9QK7N2M4P }
+        amountCents: { type: integer, minimum: 1, example: 1999 }
+        currency: { type: string, example: usd }
+
+    InvoicePatch:
+      type: object
+      description: Any subset of writable fields. Omitted fields are left unchanged.
+      properties:
+        status: { type: string, enum: [draft, sent, paid] }
+
+    # RFC 9457 (https://www.rfc-editor.org/rfc/rfc9457) — see references/payloads-and-errors.md
+    Problem:
+      type: object
+      properties:
+        type: { type: string, format: uri, example: "about:blank" }
+        title: { type: string, example: "Not Found" }
+        status: { type: integer, example: 404 }
+        detail: { type: string, example: "No invoice exists with id inv_01H8X3Z." }
+        instance: { type: string, example: "/invoices/inv_01H8X3Z" }
+
+    ValidationProblem:
+      allOf:
+        - $ref: '#/components/schemas/Problem'
+        - type: object
+          properties:
+            errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  field: { type: string, example: amountCents }
+                  message: { type: string, example: "must be a positive integer" }
+
+  # Reusable error responses — $ref these from every operation instead of
+  # redefining the same 4xx shape per endpoint. See references/openapi.md.
+  responses:
+    Unauthorized:
+      description: Missing or invalid credentials.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Forbidden:
+      description: Authenticated but not permitted for this resource.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: Resource does not exist.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Conflict:
+      description: Request conflicts with current resource state.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    ValidationError:
+      description: Request failed field-level validation.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ValidationProblem' }
