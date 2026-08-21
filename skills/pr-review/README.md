@@ -5,6 +5,7 @@ A portable agent skill for reviewing a diff — a branch, a PR, staged changes, 
 ## What it covers
 
 - Scope detection: full branch vs. base, staged changes, working tree, or a specific GitHub PR
+- Base-branch resolution from evidence — an open PR's actual base, then config, then the branch's fork point — asking the user rather than guessing when none of those is conclusive
 - The four review lenses with Rails and Node/TypeScript examples for each
 - A conservative severity ladder (critical / high / minor / not a finding) that avoids padding the list with style nits
 - Reviewing against an issue or PR's acceptance criteria, with a test-coverage check that requires the test to actually assert the behavior, not just exercise the code path
@@ -19,6 +20,7 @@ SKILL.md                        # hub: scope detection, the four lenses, severit
 references/
   rubric.md                     # full four-lens checklist, severity ladder, Rails + Node examples
   workflow.md                   # end-to-end review flow, issue/PR review, optional fix loop
+  base-branch.md                # base-branch resolution ladder: open PR, config, fork point, or ask
   output-format.md              # markdown report format + the ### FINDINGS block
   config.md                     # .eagerworks/pr-review.json schema and resolution order
 assets/
@@ -30,11 +32,11 @@ The agent loads [`SKILL.md`](SKILL.md) up front and opens the matching [`referen
 
 ## Configuration
 
-The skill works with zero configuration — it infers the base branch and reads whatever `AGENTS.md`/`CLAUDE.md` conventions exist in the target repo. To override the base branch, point at a repo-specific risk area, or wire up local verification commands for the optional fix loop, add `.eagerworks/pr-review.json`. See [`references/config.md`](references/config.md) for the full schema and [`assets/pr-review.example.json`](assets/pr-review.example.json) for a starter.
+The skill works with zero configuration — it resolves the base branch from evidence (an open PR's actual base first, then this config, then the branch's fork point, asking the user if none is conclusive — see [`references/base-branch.md`](references/base-branch.md)) and reads whatever `AGENTS.md`/`CLAUDE.md` conventions exist in the target repo. To set a default base branch, point at a repo-specific risk area, or wire up local verification commands for the optional fix loop, add `.eagerworks/pr-review.json`. See [`references/config.md`](references/config.md) for the full schema and [`assets/pr-review.example.json`](assets/pr-review.example.json) for a starter.
 
 ## Claude Code subagent (optional)
 
-[`assets/code-reviewer.agent.md`](assets/code-reviewer.agent.md) is a copyable Claude Code subagent definition that wraps this skill's rubric in a dedicated, read-only reviewer — copy it to `.claude/agents/code-reviewer.md` in your project if you want the review to run as an isolated subagent call. It's optional: the skill works standalone in any agentic tool without it. The subagent points back at this skill's own `references/rubric.md`, `workflow.md`, and `output-format.md`, so the `pr-review` skill itself must also be installed in the same project (e.g. `.claude/skills/pr-review/`) for those references to resolve — copying only the subagent file on its own leaves those paths unresolvable.
+[`assets/code-reviewer.agent.md`](assets/code-reviewer.agent.md) is a copyable Claude Code subagent definition that wraps this skill's rubric in a dedicated, read-only reviewer — copy it to `.claude/agents/code-reviewer.md` in your project if you want the review to run as an isolated subagent call. It's optional: the skill works standalone in any agentic tool without it. The subagent points back at this skill's own `references/rubric.md`, `workflow.md`, `base-branch.md`, and `output-format.md`, so the `pr-review` skill itself must also be installed in the same project (e.g. `.claude/skills/pr-review/`) for those references to resolve — copying only the subagent file on its own leaves those paths unresolvable.
 
 ## Install
 

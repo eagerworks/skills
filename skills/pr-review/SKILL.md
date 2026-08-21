@@ -29,7 +29,7 @@ gh pr diff <N>
 gh pr view <N> --json body,title       # pull the description / acceptance criteria too
 ```
 
-Infer the base branch if the user doesn't name one: `gh repo view --json defaultBranchRef` or fall back to whichever of `main`/`master`/`develop` exists on `origin`. If a `.eagerworks/pr-review.json` config is present (see `references/config.md`), its `baseBranch` wins.
+**Never guess the base branch.** If the user didn't name one, resolve it from evidence, in order: (1) the open PR for the branch under review — `gh pr view --json baseRefName` — which outranks the config file; (2) `.eagerworks/pr-review.json`'s `baseBranch` (see `references/config.md`); (3) the branch/worktree's fork point via `git reflog`, only if it resolves to exactly one candidate branch; (4) if none of those is conclusive, ask the user which branch to diff against rather than assuming one. Full procedure, commands, and anti-patterns: `references/base-branch.md`.
 
 **The most common mistake is reviewing `HEAD~1..HEAD` instead of the full branch** — that only shows the last commit and silently skips everything the branch actually changed. Always use the three-dot range against the base, not the last commit.
 
@@ -62,6 +62,7 @@ Three labels — `critical`, `high`, `minor` — plus "not a finding" for anythi
 |---|---|
 | The four lenses in full, with Rails + Node/TS examples, severity ladder, conservatism rule | `references/rubric.md` |
 | Running a review end-to-end, reviewing against an issue, the optional fix loop, posting to a PR | `references/workflow.md` |
+| Resolving which branch to diff against, when the user didn't say | `references/base-branch.md` |
 | The markdown report format and the machine-parseable `### FINDINGS` block | `references/output-format.md` |
 | The optional `.eagerworks/pr-review.json` config schema | `references/config.md` |
 
@@ -81,6 +82,8 @@ Copyable templates live in `assets/`:
 
 5. **Always diff the full branch against its base**, not just the last commit — see Scope Detection above.
 
-6. **If you can't tell whether something is a real bug without running code, say so in the finding** rather than guessing either way.
+6. **Never assume a base branch that isn't backed by evidence.** If the open PR, the config, and the fork point don't converge on one branch, ask the user — see `references/base-branch.md`.
 
-7. **Never pad the list to look thorough.** Zero findings is a valid, correct result.
+7. **If you can't tell whether something is a real bug without running code, say so in the finding** rather than guessing either way.
+
+8. **Never pad the list to look thorough.** Zero findings is a valid, correct result.

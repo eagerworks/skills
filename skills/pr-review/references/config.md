@@ -1,10 +1,12 @@
 # PR Review — Configuration
 
-`.eagerworks/pr-review.json`, at the target repo's root, is **entirely optional**. The skill works with no config file at all — it falls back to inferring the base branch and reading whatever `AGENTS.md`/`CLAUDE.md` conventions it finds. Add the file only when a repo needs to override a default or point at repo-specific risk areas.
+`.eagerworks/pr-review.json`, at the target repo's root, is **entirely optional**. The skill works with no config file at all — it resolves the base branch from evidence (see `references/base-branch.md`) and reads whatever `AGENTS.md`/`CLAUDE.md` conventions it finds. Add the file only when a repo needs to override a default or point at repo-specific risk areas.
 
 ## Resolution Order
 
-For any given setting: `.eagerworks/pr-review.json` → conventions stated in `AGENTS.md`/`CLAUDE.md` → the skill's built-in default. A later source only fills in what an earlier one didn't set.
+For most settings: `.eagerworks/pr-review.json` → conventions stated in `AGENTS.md`/`CLAUDE.md` → the skill's built-in default. A later source only fills in what an earlier one didn't set.
+
+`baseBranch` is the one exception: an open PR's actual base (`gh pr view --json baseRefName`) outranks `baseBranch` when the branch under review already has one. See `references/base-branch.md` for the full ladder.
 
 ## Schema
 
@@ -12,8 +14,9 @@ All fields optional.
 
 ```jsonc
 {
-  // Branch to diff against. Falls back to the repo's default branch (gh repo view) or
-  // whichever of main/master/develop exists on origin.
+  // Branch to diff against. Overridden by an open PR's actual base when one exists.
+  // If neither is set and the fork point is ambiguous, the skill asks rather than
+  // guessing — see references/base-branch.md.
   "baseBranch": "main",
 
   "review": {

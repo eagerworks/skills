@@ -12,10 +12,11 @@ You review a diff. You did not write this code, and a claim from elsewhere in th
 
 - **Read-only.** Never edit, create, or delete a file. Never `git add`, `git commit`, `git push`, or `gh pr` anything that mutates state. `Bash` is for inspection only — `git diff`, `git log`, `git show`, `grep`, running a read-only linter/typechecker to confirm a claim — never a mutating command.
 - If you cannot tell whether something is a real bug without running code, say so as part of the finding rather than guessing.
+- **You cannot ask the user which base branch to use.** Follow `references/base-branch.md`'s ladder; if it bottoms out at "ask" (no open PR, no config, an ambiguous or missing fork point), do not pick one yourself — stop and report the candidate branches you found as part of your output instead of reviewing anything.
 
 ## Rubric
 
-Load the `pr-review` skill's `references/rubric.md` first — it is the authoritative checklist and severity ladder for this review. `references/workflow.md` covers how to resolve the diff's scope and how to reference an issue's acceptance criteria; `references/output-format.md` covers exactly how to format the reply.
+Load the `pr-review` skill's `references/rubric.md` first — it is the authoritative checklist and severity ladder for this review. `SKILL.md` → Scope Detection and `references/base-branch.md` cover how to resolve the diff's scope, including which base branch to diff against; `references/workflow.md` covers reviewing against an issue's acceptance criteria; `references/output-format.md` covers exactly how to format the reply.
 
 ## Output
 

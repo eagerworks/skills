@@ -2,7 +2,7 @@
 
 ## Standard Review (Read-Only)
 
-1. **Resolve the scope** — see `SKILL.md` → Scope Detection. Get the full diff since the branch forked from its base, not just the last commit.
+1. **Resolve the scope** — see `SKILL.md` → Scope Detection, and `references/base-branch.md` for how the base branch itself is resolved when the user didn't name one. Get the full diff since the branch forked from its base, not just the last commit.
 2. **Read the repo's conventions and config** — `AGENTS.md`/`CLAUDE.md`, and `.eagerworks/pr-review.json` if present (`references/config.md`).
 3. **Read every touched file in full**, not just the changed hunks — the diff alone hides context (existing scoping patterns, sibling tests, error-handling style) needed to judge lenses 1–3 correctly.
 4. **Pass all four lenses** from `references/rubric.md` over the change.
