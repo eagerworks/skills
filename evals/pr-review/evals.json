@@ -1,0 +1,70 @@
+{
+  "skill_name": "pr-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review this diff from our Rails app before I merge it. It's an InvoicesController for a multi-tenant SaaS where every user belongs to exactly one Organization and invoices must never be visible across organizations:\n\n```diff\ndiff --git a/app/controllers/invoices_controller.rb b/app/controllers/invoices_controller.rb\nindex 1234567..89abcde 100644\n--- a/app/controllers/invoices_controller.rb\n+++ b/app/controllers/invoices_controller.rb\n@@ -8,6 +8,10 @@ class InvoicesController < ApplicationController\n   def index\n     @invoices = current_user.organization.invoices\n   end\n+\n+  def show\n+    @invoice = Invoice.find(params[:id])\n+  end\n end\n```\n\nWhat did I miss?",
+      "expected_output": "A critical finding: Invoice#show is not scoped to current_user.organization, unlike #index right above it in the same file, so any authenticated user from any organization can read any other organization's invoice by id (IDOR / broken auth scoping). The fix is to scope through current_user.organization.invoices.find(params[:id]), matching the existing #index pattern. The response should not raise unrelated style nits as findings.",
+      "files": [],
+      "expectations": [
+        "Response flags the missing organization scope in #show as critical or high severity, not minor",
+        "Response describes the concrete failure scenario: a user from one organization can fetch another organization's invoice by id",
+        "Response's suggested fix scopes through current_user.organization.invoices.find(params[:id]), consistent with the existing #index method",
+        "Response references the file and line (app/controllers/invoices_controller.rb around the new #show method)",
+        "Response does not raise unrelated minor style findings as if they were equally important as the scoping bug"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review this diff from our Node/TypeScript service (Prisma + a background job runner). It adds a migration and a job that logs Stripe API activity:\n\n```diff\ndiff --git a/prisma/migrations/20260801_add_status/migration.sql b/prisma/migrations/20260801_add_status/migration.sql\nnew file mode 100644\n--- /dev/null\n+++ b/prisma/migrations/20260801_add_status/migration.sql\n@@ -0,0 +1,2 @@\n+-- orders table already has ~2M rows in production\n+ALTER TABLE \"orders\" ADD COLUMN \"status\" TEXT NOT NULL;\ndiff --git a/src/jobs/syncStripeCharges.ts b/src/jobs/syncStripeCharges.ts\nnew file mode 100644\n--- /dev/null\n+++ b/src/jobs/syncStripeCharges.ts\n@@ -0,0 +1,9 @@\n+import { stripe, stripeApiKey } from '../lib/stripe'\n+\n+export async function syncStripeCharges(orgId: string) {\n+  try {\n+    const charges = await stripe.charges.list({ limit: 100 })\n+    return charges\n+  } catch (err) {\n+    console.error(`Stripe sync failed for org ${orgId} using key ${stripeApiKey}: ${err}`)\n+  }\n+}\n```\n\nAnything wrong here before this ships?",
+      "expected_output": "Two separate findings, not merged into one: (1) critical/high — the migration adds a NOT NULL column with no default to the orders table, which already has ~2M rows, so it will fail outright or lock the table; needs a default or a backfill-then-tighten approach. (2) critical/high — the catch block logs stripeApiKey directly into application logs on every failure, leaking a secret. Both should be reported as distinct findings with their own severity and fix.",
+      "files": [],
+      "expectations": [
+        "Response reports the NOT NULL migration on a populated table as a distinct finding from the secret-logging issue, not merged into one",
+        "Response explains the migration will fail or lock the table because 'orders' already has rows and the new column has no default",
+        "Response's fix for the migration suggests adding a default value or a backfill-then-constrain approach",
+        "Response flags logging stripeApiKey in the catch block as a secret leaked into logs, at critical or high severity",
+        "Response's fix for the logging issue is to remove the key from the log line, not just to change the log level"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "This repo's CLAUDE.md says: 'Controllers are thin — all business logic and query scoping lives in service objects under app/services/, one class per use case.' Review this diff, which follows that pattern exactly:\n\n```diff\ndiff --git a/app/controllers/reports_controller.rb b/app/controllers/reports_controller.rb\nindex 1111111..2222222 100644\n--- a/app/controllers/reports_controller.rb\n+++ b/app/controllers/reports_controller.rb\n@@ -1,5 +1,9 @@\n class ReportsController < ApplicationController\n+  def index\n+    @reports = Reports::ListForUser.new(current_user).call\n+  end\n end\ndiff --git a/app/services/reports/list_for_user.rb b/app/services/reports/list_for_user.rb\nnew file mode 100644\n--- /dev/null\n+++ b/app/services/reports/list_for_user.rb\n@@ -0,0 +1,11 @@\n+module Reports\n+  class ListForUser\n+    def initialize(user)\n+      @user = user\n+    end\n+\n+    def call\n+      @user.organization.reports.order(created_at: :desc)\n+    end\n+  end\n+  end\n+end\n```\n\nIs this good to merge?",
+      "expected_output": "Zero findings. The controller stays thin and delegates to a service object under app/services/, matching the documented CLAUDE.md convention exactly. Scoping goes through @user.organization, so there's no auth gap. The response should say plainly there's nothing to report rather than inventing style nits (e.g. about the service object's shape) to seem thorough, and should not flag the pattern itself since it matches a documented convention.",
+      "files": [],
+      "expectations": [
+        "Response reports zero findings, or explicitly states there is nothing to flag",
+        "Response does not invent minor style findings about the service-object pattern itself, since it matches the repo's documented CLAUDE.md convention",
+        "Response does not treat the thin-controller/service-object structure as a finding just because a different structure is also common",
+        "Response confirms (or at minimum does not dispute) that the scoping through @user.organization.reports is correct",
+        "Response's verdict line reflects zero findings rather than padding with unrelated nits to look thorough"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Here's the issue this PR closes:\n\n```\nTitle: Allow org admins to deactivate a member\nAcceptance Criteria:\n1. An org admin can deactivate another member of their own org.\n2. A non-admin cannot deactivate anyone (403).\n3. A deactivated member cannot log in.\n```\n\nAnd here's the diff, plus the only test file that touches this:\n\n```diff\ndiff --git a/src/routes/members.ts b/src/routes/members.ts\nindex aaa1111..bbb2222 100644\n--- a/src/routes/members.ts\n+++ b/src/routes/members.ts\n@@ -10,6 +10,14 @@ router.get('/members', requireAuth, listMembers)\n+router.post('/members/:id/deactivate', requireAuth, requireOrgAdmin, async (req, res) => {\n+  const member = await db.member.update({\n+    where: { id: req.params.id },\n+    data: { active: false },\n+  })\n+  res.json(member)\n+})\ndiff --git a/src/routes/members.test.ts b/src/routes/members.test.ts\nindex ccc3333..ddd4444 100644\n--- a/src/routes/members.test.ts\n+++ b/src/routes/members.test.ts\n@@ -20,3 +20,10 @@ describe('POST /members/:id/deactivate', () => {\n+  it('deactivates a member as an admin', async () => {\n+    const res = await request(app).post(`/members/${member.id}/deactivate`).set(adminAuth)\n+    expect(res.status).toBe(200)\n+  })\n+  it('rejects a non-admin', async () => {\n+    const res = await request(app).post(`/members/${member.id}/deactivate`).set(memberAuth)\n+    expect(res.status).toBe(403)\n+  })\n})\n```\n\nDoes this fully satisfy the acceptance criteria?",
+      "expected_output": "Acceptance criterion 3 ('a deactivated member cannot log in') has no test and should be flagged as high severity — the two existing tests only cover criteria 1 and 2. The response should also note that the deactivate route has no organization-scoping check on the member being deactivated (an org admin could deactivate a member of a different org), which is a critical/high finding in its own right, separate from the missing test.",
+      "files": [],
+      "expectations": [
+        "Response identifies that acceptance criterion 3 ('deactivated member cannot log in') has no corresponding test",
+        "Response marks the missing test for criterion 3 as high severity",
+        "Response separately flags that the deactivate endpoint doesn't verify the target member belongs to the admin's own organization",
+        "Response does not credit the two existing tests as covering criterion 3",
+        "Response's test-coverage finding explains that a test must assert the behavior, not just call the endpoint"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Review my branch before I open a PR. I haven't pushed yet — everything is committed locally on top of main.",
+      "expected_output": "Before doing anything else, the response resolves the diff scope using the three-dot range against the base branch (git diff origin/main...HEAD or the local equivalent since it hasn't been pushed), not just the last commit (HEAD~1..HEAD). It should also mention checking for a base branch other than main if origin's default differs, and should read AGENTS.md/CLAUDE.md before forming opinions about convention conformance.",
+      "files": [],
+      "expectations": [
+        "Response uses a three-dot diff range against the base branch (e.g. main...HEAD) rather than only the last commit",
+        "Response does not limit the review to HEAD~1..HEAD",
+        "Response mentions inferring or confirming the base branch rather than assuming main unconditionally",
+        "Response mentions reading the repo's AGENTS.md or CLAUDE.md before evaluating convention conformance",
+        "Response does not claim to have pushed, committed, or opened a PR itself"
+      ]
+    }
+  ]
+}
