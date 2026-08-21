@@ -143,6 +143,84 @@
         "Response's suggested fix is to unskip (remove it.skip) and let the test actually assert the behavior",
         "Response does not report this as a minor style nit or credit the skipped test as satisfying the criterion"
       ]
+    },
+    {
+      "id": 12,
+      "prompt": "Review this diff from our Rails app. This repo has a docs/decision-records/ directory with entries named like 2026-06-30--evals-separate-from-skills.md. The PR description says: 'Switched SeatReservation to a pessimistic lock — optimistic retries were thrashing under the checkout-page burst.'\n\n```diff\ndiff --git a/app/models/seat_reservation.rb b/app/models/seat_reservation.rb\nindex 1111111..2222222 100644\n--- a/app/models/seat_reservation.rb\n+++ b/app/models/seat_reservation.rb\n@@ -5,7 +5,7 @@ class SeatReservation\n   def reserve!(seat)\n-    seat.with_optimistic_lock { seat.update!(status: \"reserved\") }\n+    seat.with_lock { seat.update!(status: \"reserved\") }\n   end\n end\n```\n\nEvery other model in this app uses optimistic locking (lock_version). Is this good to merge?",
+      "expected_output": "The response reports this as a non-blocking documentation suggestion, not a severity-rated finding: the diff switches from the repo's usual optimistic locking to a pessimistic lock with no comment or doc explaining the departure. It proposes docs/decision-records/ as the location, matching the repo's existing YYYY-MM-DD--slug.md naming convention, and surfaces the rationale already given in the PR description (thrashing under the checkout-page burst) as the content to capture rather than asking the author to restate it. This does not change the verdict's critical/high/minor counts.",
+      "files": [],
+      "expectations": [
+        "Response reports the locking-strategy change as a non-blocking suggestion, not a severity-rated finding",
+        "Response names the rejected alternative (the repo's usual optimistic lock_version) as the reason this is worth documenting",
+        "Response proposes docs/decision-records/ with a filename matching the existing YYYY-MM-DD--slug.md convention",
+        "Response quotes or references the rationale already stated in the PR description instead of treating it as unavailable",
+        "Response's verdict line (critical/high/minor counts) is unaffected by this suggestion"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Review this diff from our Node/TypeScript service. This repo has a docs/ directory with several guides in it.\n\n```diff\ndiff --git a/src/routes/users.ts b/src/routes/users.ts\nindex aaa1111..bbb2222 100644\n--- a/src/routes/users.ts\n+++ b/src/routes/users.ts\n@@ -12,6 +12,10 @@ router.get('/users/:id', requireAuth, async (req, res) => {\n   const user = await db.user.findFirst({ where: { id: req.params.id, orgId: req.session.orgId } })\n   res.json(user)\n })\n+\n+router.patch('/users/:id/email', requireAuth, async (req, res) => {\n+  const user = await db.user.update({ where: { id: req.params.id }, data: { email: req.body.email } })\n+  res.json(user)\n+})\n```\n\nIs this good to merge?",
+      "expected_output": "The response flags the missing orgId scope on the new PATCH route as a critical/high finding (an IDOR, matching the pattern from earlier evals), but does not produce any documentation suggestion for this diff — adding a routine CRUD-style endpoint is not a non-obvious decision with a real alternative behind it, and the response should not invent one just because docs/ exists in the repo.",
+      "files": [],
+      "expectations": [
+        "Response flags the missing orgId scope on the new PATCH /users/:id/email route as a critical or high finding",
+        "Response does not produce a documentation suggestion for this diff",
+        "Response does not treat the mere existence of a docs/ directory in the repo as a reason to suggest documenting this change",
+        "Response does not pad the review with an invented 'why wasn't this documented' note for a routine CRUD endpoint",
+        "Response's documentation section (if the format includes one) is either omitted or explicitly states there is nothing to suggest"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "This repo's CLAUDE.md says: 'Every tenant-scoped Prisma query goes through withOrg(session) — no exceptions.' Review this diff:\n\n```diff\ndiff --git a/src/services/projects.ts b/src/services/projects.ts\nindex 3333333..4444444 100644\n--- a/src/services/projects.ts\n+++ b/src/services/projects.ts\n@@ -4,6 +4,10 @@ export async function listProjects(session: Session, opts: { admin?: boolean } = {}) {\n+  if (opts.admin) {\n+    return prisma.project.findMany()\n+  }\n   return withOrg(session, (org) => prisma.project.findMany({ where: { orgId: org.id } }))\n }\n```\n\nDoes this need anything before merging?",
+      "expected_output": "The response reports this as a genuine finding (high severity, since CLAUDE.md is the repo's authoritative conventions doc), not a documentation suggestion: the diff adds an admin bypass that makes CLAUDE.md's 'no exceptions' claim about withOrg false. The fix is to update CLAUDE.md in the same diff to state the admin exception (or remove the bypass if it isn't intended). This finding counts toward the verdict's high count.",
+      "files": [],
+      "expectations": [
+        "Response identifies that the new admin bypass contradicts CLAUDE.md's stated 'no exceptions' rule for withOrg",
+        "Response reports this as a severity-rated finding (high, since CLAUDE.md is the authoritative conventions doc), not as a non-blocking documentation suggestion",
+        "Response's fix suggests updating CLAUDE.md in the same diff to reflect the new exception (or removing the bypass)",
+        "Response counts this finding in the verdict's high total",
+        "Response quotes the specific CLAUDE.md line that the diff makes false"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "Review this diff. This repo's .eagerworks/pr-review.json contains `{ \"review\": { \"documentation\": { \"enabled\": false } } }`. The diff switches OrderProcessor from a synchronous call to a queued background job with no comment or doc explaining the tradeoff, and the change also makes a line in docs/architecture.md (which says 'order processing is synchronous') go stale.",
+      "expected_output": "With review.documentation.enabled set to false, the response does not run lens 5 at all: no documentation suggestion for the undocumented sync-to-queue decision, and no finding for the now-stale docs/architecture.md line either. The report explicitly discloses that the documentation lens was disabled by config, the same way an ignorePaths skip is disclosed, rather than silently omitting the section.",
+      "files": [],
+      "expectations": [
+        "Response does not produce a documentation suggestion for the sync-to-queue decision",
+        "Response does not produce a finding for the now-stale docs/architecture.md line",
+        "Response explicitly discloses that the documentation lens (lens 5) was disabled by config",
+        "Response does not silently omit the disclosure the way it would omit an empty section by default",
+        "Response still evaluates lenses 1-4 normally despite lens 5 being off"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "Review this diff from a repo with no docs/ directory at all and no AGENTS.md/CLAUDE.md. The PR description says: 'Moved webhook delivery from at-least-once with dedup to exactly-once via an idempotency table, since the downstream partner's API isn't safe to call twice.'\n\n```diff\ndiff --git a/src/webhooks/deliver.ts b/src/webhooks/deliver.ts\nindex 5555555..6666666 100644\n--- a/src/webhooks/deliver.ts\n+++ b/src/webhooks/deliver.ts\n@@ -1,8 +1,14 @@\n+import { claimIdempotencyKey } from './idempotency'\n+\n export async function deliver(event: WebhookEvent) {\n+  const claimed = await claimIdempotencyKey(event.id)\n+  if (!claimed) return\n   await partnerApi.send(event)\n }\n```\n\nIs this good to merge?",
+      "expected_output": "The response finds no correctness/security/coverage findings but does produce a non-blocking documentation suggestion: the idempotency-table approach is a real architectural decision (exactly-once delivery, a new mechanism) with a stated rationale (partner API isn't safe to call twice) that exists only in the PR description, not durably in the repo. Since there is no docs/ directory and no AGENTS.md/CLAUDE.md, the response proposes creating docs/decision-records/ and says plainly that this introduces a new documentation convention for the repo, which the author is free to decline.",
+      "files": [],
+      "expectations": [
+        "Response produces a non-blocking documentation suggestion for the idempotency/exactly-once delivery decision",
+        "Response identifies the rationale already stated in the PR description (partner API isn't safe to call twice) as the content worth capturing",
+        "Response proposes creating docs/decision-records/ (or an equivalent new path) since no documentation home exists in this repo",
+        "Response explicitly states that creating this directory/convention is new for the repo and the author can decline it",
+        "Response does not block the merge or assign a severity to this suggestion"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "Apply the fix for the documentation suggestion from the previous review: SeatReservation switched to a pessimistic lock instead of the repo's usual optimistic lock_version. The PR description explained the locking choice (thrashing under the checkout-page burst) but nothing explained why with_lock specifically was chosen over, say, a Redis-based distributed lock. Draft the decision record at docs/decision-records/, matching the two most recent existing entries there.",
+      "expected_output": "The response drafts a new markdown file under docs/decision-records/ (dated, kebab-slug named, matching the two existing entries' structure) that captures the rationale actually available — the PR description's explanation for choosing a pessimistic lock over optimistic locking. For the sub-question the response has no source for (why with_lock over a distributed lock), it writes an explicit TODO(author): line asking the author to fill it in, rather than inventing a plausible-sounding justification. The response does not claim this triggers another review round, since a documentation suggestion never drives the fix loop's round counter.",
+      "files": [],
+      "expectations": [
+        "Response drafts a new file under docs/decision-records/ with a dated, kebab-slug filename matching the existing convention",
+        "Response's drafted content sources the pessimistic-vs-optimistic locking rationale from the PR description rather than leaving it blank or inventing new detail",
+        "Response marks the unsourced sub-question (why with_lock over a distributed lock) with an explicit TODO(author) line instead of fabricating an answer",
+        "Response matches the structure/format of the two existing decision records it was told to match",
+        "Response does not claim this documentation fix triggers or counts toward another fix-loop round"
+      ]
     }
   ]
 }
