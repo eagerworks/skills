@@ -9,7 +9,12 @@
       "Rails: every query scoped to an Organization filters through current_user.organization, not just organization_id from params",
       "Node: every Prisma query on a tenant-scoped model includes orgId from the session, never only from the request body"
     ],
-    "ignorePaths": ["db/schema.rb", "package-lock.json", "src/generated/**"]
+    "ignorePaths": ["db/schema.rb", "package-lock.json", "src/generated/**"],
+    "documentation": {
+      "enabled": true,
+      "decisionRecordsPath": "docs/decision-records/",
+      "maxSuggestions": 2
+    }
   },
 
   "localChecks": [

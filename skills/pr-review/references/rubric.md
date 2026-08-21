@@ -140,12 +140,80 @@ A test that already existed and still passes can be stale rather than proving an
 
 A skipped, pending, or commented-out test does not cover its acceptance criterion either — treat it exactly like a missing test. Recognize `it.skip` / `xit` / `describe.skip` / `test.todo` in Jest/Vitest, and `xit` / `skip` / `pending` in RSpec. `.only` on a sibling test deserves its own mention even when the criterion's own test looks fine: it silently disables every other test in the file, which can hide an unrelated regression.
 
+## Lens 5 — Documentation & Decision Capture
+
+Two separate outputs come out of this lens. Keep them apart: one is a finding with a severity, the other is a non-blocking suggestion that is never counted in the verdict.
+
+**A. Doc drift.** The diff makes a document already in the repo assert something that is now false. This is a normal finding.
+
+- `high` when the stale doc is `AGENTS.md`/`CLAUDE.md`, or another doc the repo treats as authoritative for how code gets written — code gets written from a stale instruction file, and Lens 3 of the *next* review checks against it.
+- `minor` for any other stale doc — a README usage example, a `docs/` page.
+- Needs evidence like any finding: quote the doc line that is now false and the diff line that made it false. **"The doc doesn't mention the new thing" is not drift** — drift is the doc *asserting* something the diff falsified, not the doc being merely incomplete.
+
+```ts
+// CLAUDE.md (existing, unmodified by the diff):
+// "Every tenant-scoped query goes through withOrg(session) — no exceptions."
+
+// ❌ wrong — diff adds an escape hatch CLAUDE.md now falsely claims doesn't exist
+export async function listProjects(session: Session, opts: { admin?: boolean }) {
+  if (opts.admin) return prisma.project.findMany() // bypasses withOrg entirely
+  return withOrg(session, (org) => prisma.project.findMany({ where: { orgId: org.id } }))
+}
+
+// ✅ correct — CLAUDE.md updated in the same diff to state the admin exception
+export async function listProjects(session: Session, opts: { admin?: boolean }) {
+  if (opts.admin) return prisma.project.findMany() // admin bypass — see CLAUDE.md
+  return withOrg(session, (org) => prisma.project.findMany({ where: { orgId: org.id } }))
+}
+```
+
+**B. Undocumented decision.** A suggestion, not a finding — no severity, never counted in the verdict, never a merge blocker. All three must hold before it qualifies:
+
+1. **A real alternative existed.** The change commits to one of several defensible approaches with visible trade-offs: a concurrency/locking strategy, sync vs. queued, a new runtime dependency or external service, a data-model or tenancy shape, a retry/idempotency/timeout policy, a backfill or cutover strategy, an auth boundary, a public API contract, or a new convention future code will copy.
+2. **The "why" is nowhere durable in the repo** — not in a doc, not in a comment at the decision site. A PR description, issue, or commit message does **not** count as durable — it's invisible to whoever opens the file later. But when the rationale *is* there, quote it in the suggestion so the author can paste it in rather than rewrite it.
+3. **A future reader would ask "why this way?" and be unable to answer from the code.**
+
+Never suggest for: routine CRUD, a bug fix restoring already-intended behavior, a change that follows a convention the repo already documents, a dependency version bump, a behavior-preserving refactor, or anything a comment at the site already explains. Same discipline as Lens 4's conservatism — padding here is worse than silence.
+
+```ruby
+# ❌ wrong — a pessimistic lock where the rest of the repo uses optimistic
+# locking (lock_version), with nothing explaining the departure
+class SeatReservation
+  def reserve!(seat)
+    seat.with_lock { seat.update!(status: "reserved") }
+  end
+end
+
+# ✅ correct — the rejected alternative and the reason are on record
+class SeatReservation
+  # Pessimistic lock, not the repo's usual lock_version: optimistic retries
+  # were thrashing under the checkout-page burst. See decision record:
+  # docs/decision-records/2026-08-21--seat-reservation-locking.md
+  def reserve!(seat)
+    seat.with_lock { seat.update!(status: "reserved") }
+  end
+end
+```
+
+Cap at **two suggestions per review** (`review.documentation.maxSuggestions`, default 2, see `references/config.md`). If more than two qualify, keep the two with the longest-lived consequences and drop the rest rather than listing every one.
+
+Every suggestion proposes a concrete path for the doc, checked in this order:
+
+1. An existing decision-records/ADR directory (`docs/decision-records/`, `docs/adr/`, `adr/`) — read two existing entries first and match their filename convention and heading structure exactly.
+2. A `docs/` tree with no ADR directory — the existing page closest to the subject, or a new page beside it.
+3. No `docs/` tree, but `AGENTS.md`/`CLAUDE.md` is where the repo states its conventions and the decision sets one — a section there.
+4. No documentation home at all — propose creating `docs/decision-records/YYYY-MM-DD--<slug>.md`, and say plainly this introduces a new convention for the repo so the author can decline it as a one-off.
+
+`review.documentation.decisionRecordsPath`, when set, overrides rungs 1–4 (`references/config.md`).
+
 ## Severity Ladder
 
 - **critical** — exploitable now, or causes data loss/corruption, or leaks one tenant's/user's data to another. A missing auth/tenant scope check is always `critical` (see Lens 2).
-- **high** — everything else in the correctness/security/coverage tier that isn't yet `critical`: correctness bugs without an active exploit path, a change touching a lot of logic (state transitions, auth/scoping guards, migrations) without a confirmed concrete failure, and an uncovered (or stale-tested) acceptance criterion.
-- **minor** — local style/naming nits with no behavioral risk.
+- **high** — everything else in the correctness/security/coverage tier that isn't yet `critical`: correctness bugs without an active exploit path, a change touching a lot of logic (state transitions, auth/scoping guards, migrations) without a confirmed concrete failure, an uncovered (or stale-tested) acceptance criterion, and a diff that makes an authoritative doc (`AGENTS.md`/`CLAUDE.md`) assert something false (see Lens 5).
+- **minor** — local style/naming nits with no behavioral risk, and a diff that makes a non-authoritative doc (a README, a `docs/` page) assert something false (see Lens 5).
 - **Not a finding** — anything that conflicts with a documented repo convention the code correctly follows, or a preference with no concrete failure path or cited convention behind it.
+
+Documentation *suggestions* (Lens 5B) carry no severity, are never counted in the verdict, and never block a merge — they're reported separately from findings.
 
 ## Conservatism
 
@@ -153,4 +221,4 @@ Every finding needs either a concrete failure scenario (specific inputs or state
 
 ## Repo-Specific Focus (extraFocus)
 
-If `.eagerworks/pr-review.json` supplies `review.extraFocus` entries (see `references/config.md`), treat each as an additional required check on top of the four lenses above — read them as repo-specific known risk areas, e.g. "every quiz-scoped query must filter by `orgId`, not just `quizId`".
+If `.eagerworks/pr-review.json` supplies `review.extraFocus` entries (see `references/config.md`), treat each as an additional required check on top of the five lenses above — read them as repo-specific known risk areas, e.g. "every quiz-scoped query must filter by `orgId`, not just `quizId`".

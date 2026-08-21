@@ -3,10 +3,10 @@
 ## Standard Review (Read-Only)
 
 1. **Resolve the scope** — see `SKILL.md` → Scope Detection, and `references/base-branch.md` for how the base branch itself is resolved when the user didn't name one. Get the full diff since the branch forked from its base, not just the last commit.
-2. **Read the repo's conventions and config** — `AGENTS.md`/`CLAUDE.md`, and `.eagerworks/pr-review.json` if present (`references/config.md`).
+2. **Read the repo's conventions, config, and documentation surface** — `AGENTS.md`/`CLAUDE.md`, `.eagerworks/pr-review.json` if present (`references/config.md`), and enough of the repo's `docs/` tree (an ADR directory, other pages) to know where a decision would be written down and whether this diff makes an existing page false. Lens 5 (`references/rubric.md`) is a guess without it.
 3. **Read every touched file in full**, not just the changed hunks — the diff alone hides context (existing scoping patterns, sibling tests, error-handling style) needed to judge lenses 1–3 correctly. Skip a file only if it matches `review.ignorePaths` in `.eagerworks/pr-review.json` (`references/config.md`) — those files are excluded from the full-file read and produce no findings. If a configured pattern would exclude a schema migration or auth/scoping code, read and review that file anyway and name the mismatch in the report rather than silently applying the pattern.
-4. **Pass all four lenses** from `references/rubric.md` over the change.
-5. **Write the report** — see `references/output-format.md` for the format. If any `ignorePaths` pattern actually matched a touched file, disclose it in the report — a skip is never silent.
+4. **Pass all five lenses** from `references/rubric.md` over the change.
+5. **Write the report** — see `references/output-format.md` for the format. If any `ignorePaths` pattern actually matched a touched file, disclose it in the report — a skip is never silent. Same for `review.documentation.enabled: false` — disclose that Lens 5 didn't run rather than just omitting its section silently.
 
 ## Reviewing Against an Issue or PR
 
@@ -25,8 +25,10 @@ Only run this when the user explicitly asks for findings to be fixed, not by def
 
 1. **Review** — produce the findings as usual.
 2. **Fix** — implement a change for every `critical`/`high` and `minor` finding, or decline one only by citing a specific documented repo convention the code actually follows, or by demonstrating the claimed failure path can't occur. Record the decline reason in one sentence.
+
+   **Documentation findings and suggestions.** Doc drift (Lens 5A, `references/rubric.md`) is fixed like any other finding: edit the stale lines so the doc matches what the diff made true. A documentation *suggestion* (Lens 5B) under the fix loop means **drafting the proposed file** at its proposed path, matching the format of two existing entries in the same directory (read them first). Source every sentence of rationale from the PR/issue description, commit messages, code comments, or the diff itself — never invent one. Anything unsourceable is written as an explicit `TODO(author): why <X> over <Y>?` line rather than guessed at: a confidently wrong "why" in a repo's decision log is worse than no entry at all, because later readers and later reviews treat it as fact. Drafting a suggested doc needs no `localChecks` re-run, and never counts toward the round cap or the "identical findings" stop condition below — only `critical`/`high` findings drive another round.
 3. **Re-verify** — re-run this repo's own local checks (tests, linter, type checker — see `references/config.md` → `localChecks`) against the new changes.
-4. **Re-review** — review only what changed in this round against the same four lenses.
+4. **Re-review** — review only what changed in this round against the same five lenses.
 5. **Repeat or stop:**
    - Any `critical`/`high` finding in this round → go back to step 1.
    - This round was minor-only, or returned zero findings → the loop ends. Any minor findings from this final round are reported to the user as known remaining nits, not fixed — the loop's job is closing critical/high gaps, not zeroing out every style nit.

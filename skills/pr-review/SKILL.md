@@ -1,12 +1,12 @@
 ---
 name: pr-review
 description: >
-  Expert code reviewer for Ruby on Rails and Node/TypeScript codebases. Use this skill whenever the user: asks to review a branch, PR, diff, or working-tree changes before merging; wants a second opinion on their own code before opening a PR; asks "what's wrong with this diff" or "is this ready to merge"; wants findings posted as PR comments; asks to check for correctness bugs, security or multi-tenant scoping gaps, missing test coverage against acceptance criteria, or violations of the repo's own conventions; or wants a fix applied for review findings. Also use when the user says things like "review my branch", "look over this PR", "check this diff before I push", or "did I miss anything here" — even if they don't name the skill.
+  Expert code reviewer for Ruby on Rails and Node/TypeScript codebases. Use this skill whenever the user: asks to review a branch, PR, diff, or working-tree changes before merging; wants a second opinion on their own code before opening a PR; asks "what's wrong with this diff" or "is this ready to merge"; wants findings posted as PR comments; asks to check for correctness bugs, security or multi-tenant scoping gaps, missing test coverage against acceptance criteria, or violations of the repo's own conventions; asks whether a decision made in the change should have been documented (an ADR, a docs/ page, a README/CLAUDE.md update) or whether the diff makes an existing doc go stale; or wants a fix applied for review findings. Also use when the user says things like "review my branch", "look over this PR", "check this diff before I push", "should this have been documented", "does this need an ADR", or "did I miss anything here" — even if they don't name the skill.
 ---
 
 # PR Review Skill
 
-Reviews a diff — a branch, a PR, staged changes, or working-tree changes — against four fixed lenses: correctness, security & data integrity, repo-convention conformance, and test coverage. Returns structured, evidence-backed findings with severities. This is **not** a linter and does **not** replace CI: skip anything a linter or type checker already catches, and don't re-derive what a failing test already proves.
+Reviews a diff — a branch, a PR, staged changes, or working-tree changes — against five fixed lenses: correctness, security & data integrity, repo-convention conformance, test coverage, and documentation & decision capture. Returns structured, evidence-backed findings with severities. This is **not** a linter and does **not** replace CI: skip anything a linter or type checker already catches, and don't re-derive what a failing test already proves.
 
 By default this is a **read-only** review: no file is edited, no commit is made, nothing is pushed. See `references/workflow.md` if the user explicitly wants findings fixed automatically.
 
@@ -40,8 +40,9 @@ Read these before forming any opinion — lens 3 (repo-convention conformance) i
 1. `AGENTS.md` / `CLAUDE.md` at the repo root — the project's own stated conventions.
 2. `.eagerworks/pr-review.json`, if present — see `references/config.md` for its schema and how it layers with the two files above.
 3. The full contents of every file the diff touches, not just the changed hunks — the diff alone hides the surrounding context (existing scoping patterns, error handling style, sibling tests) needed to judge lenses 1–3 correctly. On a very large diff, see `references/workflow.md` → "Reviewing a Large Diff" for how to triage instead of reading everything at equal depth. A repo can exclude generated/vendored paths from this read via `review.ignorePaths` (`references/config.md`) — any match must be disclosed in the report, never applied silently.
+4. The repo's documentation surface — a `docs/` tree, an ADR directory, `README.md` — enough to know where a decision would be written down and whether this diff makes an existing page false. Lens 5 is a guess without it.
 
-## The Four Lenses
+## The Five Lenses
 
 | Lens | Checks |
 |---|---|
@@ -49,8 +50,9 @@ Read these before forming any opinion — lens 3 (repo-convention conformance) i
 | 2. Security & data integrity | Auth/tenant scoping, injection, secrets, unsafe migrations |
 | 3. Repo-convention conformance | Violates `AGENTS.md`/`CLAUDE.md` or an evident surrounding pattern |
 | 4. Test coverage | Every acceptance criterion (or new behavior) has a test that actually asserts it |
+| 5. Documentation & decision capture | A non-obvious decision in this diff has no durable home in the repo, or the diff makes an existing doc assert something false |
 
-Full detail, decision rules, and Rails + Node/TS examples for each lens: `references/rubric.md` — read it before writing the report, it is the authoritative checklist.
+Full detail, decision rules, and Rails + Node/TS examples for each lens: `references/rubric.md` — read it before writing the report, it is the authoritative checklist. Unlike the other four, lens 5 can produce a non-blocking *suggestion* instead of a severity-rated finding — it never counts toward the verdict.
 
 ## Severity at a Glance
 
@@ -60,7 +62,7 @@ Three labels — `critical`, `high`, `minor` — plus "not a finding" for anythi
 
 | Task | Read |
 |---|---|
-| The four lenses in full, with Rails + Node/TS examples, severity ladder, conservatism rule | `references/rubric.md` |
+| The five lenses in full, with Rails + Node/TS examples, severity ladder, conservatism rule | `references/rubric.md` |
 | Running a review end-to-end, reviewing against an issue, the optional fix loop, posting to a PR | `references/workflow.md` |
 | Resolving which branch to diff against, when the user didn't say | `references/base-branch.md` |
 | The markdown report format and the machine-parseable `### FINDINGS` block | `references/output-format.md` |
@@ -87,3 +89,5 @@ Copyable templates live in `assets/`:
 7. **If you can't tell whether something is a real bug without running code, say so in the finding** rather than guessing either way.
 
 8. **Never pad the list to look thorough.** Zero findings is a valid, correct result.
+
+9. **A documentation suggestion (Lens 5B) is never a merge blocker and never counted as a finding** — keep it in its own report section, out of the verdict. And never fabricate a rationale for a decision you can't source from the PR, issue, commits, or code — an unsourced "why" is written as `TODO(author):`, never guessed.

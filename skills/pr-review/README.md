@@ -1,24 +1,25 @@
 # pr-review
 
-A portable agent skill for reviewing a diff — a branch, a PR, staged changes, or working-tree changes — against a fixed four-lens rubric: correctness, security & data integrity, repo-convention conformance, and test coverage. Built for Ruby on Rails and Node/TypeScript codebases. Works with Claude Code, Cursor, GitHub Copilot, Codex, Amp, and any agentic coding tool that can read markdown files.
+A portable agent skill for reviewing a diff — a branch, a PR, staged changes, or working-tree changes — against a fixed five-lens rubric: correctness, security & data integrity, repo-convention conformance, test coverage, and documentation & decision capture. Built for Ruby on Rails and Node/TypeScript codebases. Works with Claude Code, Cursor, GitHub Copilot, Codex, Amp, and any agentic coding tool that can read markdown files.
 
 ## What it covers
 
 - Scope detection: full branch vs. base, staged changes, working tree, or a specific GitHub PR
 - Base-branch resolution from evidence — an open PR's actual base, then config, then the branch's fork point — asking the user rather than guessing when none of those is conclusive
-- The four review lenses with Rails and Node/TypeScript examples for each
+- The five review lenses with Rails and Node/TypeScript examples for each
 - A conservative severity ladder (critical / high / minor / not a finding) that avoids padding the list with style nits
 - Reviewing against an issue or PR's acceptance criteria, with a test-coverage check that requires the test to actually assert the behavior — not just exercise the code path, and not be skipped, pending, or commented out
+- Flags a diff that makes an existing doc (`AGENTS.md`/`CLAUDE.md`, a `docs/` page) assert something now false, and — on a high bar, capped and non-blocking — suggests a decision record for a non-obvious choice the repo has nowhere durable to explain, on by default and switchable off via config
 - Two output formats: a readable markdown report by default, and a machine-parseable `### FINDINGS` block for automated consumers
 - An optional review → fix → re-review loop, off by default — the standard review never edits, commits, or pushes
-- Optional per-repo configuration for the base branch, local verification commands, repo-specific risk areas (`extraFocus`), and paths to exclude from the full-file read (`ignorePaths`), with any exclusion disclosed in the report
+- Optional per-repo configuration for the base branch, local verification commands, repo-specific risk areas (`extraFocus`), paths to exclude from the full-file read (`ignorePaths`), and the documentation lens (`documentation.enabled`, `decisionRecordsPath`, `maxSuggestions`), with any exclusion or opt-out disclosed in the report
 
 ## Layout
 
 ```
-SKILL.md                        # hub: scope detection, the four lenses, severity, gotchas (agent entrypoint)
+SKILL.md                        # hub: scope detection, the five lenses, severity, gotchas (agent entrypoint)
 references/
-  rubric.md                     # full four-lens checklist, severity ladder, Rails + Node examples
+  rubric.md                     # full five-lens checklist, severity ladder, Rails + Node examples
   workflow.md                   # end-to-end review flow, issue/PR review, optional fix loop
   base-branch.md                # base-branch resolution ladder: open PR, config, fork point, or ask
   output-format.md              # markdown report format + the ### FINDINGS block

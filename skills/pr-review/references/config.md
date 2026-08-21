@@ -24,7 +24,7 @@ All fields optional.
     // (see references/workflow.md). Only relevant when the user explicitly asked for fixes.
     "maxRounds": 3,
 
-    // Repo-specific concerns appended to the four lenses in references/rubric.md, one
+    // Repo-specific concerns appended to the five lenses in references/rubric.md, one
     // sentence each. Treat these as known risk areas for this codebase specifically.
     "extraFocus": [],
 
@@ -33,7 +33,25 @@ All fields optional.
     // Matches are always disclosed in the report (see references/output-format.md);
     // this is a skip, never a silent one. A pattern that would exclude a schema
     // migration or auth/scoping code gets named in the report rather than dropped.
-    "ignorePaths": []
+    "ignorePaths": [],
+
+    // Lens 5 (references/rubric.md) — flags a diff that makes an existing doc
+    // (AGENTS.md/CLAUDE.md, a docs/ page) assert something false, and suggests
+    // (never requires) a decision record for an undocumented, non-obvious choice.
+    "documentation": {
+      // On by default. Set false to turn the whole lens off — no doc-drift
+      // findings, no suggestions. A review run this way discloses it in the
+      // report rather than silently omitting the section (references/output-format.md).
+      "enabled": true,
+
+      // Where a new decision record belongs in this repo. Unset, the skill infers
+      // it from the existing layout and proposes docs/decision-records/ when the
+      // repo has no documentation home at all.
+      "decisionRecordsPath": "docs/decision-records/",
+
+      // Cap on documentation suggestions per review.
+      "maxSuggestions": 2
+    }
   },
 
   // Commands this repo uses to verify a fix during the optional fix loop. Run as-is, in order.
@@ -51,7 +69,8 @@ All fields optional.
     "extraFocus": [
       "Every query scoped to an Organization filters through current_user.organization, not just organization_id from params"
     ],
-    "ignorePaths": ["db/schema.rb"]
+    "ignorePaths": ["db/schema.rb"],
+    "documentation": { "enabled": true, "decisionRecordsPath": "docs/adr/" }
   },
   "localChecks": ["bundle exec rspec", "bundle exec rubocop"]
 }
@@ -67,7 +86,8 @@ All fields optional.
     "extraFocus": [
       "Every Prisma query on a tenant-scoped model includes orgId from the session, never only from the request body"
     ],
-    "ignorePaths": ["package-lock.json", "src/generated/**"]
+    "ignorePaths": ["package-lock.json", "src/generated/**"],
+    "documentation": { "enabled": true, "decisionRecordsPath": "docs/decision-records/" }
   },
   "localChecks": ["npm test", "npm run lint", "npm run typecheck"]
 }
