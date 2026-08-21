@@ -8,7 +8,7 @@ A portable agent skill for reviewing a diff — a branch, a PR, staged changes, 
 - Base-branch resolution from evidence — an open PR's actual base, then config, then the branch's fork point — asking the user rather than guessing when none of those is conclusive
 - The four review lenses with Rails and Node/TypeScript examples for each
 - A conservative severity ladder (critical / high / minor / not a finding) that avoids padding the list with style nits
-- Reviewing against an issue or PR's acceptance criteria, with a test-coverage check that requires the test to actually assert the behavior, not just exercise the code path
+- Reviewing against an issue or PR's acceptance criteria, with a test-coverage check that requires the test to actually assert the behavior — not just exercise the code path, and not be skipped, pending, or commented out
 - Two output formats: a readable markdown report by default, and a machine-parseable `### FINDINGS` block for automated consumers
 - An optional review → fix → re-review loop, off by default — the standard review never edits, commits, or pushes
 - Optional per-repo configuration for the base branch, local verification commands, repo-specific risk areas (`extraFocus`), and paths to exclude from the full-file read (`ignorePaths`), with any exclusion disclosed in the report

@@ -138,6 +138,8 @@ An acceptance criterion with no proving test is always `high`.
 
 A test that already existed and still passes can be stale rather than proving anything: if the diff changes the behavior a pre-existing test was written to assert, and that test's assertions weren't updated to match, treat it the same as a missing test for that behavior.
 
+A skipped, pending, or commented-out test does not cover its acceptance criterion either — treat it exactly like a missing test. Recognize `it.skip` / `xit` / `describe.skip` / `test.todo` in Jest/Vitest, and `xit` / `skip` / `pending` in RSpec. `.only` on a sibling test deserves its own mention even when the criterion's own test looks fine: it silently disables every other test in the file, which can hide an unrelated regression.
+
 ## Severity Ladder
 
 - **critical** — exploitable now, or causes data loss/corruption, or leaks one tenant's/user's data to another. A missing auth/tenant scope check is always `critical` (see Lens 2).
