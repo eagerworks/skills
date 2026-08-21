@@ -24,7 +24,11 @@ Use this format for a human reading the review in an IDE or terminal. One verdic
 ### Minor
 
 _(none)_
+
+_Skipped by ignorePaths: package-lock.json, src/generated/**_
 ```
+
+Only include the `_Skipped by ignorePaths: ..._` line when `.eagerworks/pr-review.json` sets `review.ignorePaths` and at least one touched file matched — see `references/config.md`. Omit it entirely otherwise; never print it empty.
 
 When there is nothing to report, say so plainly instead of omitting the section:
 

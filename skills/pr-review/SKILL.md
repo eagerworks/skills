@@ -39,7 +39,7 @@ Read these before forming any opinion — lens 3 (repo-convention conformance) i
 
 1. `AGENTS.md` / `CLAUDE.md` at the repo root — the project's own stated conventions.
 2. `.eagerworks/pr-review.json`, if present — see `references/config.md` for its schema and how it layers with the two files above.
-3. The full contents of every file the diff touches, not just the changed hunks — the diff alone hides the surrounding context (existing scoping patterns, error handling style, sibling tests) needed to judge lenses 1–3 correctly. On a very large diff, see `references/workflow.md` → "Reviewing a Large Diff" for how to triage instead of reading everything at equal depth.
+3. The full contents of every file the diff touches, not just the changed hunks — the diff alone hides the surrounding context (existing scoping patterns, error handling style, sibling tests) needed to judge lenses 1–3 correctly. On a very large diff, see `references/workflow.md` → "Reviewing a Large Diff" for how to triage instead of reading everything at equal depth. A repo can exclude generated/vendored paths from this read via `review.ignorePaths` (`references/config.md`) — any match must be disclosed in the report, never applied silently.
 
 ## The Four Lenses
 

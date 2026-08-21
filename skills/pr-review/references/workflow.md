@@ -4,9 +4,9 @@
 
 1. **Resolve the scope** — see `SKILL.md` → Scope Detection, and `references/base-branch.md` for how the base branch itself is resolved when the user didn't name one. Get the full diff since the branch forked from its base, not just the last commit.
 2. **Read the repo's conventions and config** — `AGENTS.md`/`CLAUDE.md`, and `.eagerworks/pr-review.json` if present (`references/config.md`).
-3. **Read every touched file in full**, not just the changed hunks — the diff alone hides context (existing scoping patterns, sibling tests, error-handling style) needed to judge lenses 1–3 correctly.
+3. **Read every touched file in full**, not just the changed hunks — the diff alone hides context (existing scoping patterns, sibling tests, error-handling style) needed to judge lenses 1–3 correctly. Skip a file only if it matches `review.ignorePaths` in `.eagerworks/pr-review.json` (`references/config.md`) — those files are excluded from the full-file read and produce no findings. If a configured pattern would exclude a schema migration or auth/scoping code, read and review that file anyway and name the mismatch in the report rather than silently applying the pattern.
 4. **Pass all four lenses** from `references/rubric.md` over the change.
-5. **Write the report** — see `references/output-format.md` for the format.
+5. **Write the report** — see `references/output-format.md` for the format. If any `ignorePaths` pattern actually matched a touched file, disclose it in the report — a skip is never silent.
 
 ## Reviewing Against an Issue or PR
 

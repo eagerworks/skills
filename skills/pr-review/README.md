@@ -11,7 +11,7 @@ A portable agent skill for reviewing a diff — a branch, a PR, staged changes, 
 - Reviewing against an issue or PR's acceptance criteria, with a test-coverage check that requires the test to actually assert the behavior, not just exercise the code path
 - Two output formats: a readable markdown report by default, and a machine-parseable `### FINDINGS` block for automated consumers
 - An optional review → fix → re-review loop, off by default — the standard review never edits, commits, or pushes
-- Optional per-repo configuration for the base branch, local verification commands, and repo-specific risk areas (`extraFocus`)
+- Optional per-repo configuration for the base branch, local verification commands, repo-specific risk areas (`extraFocus`), and paths to exclude from the full-file read (`ignorePaths`), with any exclusion disclosed in the report
 
 ## Layout
 

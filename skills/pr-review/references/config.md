@@ -26,7 +26,14 @@ All fields optional.
 
     // Repo-specific concerns appended to the four lenses in references/rubric.md, one
     // sentence each. Treat these as known risk areas for this codebase specifically.
-    "extraFocus": []
+    "extraFocus": [],
+
+    // Glob patterns excluded from the full-file read and from producing findings —
+    // for generated or vendored files (lockfiles, generated clients, snapshots).
+    // Matches are always disclosed in the report (see references/output-format.md);
+    // this is a skip, never a silent one. A pattern that would exclude a schema
+    // migration or auth/scoping code gets named in the report rather than dropped.
+    "ignorePaths": []
   },
 
   // Commands this repo uses to verify a fix during the optional fix loop. Run as-is, in order.
@@ -43,7 +50,8 @@ All fields optional.
     "maxRounds": 3,
     "extraFocus": [
       "Every query scoped to an Organization filters through current_user.organization, not just organization_id from params"
-    ]
+    ],
+    "ignorePaths": ["db/schema.rb"]
   },
   "localChecks": ["bundle exec rspec", "bundle exec rubocop"]
 }
@@ -58,7 +66,8 @@ All fields optional.
     "maxRounds": 3,
     "extraFocus": [
       "Every Prisma query on a tenant-scoped model includes orgId from the session, never only from the request body"
-    ]
+    ],
+    "ignorePaths": ["package-lock.json", "src/generated/**"]
   },
   "localChecks": ["npm test", "npm run lint", "npm run typecheck"]
 }
