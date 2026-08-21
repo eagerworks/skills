@@ -62,8 +62,16 @@ If there is nothing to report, return the literal empty block — never replace 
 
 ## PR Comment
 
-When posting to a PR (see `references/workflow.md`), use one line per finding, however long — never hard-wrapped; let GitHub wrap it:
+When posting to a PR (see `references/workflow.md`), use one line per finding, however long — never hard-wrapped; let GitHub wrap it. Order findings most-severe-first, and mark each with its severity:
+
+- 🔴 `critical`
+- 🟠 `high`
+- 🟡 `minor`
 
 ```text
 🔴 critical — app/controllers/invoices_controller.rb:12 — Invoice#show isn't scoped to the current user's organization, so any authenticated user can read any org's invoice by id. Fix: scope through `current_user.organization.invoices.find(params[:id])`.
+🟠 high — spec/requests/invoices_spec.rb — acceptance criterion "a user cannot view another org's invoice" has no test. Fix: add a request spec asserting a 404 on another org's invoice id.
+🟡 minor — app/services/reports/list_for_user.rb:8 — `call` could default `order` to a named scope for consistency with sibling services. Fix: extract `Report.recent` and use it here.
 ```
+
+If there is nothing to report, post the one-line verdict from the markdown report (e.g. "0 findings — no correctness, security, or coverage gaps found"), never an empty comment.
