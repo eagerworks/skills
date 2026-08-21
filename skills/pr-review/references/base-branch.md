@@ -1,6 +1,6 @@
 # PR Review — Resolving the Base Branch
 
-Never guess the base branch. Work down this ladder and stop at the first rung that gives an unambiguous answer. See `docs/decision-records/0002-base-branch-resolution.md` for why it's ordered this way.
+Never guess the base branch. Work down this ladder and stop at the first rung that gives an unambiguous answer. See `docs/decision-records/2026-08-21--base-branch-resolution.md` for why it's ordered this way.
 
 ## The ladder
 

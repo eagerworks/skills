@@ -44,5 +44,5 @@ The full procedure, including the anti-patterns above (`@{u}`, an unset `origin/
 
 ## Related
 
-- [0001](0001-evals-separate-from-skills.md) — why `evals/pr-review/evals.json` sits outside the shipped skill; the cases covering this decision land there, not in `skills/pr-review/`.
+- [2026-06-30--evals-separate-from-skills](2026-06-30--evals-separate-from-skills.md) — why `evals/pr-review/evals.json` sits outside the shipped skill; the cases covering this decision land there, not in `skills/pr-review/`.
 - `skills/pr-review/references/base-branch.md` — the operative procedure this ADR justifies.

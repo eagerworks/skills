@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-Two parallel trees, intentionally kept separate (see `docs/decision-records/0001-evals-separate-from-skills.md`):
+Two parallel trees, intentionally kept separate (see `docs/decision-records/2026-06-30--evals-separate-from-skills.md`):
 
 ```
 skills/<name>/      # SHIPPED to users — the skills.sh CLI copies this whole dir

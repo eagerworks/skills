@@ -30,6 +30,6 @@ Silent, undisclosed skipping was considered and rejected: it's the simplest opti
 
 ## Related
 
-- [0002](0002-base-branch-resolution.md) — the other precedent in this skill for "ask/disclose rather than silently guess."
+- [2026-08-21--base-branch-resolution](2026-08-21--base-branch-resolution.md) — the other precedent in this skill for "ask/disclose rather than silently guess."
 - `skills/pr-review/references/config.md` — the `ignorePaths` schema entry this ADR justifies.
 - `skills/pr-review/references/workflow.md` → "Reviewing a Large Diff" — the pre-existing disclosure principle this decision extends to repo-configured skips.
