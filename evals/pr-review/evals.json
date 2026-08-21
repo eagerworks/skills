@@ -56,14 +56,40 @@
     {
       "id": 5,
       "prompt": "Review my branch before I open a PR. I haven't pushed yet — everything is committed locally on top of main.",
-      "expected_output": "Before doing anything else, the response resolves the diff scope using the three-dot range against the base branch (git diff origin/main...HEAD or the local equivalent since it hasn't been pushed), not just the last commit (HEAD~1..HEAD). It should also mention checking for a base branch other than main if origin's default differs, and should read AGENTS.md/CLAUDE.md before forming opinions about convention conformance.",
+      "expected_output": "The user already named the base branch (main), so no inference is needed. The response resolves the diff scope using the three-dot range against main (main...HEAD locally, since nothing has been pushed and there's no open PR to check yet), not just the last commit (HEAD~1..HEAD). It should not claim to have checked for an open PR's base (nothing is pushed), and should read AGENTS.md/CLAUDE.md before forming opinions about convention conformance.",
       "files": [],
       "expectations": [
-        "Response uses a three-dot diff range against the base branch (e.g. main...HEAD) rather than only the last commit",
+        "Response uses a three-dot diff range against main (e.g. main...HEAD) rather than only the last commit",
         "Response does not limit the review to HEAD~1..HEAD",
-        "Response mentions inferring or confirming the base branch rather than assuming main unconditionally",
+        "Response treats main as given by the user's own description rather than guessing it from a repo default or falling back silently",
         "Response mentions reading the repo's AGENTS.md or CLAUDE.md before evaluating convention conformance",
         "Response does not claim to have pushed, committed, or opened a PR itself"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Review this PR before we merge it. For context: this repo's .eagerworks/pr-review.json contains `{ \"baseBranch\": \"main\" }`, but `gh pr view` on the current branch reports an open PR (#42) with baseRefName `develop`, not `main`.",
+      "expected_output": "The response first resolves the base branch rather than assuming one. This repo has an .eagerworks/pr-review.json with `\"baseBranch\": \"main\"`, but the branch under review already has an open PR (#42) whose actual base is `develop`, not `main`. The response should use the open PR's real base (develop) for the diff, explicitly noting that the PR's base takes priority over the config file's baseBranch, and should not review against main.",
+      "files": [],
+      "expectations": [
+        "Response checks for an open PR on the branch under review (e.g. via gh pr view) before trusting the config file",
+        "Response uses develop as the base branch for the diff, not main",
+        "Response explains that the open PR's base branch overrides .eagerworks/pr-review.json's baseBranch setting",
+        "Response does not silently review against main just because it's the configured baseBranch",
+        "Response uses a three-dot diff range against develop (e.g. origin/develop...HEAD), not just the last commit"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Review my current branch. It's not pushed, there's no PR yet, and there's no .eagerworks/pr-review.json in this repo.",
+      "expected_output": "With no open PR and no config, the response tries to resolve the fork point (e.g. via git reflog), but the fork point resolves to a commit that multiple local branches contain — main, develop, and a third feature branch all contain it, so there is no single unambiguous base. Rather than guessing one (e.g. defaulting to main), the response stops and asks the user which branch to diff against, listing the candidate branches it found. It does not proceed to produce review findings before the user answers.",
+      "files": [],
+      "expectations": [
+        "Response does not silently pick main, master, or develop as the base branch",
+        "Response explicitly asks the user which branch to review against",
+        "Response lists the specific candidate branches it found as ambiguous, rather than asking a generic open-ended question",
+        "Response does not produce any correctness/security/convention/test-coverage findings before the base branch question is resolved",
+        "Response explains why it couldn't resolve the base branch on its own (no open PR, no config, multiple branches contain the fork point)"
       ]
     }
   ]
