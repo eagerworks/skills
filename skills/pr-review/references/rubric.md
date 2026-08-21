@@ -136,9 +136,12 @@ it("404s when the project belongs to a different org", async () => {
 
 An acceptance criterion with no proving test is always `high`.
 
+A test that already existed and still passes can be stale rather than proving anything: if the diff changes the behavior a pre-existing test was written to assert, and that test's assertions weren't updated to match, treat it the same as a missing test for that behavior.
+
 ## Severity Ladder
 
-- **critical / high** — correctness bugs, security or data-integrity gaps, or a change touching a lot of logic (state transitions, auth/scoping guards, migrations); an uncovered acceptance criterion.
+- **critical** — exploitable now, or causes data loss/corruption, or leaks one tenant's/user's data to another. A missing auth/tenant scope check is always `critical` (see Lens 2).
+- **high** — everything else in the correctness/security/coverage tier that isn't yet `critical`: correctness bugs without an active exploit path, a change touching a lot of logic (state transitions, auth/scoping guards, migrations) without a confirmed concrete failure, and an uncovered (or stale-tested) acceptance criterion.
 - **minor** — local style/naming nits with no behavioral risk.
 - **Not a finding** — anything that conflicts with a documented repo convention the code correctly follows, or a preference with no concrete failure path or cited convention behind it.
 
