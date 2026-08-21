@@ -41,7 +41,9 @@ review stays the default behavior described in `SKILL.md`.
 4. **Re-review** — review only what changed in this round against the same four lenses.
 5. **Repeat or stop:**
    - Any `critical`/`high` finding in this round → go back to step 1.
-   - This round was minor-only, or returned zero findings → the loop ends.
+   - This round was minor-only, or returned zero findings → the loop ends. Any minor findings
+     from this final round are reported to the user as known remaining nits, not fixed — the
+     loop's job is closing critical/high gaps, not zeroing out every style nit.
 
 **Round cap** — default 3 rounds (`review.maxRounds` in `.eagerworks/pr-review.json` overrides
 it). Stop and report to the user, rather than continuing indefinitely, when:

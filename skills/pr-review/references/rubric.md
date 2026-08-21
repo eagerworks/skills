@@ -15,6 +15,11 @@ behavior).
 def paginate(items, page:, per_page: 20)
   items[(page - 1) * per_page...page * per_page - 1]
 end
+
+# ✅ correct
+def paginate(items, page:, per_page: 20)
+  items[(page - 1) * per_page...page * per_page]
+end
 ```
 
 ```ts
@@ -24,6 +29,15 @@ async function saveDraft(draft: Draft) {
     await db.draft.update({ where: { id: draft.id }, data: draft })
   } catch {
     console.log("save failed")
+  }
+}
+
+// ✅ correct — caller (and its own caller) can react to the failure
+async function saveDraft(draft: Draft) {
+  try {
+    await db.draft.update({ where: { id: draft.id }, data: draft })
+  } catch (err) {
+    throw new Error(`Failed to save draft ${draft.id}: ${err.message}`)
   }
 }
 ```
@@ -80,6 +94,9 @@ response.
 ```ts
 // ❌ wrong — leaks the API key into application logs on every failure
 logger.error(`Stripe call failed with key ${stripeApiKey}: ${err.message}`)
+
+// ✅ correct — no secret in the log line
+logger.error(`Stripe call failed: ${err.message}`)
 ```
 
 **Migration safety.** A schema migration doesn't lock or lose data on a table that already has

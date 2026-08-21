@@ -48,7 +48,7 @@ Use this when another skill, script, or agent needs to parse the output mechanic
 example, feeding findings into an automated fix loop. Not needed for a human reading the review
 directly.
 
-```
+```text
 ### FINDINGS
 - id: F1
   severity: critical | high | minor
@@ -63,7 +63,7 @@ If there is nothing to report, return the literal empty block — never replace 
 like "looks good" or "no issues found", since a caller parsing this block mechanically expects
 exactly one of the two shapes:
 
-```
+```text
 ### FINDINGS
 ### END FINDINGS
 ```
@@ -73,6 +73,6 @@ exactly one of the two shapes:
 When posting to a PR (see `references/workflow.md`), use one line per finding, however long —
 never hard-wrapped; let GitHub wrap it:
 
-```
+```text
 🔴 critical — app/controllers/invoices_controller.rb:12 — Invoice#show isn't scoped to the current user's organization, so any authenticated user can read any org's invoice by id. Fix: scope through `current_user.organization.invoices.find(params[:id])`.
 ```

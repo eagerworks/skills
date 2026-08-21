@@ -29,7 +29,6 @@ how requests are usually phrased:
 
 ```bash
 # "review my branch" / "review this PR" — the normal case: full branch vs. its base
-git merge-base --fork-point origin/main HEAD 2>/dev/null || git merge-base origin/main HEAD
 git diff origin/<base-branch>...HEAD      # note the THREE dots — diff since the branch forked
 
 # "review what I'm about to commit"
@@ -62,7 +61,9 @@ them:
    it layers with the two files above.
 3. The full contents of every file the diff touches, not just the changed hunks — the diff
    alone hides the surrounding context (existing scoping patterns, error handling style,
-   sibling tests) needed to judge lenses 1–3 correctly.
+   sibling tests) needed to judge lenses 1–3 correctly. On a very large diff, see
+   `references/workflow.md` → "Reviewing a Large Diff" for how to triage instead of reading
+   everything at equal depth.
 
 ## The Four Lenses
 
@@ -78,11 +79,9 @@ Full detail, decision rules, and Rails + Node/TS examples for each lens: `refere
 
 ## Severity at a Glance
 
-| Severity | Meaning |
-|---|---|
-| `critical` / `high` | Correctness bug, security/data-integrity gap, or heavy logic change (state transitions, auth/scoping guards, migrations); an uncovered acceptance criterion |
-| `minor` | Local style/naming nit, no behavioral risk |
-| Not a finding | Follows a documented repo convention, or a preference with no concrete failure path |
+Three labels — `critical`, `high`, `minor` — plus "not a finding" for anything without a
+concrete failure scenario or violated convention behind it. The full ladder and what qualifies
+each finding for its label lives in `references/rubric.md` — don't re-derive it here.
 
 ## Reference Files (read these on demand)
 
@@ -99,13 +98,15 @@ Copyable templates live in `assets/`:
 
 ## Critical Gotchas
 
-1. **Read-only by default.** Never edit, create, or delete a file. Never `git commit`,
-   `git push`, or open a PR. `git`/`gh` are for inspection only, never a mutating command,
-   unless the user explicitly asked for the fix loop in `references/workflow.md`.
+1. **Read-only unless asked otherwise.** Never edit, create, or delete a file, and never
+   `git commit`, `git push`, or open a PR on your own initiative. `git`/`gh` are for inspection
+   only by default. The two exceptions are explicit user requests documented in
+   `references/workflow.md`: the optional fix loop, and posting the report with
+   `gh pr comment`.
 
-2. **A finding needs evidence.** Every finding cites either a concrete failure scenario
-   (specific inputs or state that produce a wrong result or crash) or a documented convention
-   it violates. A preference with neither is not a finding — leave it out.
+2. **A finding needs evidence — see `references/rubric.md` → Conservatism.** No concrete
+   failure scenario or cited convention means it's not a finding, no matter how confident the
+   preference.
 
 3. **Code that follows a documented convention is never a finding**, even if a different style
    would generally be preferable.
@@ -120,5 +121,4 @@ Copyable templates live in `assets/`:
 6. **If you can't tell whether something is a real bug without running code, say so in the
    finding** rather than guessing either way.
 
-7. **Never pad the list.** Zero findings is a valid, correct result — report it as such instead
-   of inventing minor nits to look thorough.
+7. **Never pad the list to look thorough.** Zero findings is a valid, correct result.

@@ -54,7 +54,10 @@ starter.
 subagent definition that wraps this skill's rubric in a dedicated, read-only reviewer — copy it
 to `.claude/agents/code-reviewer.md` in your project if you want the review to run as an
 isolated subagent call. It's optional: the skill works standalone in any agentic tool without
-it.
+it. The subagent points back at this skill's own `references/rubric.md`, `workflow.md`, and
+`output-format.md`, so the `pr-review` skill itself must also be installed in the same project
+(e.g. `.claude/skills/pr-review/`) for those references to resolve — copying only the subagent
+file on its own leaves those paths unresolvable.
 
 ## Install
 
