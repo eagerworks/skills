@@ -1,7 +1,10 @@
 ---
 name: pr-review
-description: >
-  Expert code reviewer for Ruby on Rails and Node/TypeScript codebases. Use this skill whenever the user: asks to review a branch, PR, diff, or working-tree changes before merging; wants a second opinion on their own code before opening a PR; asks "what's wrong with this diff" or "is this ready to merge"; wants findings posted as PR comments; asks to check for correctness bugs, security or multi-tenant scoping gaps, missing test coverage against acceptance criteria, or violations of the repo's own conventions; asks whether a decision made in the change should have been documented (an ADR, a docs/ page, a README/CLAUDE.md update) or whether the diff makes an existing doc go stale; or wants a fix applied for review findings. Also use when the user says things like "review my branch", "look over this PR", "check this diff before I push", "should this have been documented", "does this need an ADR", or "did I miss anything here" — even if they don't name the skill.
+description: >-
+  Reviews a branch, PR, staged, or working-tree diff for correctness, security, repo-convention, test-coverage, and documentation gaps, returning severity-rated findings without editing code. Use when asked to "review my branch/PR", "is this ready to merge", "check this diff before I push", "does this need an ADR", to post review findings as PR comments, or to apply fixes for findings from a previous review round.
+metadata:
+  author: eagerworks
+  version: "1.0.0"
 ---
 
 # PR Review Skill

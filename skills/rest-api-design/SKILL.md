@@ -1,16 +1,10 @@
 ---
 name: rest-api-design
-description: >
-  Expert guide for designing and reviewing REST APIs. Use this skill whenever the user: is adding,
-  designing, or renaming an HTTP endpoint or resource; asks what HTTP method or status code to use;
-  is shaping a request or response payload, an error format, or a validation-error response; is
-  adding pagination, filtering, sorting, or bulk operations to a collection endpoint; is versioning
-  an API, planning a breaking change, or deprecating a field/endpoint; is adding authentication,
-  authorization, rate limiting, or reviewing an endpoint for security issues (IDOR, mass assignment,
-  enumeration); is writing, editing, or linting an OpenAPI/Swagger spec; or is reviewing/auditing an
-  existing API for RESTful consistency. Also use when the user says things like "design the API for
-  X", "is this endpoint RESTful?", "what status code should I return here", or "review my API" —
-  even if they don't say "REST" explicitly.
+description: >-
+  Designs and reviews REST APIs: resource naming, HTTP methods and status codes, payload and error formats, pagination, versioning, auth, rate limiting, and OpenAPI specs. Use when adding or renaming an endpoint, asked "is this endpoint RESTful", "what status code should I return", "design the API for X", or to audit an existing API for consistency or security (IDOR, mass assignment).
+metadata:
+  author: eagerworks
+  version: "1.0.0"
 ---
 
 # REST API Design Skill
