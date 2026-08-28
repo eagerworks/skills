@@ -14,7 +14,8 @@
       "enabled": true,
       "decisionRecordsPath": "docs/decision-records/",
       "maxSuggestions": 2
-    }
+    },
+    "postToPr": true
   },
 
   "localChecks": [

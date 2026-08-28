@@ -1,7 +1,7 @@
 ---
 name: pr-review
 description: >-
-  Reviews a branch, PR, staged, or working-tree diff for correctness, security, repo-convention, test-coverage, and documentation gaps, returning severity-rated findings without editing code. Use when asked to "review my branch/PR", "is this ready to merge", "check this diff before I push", "does this need an ADR", to post review findings as PR comments, or to apply fixes for findings from a previous review round.
+  Reviews a branch, PR, staged, or working-tree diff for correctness, security, repo-convention, test-coverage, and documentation gaps, returning severity-rated findings without editing code. Use when asked to "review my branch/PR", "is this ready to merge", "check this diff before I push", "does this need an ADR", or to apply fixes for findings from a previous review round. When the target is a GitHub PR, the same report is also posted on the PR as a comment so the whole team can read it.
 metadata:
   author: eagerworks
   version: "1.0.0"
@@ -12,6 +12,8 @@ metadata:
 Reviews a diff — a branch, a PR, staged changes, or working-tree changes — against five fixed lenses: correctness, security & data integrity, repo-convention conformance, test coverage, and documentation & decision capture. Returns structured, evidence-backed findings with severities. This is **not** a linter and does **not** replace CI: skip anything a linter or type checker already catches, and don't re-derive what a failing test already proves.
 
 By default this is a **read-only** review: no file is edited, no commit is made, nothing is pushed. See `references/workflow.md` if the user explicitly wants findings fixed automatically.
+
+When the review targets a GitHub PR (`review PR #N`, or the branch under review has an open PR), the report is printed to the console **and** posted on the PR as a comment so it stays with the PR and the whole team can read it. If `gh` isn't installed or authenticated, the report is still printed and the skill offers to post it once the user sets up the GitHub CLI. See `references/workflow.md` → "Posting to a PR".
 
 ## Scope Detection — Do This First
 
@@ -77,7 +79,7 @@ Copyable templates live in `assets/`:
 
 ## Critical Gotchas
 
-1. **Read-only unless asked otherwise.** Never edit, create, or delete a file, and never `git commit`, `git push`, or open a PR on your own initiative. `git`/`gh` are for inspection only by default. The two exceptions are explicit user requests documented in `references/workflow.md`: the optional fix loop, and posting the report with `gh pr comment`.
+1. **Read-only, with exactly two exceptions.** Never edit, create, or delete a file, and never `git commit`, `git push`, or open a PR on your own initiative. `git`/`gh` are for inspection only, except for: the optional fix loop (only on an explicit user request), and `gh pr comment` on the PR under review (automatic when the scope is a GitHub PR; opt-out with "don't post" or `review.postToPr: false`). Both are documented in `references/workflow.md`. No other mutation, ever.
 
 2. **A finding needs evidence — see `references/rubric.md` → Conservatism.** No concrete failure scenario or cited convention means it's not a finding, no matter how confident the preference.
 

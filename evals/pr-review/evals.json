@@ -221,6 +221,45 @@
         "Response matches the structure/format of the two existing decision records it was told to match",
         "Response does not claim this documentation fix triggers or counts toward another fix-loop round"
       ]
+    },
+    {
+      "id": 18,
+      "prompt": "Review PR #42 on GitHub. For context: `gh auth status` succeeds, `gh pr diff 42` shows a Rails InvoicesController adding `def show; @invoice = Invoice.find(params[:id]); end` next to an existing `#index` that scopes through `current_user.organization.invoices`, and there is no .eagerworks/pr-review.json in the repo.",
+      "expected_output": "The response prints the markdown report to the console (a critical finding for the unscoped Invoice#show), then — because the scope is a GitHub PR and gh is authenticated — posts that same report as a comment on PR #42 with `gh pr comment 42 --body-file <report>` and reports the comment URL. The posted body is the same markdown report shown in the console plus a footer identifying the skill, not a reformatted summary. It is a new comment (no --edit-last), and no other git/gh mutation happens: no commit, no push, no file edits.",
+      "files": [],
+      "expectations": [
+        "Response prints the full markdown report to the console before or in addition to posting it, never only posts",
+        "Response posts the report on PR #42 using gh pr comment (e.g. `gh pr comment 42 --body-file ...`) without asking for confirmation first",
+        "Response posts the same markdown report shown in the console, not a reformatted or summarized version",
+        "Response creates a new comment rather than editing a previous one (does not use --edit-last)",
+        "Response performs no other mutation: no commit, no push, no file edits"
+      ]
+    },
+    {
+      "id": 19,
+      "prompt": "Review PR #42 on GitHub. For context: `command -v gh` finds nothing — the GitHub CLI is not installed on this machine — but the PR diff was already fetched and shows a Rails InvoicesController adding an unscoped `Invoice.find(params[:id])` in `#show`.",
+      "expected_output": "The response still delivers the full markdown report in the console (critical finding for the unscoped #show) — a missing gh never blocks or fails the review. It does not attempt to post, does not claim the report was posted, and instead offers to post the report on PR #42 so the team can read it once the user installs the GitHub CLI (cli.github.com) and runs `gh auth login`, asking the user to say so when that's done.",
+      "files": [],
+      "expectations": [
+        "Response prints the full markdown report despite gh being unavailable",
+        "Response does not claim the report was posted to the PR",
+        "Response offers to post the report on PR #42 once the user installs the GitHub CLI and runs `gh auth login`",
+        "Response mentions both installing the GitHub CLI and authenticating with `gh auth login` as the steps needed",
+        "Response does not treat the missing gh as an error that fails or aborts the review"
+      ]
+    },
+    {
+      "id": 20,
+      "prompt": "Review PR #42 on GitHub. This repo's .eagerworks/pr-review.json contains `{ \"review\": { \"postToPr\": false } }` and `gh auth status` succeeds. The diff adds a service object that scopes correctly through current_user.organization and matches the repo's documented conventions.",
+      "expected_output": "The response runs the review normally and prints a zero-findings report in the console, but does not post any comment on PR #42 because review.postToPr is false. It discloses the skip in one line (e.g. '_Not posted to PR #42 — postToPr is false._') rather than silently omitting the posting step, and does not ask the user whether to post anyway.",
+      "files": [],
+      "expectations": [
+        "Response does not run gh pr comment or otherwise post a comment on PR #42",
+        "Response explicitly discloses that posting was skipped because postToPr is false in .eagerworks/pr-review.json",
+        "Response still prints the full review report in the console",
+        "Response does not silently omit the posting step without mentioning the config opt-out",
+        "Response's verdict reflects zero findings rather than padding with nits"
+      ]
     }
   ]
 }

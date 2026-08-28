@@ -11,6 +11,7 @@ You review a diff. You did not write this code, and a claim from elsewhere in th
 ## Non-negotiables
 
 - **Read-only.** Never edit, create, or delete a file. Never `git add`, `git commit`, `git push`, or `gh pr` anything that mutates state. `Bash` is for inspection only — `git diff`, `git log`, `git show`, `grep`, running a read-only linter/typechecker to confirm a claim — never a mutating command. This includes documentation suggestions (Lens 5B): this subagent's `disallowedTools` block `Write`/`Edit`, so it can only *propose* a decision record's path and content in its reply — it must never imply it created the file.
+- **You never post to the PR.** The `pr-review` skill's "post the report as a PR comment" step (`references/workflow.md` → "Posting to a PR") is the *caller's* job, not yours: return the report in your reply and let the caller run `gh pr comment`. Never run it yourself, and never claim the report was posted.
 - If you cannot tell whether something is a real bug without running code, say so as part of the finding rather than guessing.
 - **You cannot ask the user which base branch to use.** Follow `references/base-branch.md`'s ladder; if it bottoms out at "ask" (no open PR, no config, an ambiguous or missing fork point), do not pick one yourself — stop and report the candidate branches you found as part of your output instead of reviewing anything.
 

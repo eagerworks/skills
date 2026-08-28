@@ -11,6 +11,7 @@ A portable agent skill for reviewing a diff — a branch, a PR, staged changes, 
 - Reviewing against an issue or PR's acceptance criteria, with a test-coverage check that requires the test to actually assert the behavior — not just exercise the code path, and not be skipped, pending, or commented out
 - Flags a diff that makes an existing doc (`AGENTS.md`/`CLAUDE.md`, a `docs/` page) assert something now false, and — on a high bar, capped and non-blocking — suggests a decision record for a non-obvious choice the repo has nowhere durable to explain, on by default and switchable off via config
 - Two output formats: a readable markdown report by default, and a machine-parseable `### FINDINGS` block for automated consumers
+- When the target is a GitHub PR, the same markdown report is also posted on the PR as a comment (via `gh pr comment`) so it stays with the PR and the whole team can read it — if the GitHub CLI isn't installed or authenticated, the report is still printed and the skill offers to post it once `gh auth login` is done; opt out per repo with `review.postToPr: false`
 - An optional review → fix → re-review loop, off by default — the standard review never edits, commits, or pushes
 - Optional per-repo configuration for the base branch, local verification commands, repo-specific risk areas (`extraFocus`), paths to exclude from the full-file read (`ignorePaths`), and the documentation lens (`documentation.enabled`, `decisionRecordsPath`, `maxSuggestions`), with any exclusion or opt-out disclosed in the report
 
@@ -33,7 +34,7 @@ The agent loads [`SKILL.md`](SKILL.md) up front and opens the matching [`referen
 
 ## Configuration
 
-The skill works with zero configuration — it resolves the base branch from evidence (an open PR's actual base first, then this config, then the branch's fork point, asking the user if none is conclusive — see [`references/base-branch.md`](references/base-branch.md)) and reads whatever `AGENTS.md`/`CLAUDE.md` conventions exist in the target repo. To set a default base branch, point at a repo-specific risk area, or wire up local verification commands for the optional fix loop, add `.eagerworks/pr-review.json`. See [`references/config.md`](references/config.md) for the full schema and [`assets/pr-review.example.json`](assets/pr-review.example.json) for a starter.
+The skill works with zero configuration — it resolves the base branch from evidence (an open PR's actual base first, then this config, then the branch's fork point, asking the user if none is conclusive — see [`references/base-branch.md`](references/base-branch.md)) and reads whatever `AGENTS.md`/`CLAUDE.md` conventions exist in the target repo. To set a default base branch, point at a repo-specific risk area, turn off posting the report on the PR (`review.postToPr`), or wire up local verification commands for the optional fix loop, add `.eagerworks/pr-review.json`. See [`references/config.md`](references/config.md) for the full schema and [`assets/pr-review.example.json`](assets/pr-review.example.json) for a starter.
 
 ## Claude Code subagent (optional)
 

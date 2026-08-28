@@ -97,18 +97,25 @@ If there are no suggestions, return the literal empty block, same rule as `### F
 
 ## PR Comment
 
-When posting to a PR (see `references/workflow.md`), use one line per finding, however long — never hard-wrapped; let GitHub wrap it. Order findings most-severe-first, and mark each with its severity:
+When the review targets a GitHub PR (see `references/workflow.md` → "Posting to a PR"), the comment body is the **markdown report above, verbatim** — same verdict line, same severity sections, same Documentation section, same disclosure lines. Don't reformat, summarize, or reorder it for the PR: the comment must read exactly like the console output, so a teammate reading the PR sees what the author saw. Append one footer line so readers know where the comment came from:
 
-- 🔴 `critical`
-- 🟠 `high`
-- 🟡 `minor`
-- 📄 documentation suggestion (Lens 5B — always place these after every severity line)
+```markdown
+## PR Review
 
-```text
-🔴 critical — app/controllers/invoices_controller.rb:12 — Invoice#show isn't scoped to the current user's organization, so any authenticated user can read any org's invoice by id. Fix: scope through `current_user.organization.invoices.find(params[:id])`.
-🟠 high — spec/requests/invoices_spec.rb — acceptance criterion "a user cannot view another org's invoice" has no test. Fix: add a request spec asserting a 404 on another org's invoice id.
-🟡 minor — app/services/reports/list_for_user.rb:8 — `call` could default `order` to a named scope for consistency with sibling services. Fix: extract `Report.recent` and use it here.
-📄 Suggestion, not a blocker: app/models/seat_reservation.rb:8 — pessimistic lock chosen over the repo's usual optimistic `lock_version` with no recorded rationale. Consider `docs/decision-records/2026-08-21--seat-reservation-locking.md`.
+**Verdict:** 1 critical, 1 high, 0 minor — do not merge until the critical finding is fixed.
+
+### Critical
+
+- **app/controllers/invoices_controller.rb:12** — `Invoice.find(params[:id])` is not scoped to the current user's organization.
+  - **Failure:** an authenticated user from Org A can read any invoice by guessing or incrementing the id, regardless of which org it belongs to.
+  - **Fix:** scope through the caller — `current_user.organization.invoices.find(params[:id])`.
+
+### High
+
+…
+
+---
+_Posted by the [eagerworks pr-review](https://github.com/eagerworks/skills/tree/main/skills/pr-review) skill._
 ```
 
-If there is nothing to report, post the one-line verdict from the markdown report (e.g. "0 findings — no correctness, security, or coverage gaps found"), never an empty comment.
+Never hard-wrap lines — let GitHub wrap them. Never post an empty comment: a review with zero findings posts the same two-line "0 findings" report shown above, plus the footer. Never post the `### FINDINGS` / `### DOCUMENTATION` machine-parseable blocks — those are for scripts, not for people reading the PR.
