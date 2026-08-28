@@ -1,0 +1,27 @@
+{
+  "$comment": "Copy to .eagerworks/loop-engineering-audit.json at your repo root. Every field is optional — delete what you don't need. Schema: references/config.md",
+  "reportPath": "docs/loop-engineering-audit.md",
+  "commands": {
+    "setup": "bin/setup",
+    "lint": "bin/rubocop",
+    "typecheck": "pnpm typecheck",
+    "test": "bin/rspec --tag ~type:system",
+    "build": "pnpm build"
+  },
+  "budgets": {
+    "testSeconds": 300,
+    "lintSeconds": 120,
+    "typecheckSeconds": 120,
+    "buildSeconds": 600
+  },
+  "runCommands": true,
+  "dimensions": {
+    "agentContext": { "enabled": true },
+    "environment": { "enabled": true },
+    "verification": { "enabled": true },
+    "testCoverage": { "enabled": true },
+    "taskDefinition": { "enabled": true },
+    "ciAndGates": { "enabled": true },
+    "guardrails": { "enabled": true }
+  }
+}
