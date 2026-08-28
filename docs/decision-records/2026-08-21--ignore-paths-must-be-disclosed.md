@@ -1,6 +1,5 @@
 # 3. `review.ignorePaths` must always be disclosed in the report
 
-- **Status:** Accepted
 - **Date:** 2026-08-21
 
 ## Context

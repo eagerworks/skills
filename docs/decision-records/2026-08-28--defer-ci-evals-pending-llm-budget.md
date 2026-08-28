@@ -1,6 +1,5 @@
 # 6. Defer running evals in GitHub Actions
 
-- **Status:** Accepted
 - **Date:** 2026-08-28
 
 ## Context

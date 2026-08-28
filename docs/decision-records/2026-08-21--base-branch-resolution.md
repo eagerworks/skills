@@ -1,6 +1,5 @@
 # 2. Resolve the `pr-review` base branch from evidence, never a silent default
 
-- **Status:** Accepted
 - **Date:** 2026-08-21
 
 ## Context
