@@ -8,8 +8,8 @@ Each skill is plain markdown and works with Claude Code, Cursor, GitHub Copilot,
 
 <table>
 <colgroup>
-<col width="12%">
-<col width="88%">
+<col width="18%">
+<col width="82%">
 </colgroup>
 <tr><th>Skill</th><th>What it does</th></tr>
 <tr><td><a href="skills/kamal/"><strong>kamal</strong></a></td><td>Zero-downtime <a href="https://kamal-deploy.org">Kamal</a> deployments (v2.x + 1.9.x): first-time setup, deploys, rollbacks, rolling deploys, <code>kamal-proxy</code> + Let's Encrypt SSL, secrets & vault adapters, accessories, builders/multiarch, troubleshooting, and the v1→v2 upgrade.</td></tr>
