@@ -40,6 +40,17 @@ A few notes:
 - **Global vs project** — installs into your project by default. Add `-g` / `--global` to make it available in every project.
 - **No pointer files** — agents with native Agent Skills support load each skill's `SKILL.md` automatically from its frontmatter `description`, and open `references/*.md` on demand. Nothing else to wire up.
 
+> **Known issue with Claude Code** — `npx skills add` (even with `-a claude-code`, global or project-scoped) can install the skill into `.agents/skills/<name>/` and record it in `skills-lock.json`, without creating the symlink in `.claude/skills/<name>/` that Claude Code actually reads from. If a freshly installed skill doesn't show up, check whether that symlink exists; if it doesn't, create it yourself and reload:
+>
+> ```bash
+> # project-level
+> ln -s ../../.agents/skills/<name> .claude/skills/<name>
+> # global
+> ln -s ~/.agents/skills/<name> ~/.claude/skills/<name>
+> ```
+>
+> Then run `/reload-skills` inside Claude Code so the session picks it up. Tracked upstream: [vercel-labs/skills#744](https://github.com/vercel-labs/skills/issues/744), [#851](https://github.com/vercel-labs/skills/issues/851), [#1355](https://github.com/vercel-labs/skills/issues/1355).
+
 <details>
 <summary><strong>Manual install (advanced)</strong> — for tools without skills.sh support, or if you prefer to vendor the files yourself</summary>
 
