@@ -1,0 +1,70 @@
+{
+  "skill_name": "hipaa",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We're a healthtech startup building a scheduling and records app for independent physical therapy clinics — our clinics are the covered entities, we're their vendor. Can you audit our Rails app (app/models/patient.rb has name, dob, diagnosis_notes, ssn fields) for HIPAA compliance before we sign our first enterprise clinic contract?",
+      "expected_output": "The agent should first run the scoping step, classifying the company as a business associate to the clinics (covered entities), then locate PHI across models/logs/error-tracking/analytics before producing findings. It should walk the §164.312 technical safeguards, grade findings with file:line evidence, and write the report to docs/hipaa-audits/YYYY-MM-DD-<slug>.md, creating the directory if needed. It should not claim the app will become 'HIPAA certified.'",
+      "files": [],
+      "expectations": [
+        "Response classifies the company as a business associate (not a covered entity) before producing any findings",
+        "Response locates or asks about PHI flow beyond the database — logs, error tracking, analytics — not just the patient model's columns",
+        "Response references or applies §164.312 technical safeguards (access control, audit controls, integrity, authentication, or transmission security) with specific citations",
+        "Response states the report will be written to a dated file under docs/hipaa-audits/, creating the directory if it doesn't exist",
+        "Response does not claim the app will be or become 'HIPAA certified'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Here's a snippet from our Rails app:\n\n```ruby\n# app/controllers/patients_controller.rb\ndef update\n  @patient = Patient.find(params[:id])\n  @patient.update!(patient_params)\n  logger.info(\"Updated record: #{@patient.inspect}\")\nrescue => e\n  Sentry.capture_exception(e)\nend\n```\n\nWe use Sentry with default config (no beforeSend hook). Is there a HIPAA problem here?",
+      "expected_output": "The agent should identify the logger.info call as a blocker — it writes the full patient object including PHI (name, DOB, diagnosis) to plaintext logs — and separately flag that default Sentry config with no scrubbing hook can also leak PHI (request/exception context) to a third party with no confirmed BAA. Both should be graded, cited with file:line and a §164.312 reference, and given a concrete fix (log identifiers only, filter_parameters, and a Sentry beforeSend scrub).",
+      "files": [],
+      "expectations": [
+        "Response identifies the logger.info(@patient.inspect) line as a Blocker/critical PHI exposure with a file:line citation",
+        "Response separately flags the default Sentry configuration (no beforeSend/scrub hook) as a risk of PHI reaching a third party",
+        "Response proposes a concrete fix for the logging issue (e.g. log only patient.id, add PHI fields to filter_parameters) rather than a vague 'be more careful'",
+        "Response cites a HIPAA safeguard reference (e.g. §164.312 or 'audit controls'/'transmission security') rather than giving generic security advice with no HIPAA framing",
+        "Response does not grade the Sentry exposure as a Pass just because Sentry itself is a reputable vendor"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We built a feature where our Node.js backend sends a patient's full clinical notes to OpenAI's API to generate a plain-language summary for the patient portal. We haven't set up anything special with OpenAI account-wise. Is this okay from a HIPAA standpoint?",
+      "expected_output": "The agent should flag this as a blocker: PHI (clinical notes) is being sent to a third-party LLM vendor with no confirmed Business Associate Agreement, which is a hard requirement before PHI reaches any vendor. It should not just suggest redacting the prompt as if that alone resolves it, and should not assert OpenAI's current BAA policy as a fact one way or the other, instead flagging BAA status as something to confirm with the vendor and route as a human/legal action item.",
+      "files": [],
+      "expectations": [
+        "Response identifies sending clinical notes to the LLM API as a Blocker due to no confirmed Business Associate Agreement",
+        "Response does not treat prompt redaction/de-identification alone as a complete fix without also addressing the BAA requirement",
+        "Response does not assert a specific, unverified claim about the LLM vendor's current BAA availability or terms as settled fact",
+        "Response explicitly routes confirming BAA status as an action item for a human (e.g. legal, vendor management) rather than resolving it itself",
+        "Response does not say the feature is fine to ship as-is"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Someone on our team said we're fine because we hash the patient's name before storing it in our analytics events, so the data is de-identified and HIPAA doesn't apply to it anymore. We still send date of birth and full 5-digit ZIP code in the same event. Is that right?",
+      "expected_output": "The agent should correct this premise clearly: de-identification under HIPAA's Safe Harbor method requires removing all 18 identifiers, not just the name. Hashing a name doesn't remove it as an identifier (it's still tied 1:1 to the person and often reversible/correlatable), and date of birth plus a full 5-digit ZIP are both on the Safe Harbor list and remain PHI-identifying on their own. The agent should explain the analytics events are still PHI and need to be treated accordingly (or the remaining identifiers actually removed/generalized).",
+      "files": [],
+      "expectations": [
+        "Response explicitly corrects the claim that hashing the name alone achieves HIPAA de-identification",
+        "Response explains Safe Harbor de-identification requires removing all 18 identifiers, not a subset",
+        "Response specifically calls out that full date of birth and full 5-digit ZIP code are themselves Safe Harbor identifiers that must be removed or generalized (e.g. birth year only, 3-digit ZIP)",
+        "Response states the analytics events should still be treated as PHI given the remaining identifiers",
+        "Response does not agree that hashing the name alone made the team 'fine'"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "We're building a consumer app that lets people log their daily step count, sleep, and mood. No connection to any doctor, clinic, insurer, or health plan - just a standalone wellness app people download themselves. Do we need to worry about HIPAA?",
+      "expected_output": "The agent should recognize this as very likely outside HIPAA's scope, since there is no covered entity or business associate relationship - the company is not a healthcare provider, health plan, or clearinghouse, and isn't handling data on behalf of one. It should explain what would change that (e.g. adding an integration where a clinic imports patient data, or partnering with a health plan) rather than fabricating HIPAA findings or treating the app as automatically in scope just because it involves health-adjacent data. It may still note other applicable frameworks (state privacy law, FTC) as a brief aside without making that the focus.",
+      "files": [],
+      "expectations": [
+        "Response concludes HIPAA likely does not apply given the described consumer-only, no-covered-entity scenario",
+        "Response explains the reasoning is based on the absence of a covered entity/business associate relationship, not merely that the data 'isn't sensitive enough'",
+        "Response names at least one concrete scenario that would pull the app into HIPAA scope (e.g. a clinic integration or health plan partnership)",
+        "Response does not proceed to produce a graded HIPAA audit report or treat unrelated data (step count, sleep, mood) as PHI requiring §164.312 controls",
+        "Response does not claim the app is or needs to be 'HIPAA certified'"
+      ]
+    }
+  ]
+}
