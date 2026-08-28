@@ -51,7 +51,13 @@ All fields optional.
 
       // Cap on documentation suggestions per review.
       "maxSuggestions": 2
-    }
+    },
+
+    // Post the report as a comment on the PR under review (see references/workflow.md
+    // → "Posting to a PR"). On by default; only relevant when the scope is a GitHub PR.
+    // Set false to keep the review in the console only — the skip is disclosed in the
+    // report, never silent.
+    "postToPr": true
   },
 
   // Commands this repo uses to verify a fix during the optional fix loop. Run as-is, in order.
@@ -70,7 +76,8 @@ All fields optional.
       "Every query scoped to an Organization filters through current_user.organization, not just organization_id from params"
     ],
     "ignorePaths": ["db/schema.rb"],
-    "documentation": { "enabled": true, "decisionRecordsPath": "docs/adr/" }
+    "documentation": { "enabled": true, "decisionRecordsPath": "docs/adr/" },
+    "postToPr": true
   },
   "localChecks": ["bundle exec rspec", "bundle exec rubocop"]
 }
@@ -87,7 +94,8 @@ All fields optional.
       "Every Prisma query on a tenant-scoped model includes orgId from the session, never only from the request body"
     ],
     "ignorePaths": ["package-lock.json", "src/generated/**"],
-    "documentation": { "enabled": true, "decisionRecordsPath": "docs/decision-records/" }
+    "documentation": { "enabled": true, "decisionRecordsPath": "docs/decision-records/" },
+    "postToPr": false
   },
   "localChecks": ["npm test", "npm run lint", "npm run typecheck"]
 }
