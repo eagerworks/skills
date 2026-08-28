@@ -1,16 +1,10 @@
 ---
 name: kamal
-description: >
-  Expert guide for setting up and managing Kamal deployments — the Basecamp tool for zero-downtime
-  container deployments to bare-metal servers and VMs. Use this skill whenever the user: mentions
-  Kamal, kamal-proxy, or Traefik-based deployments; wants to deploy a Dockerized app to a VPS, VM,
-  or bare-metal server; is writing or editing a config/deploy.yml or .kamal/secrets file; asks about
-  zero-downtime deploys, rolling deploys, rollbacks, or deploy hooks; needs to set up a Docker
-  registry, builder, or SSH connection for deployments; asks about Kamal accessories (databases,
-  Redis, etc.); is troubleshooting a failed deploy, healthcheck error, or lock issue; is upgrading
-  from Kamal 1 to Kamal 2; or wants to run commands inside a running container. Also use when
-  the user says things like "deploy my app without downtime", "deploy to my own server", or
-  "set up SSL for my self-hosted app" — even if they don't name Kamal.
+description: >-
+  Sets up, runs, and troubleshoots Kamal deployments (v1 and v2) — zero-downtime Docker deploys to VPS or bare-metal servers. Use when the user mentions Kamal, kamal-proxy, or Traefik, edits config/deploy.yml or .kamal/secrets, or asks to deploy an app to their own server, roll back, add accessories like Postgres or Redis, fix a failed deploy or healthcheck, or upgrade from Kamal 1 to 2.
+metadata:
+  author: eagerworks
+  version: "1.0.0"
 ---
 
 # Kamal Deployment Skill

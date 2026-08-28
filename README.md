@@ -6,10 +6,18 @@ Each skill is plain markdown and works with Claude Code, Cursor, GitHub Copilot,
 
 ## Available skills
 
-| Skill | What it does |
-|---|---|
-| [**kamal**](skills/kamal/) | Zero-downtime [Kamal](https://kamal-deploy.org) deployments (v2.x + 1.9.x): first-time setup, deploys, rollbacks, rolling deploys, `kamal-proxy` + Let's Encrypt SSL, secrets & vault adapters, accessories, builders/multiarch, troubleshooting, and the v1→v2 upgrade. |
-| [**soc2**](skills/soc2/) | SOC 2 readiness planning: a structured intake interview, Trust Services Criteria scoping (Type I/II, system boundary, subservice orgs), a gap analysis and phased roadmap, required policy skeletons, DIY evidence collection, and the CPA audit process. |
+<table>
+<colgroup>
+<col width="18%">
+<col width="82%">
+</colgroup>
+<tr><th>Skill</th><th>What it does</th></tr>
+<tr><td><a href="skills/kamal/"><strong>kamal</strong></a></td><td>Zero-downtime <a href="https://kamal-deploy.org">Kamal</a> deployments (v2.x + 1.9.x): first-time setup, deploys, rollbacks, rolling deploys, <code>kamal-proxy</code> + Let's Encrypt SSL, secrets & vault adapters, accessories, builders/multiarch, troubleshooting, and the v1→v2 upgrade.</td></tr>
+<tr><td><a href="skills/mobile-store-review/"><strong>mobile-store-review</strong></a></td><td>Audits an Expo/React Native or native mobile app — standalone or inside a Turborepo — against the <a href="https://developer.apple.com/app-store/review/guidelines/">Apple App Review Guidelines</a> and <a href="https://play.google.com/about/developer-content-policy/">Google Play Developer Program Policies</a>: permissions & usage descriptions, privacy manifests & App Tracking Transparency, App Privacy vs. Data safety, account deletion, IAP & external payments, SDK/target-API floors, versioning & credentials, and EAS/monorepo build config — output as a severity-graded audit report.</td></tr>
+<tr><td><a href="skills/pr-review/"><strong>pr-review</strong></a></td><td>Code review for Rails and Node/TypeScript diffs: correctness, security & multi-tenant scoping, repo-convention conformance, test coverage against acceptance criteria, and documentation & decision capture (stale docs, undocumented decisions), with a conservative severity ladder, markdown or machine-parseable output, and an optional review-fix loop.</td></tr>
+<tr><td><a href="skills/rest-api-design/"><strong>rest‑api‑design</strong></a></td><td>Design and review REST APIs: resource modeling, HTTP methods & status codes, payload and RFC 9457 error shapes, pagination/filtering, versioning & deprecation, auth, rate limiting, security pitfalls, and OpenAPI 3.1 — with an existing-API survey step so new endpoints match the conventions already in the codebase.</td></tr>
+<tr><td><a href="skills/soc2/"><strong>soc2</strong></a></td><td>SOC 2 readiness planning: a structured intake interview, Trust Services Criteria scoping (Type I/II, system boundary, subservice orgs), a gap analysis and phased roadmap, required policy skeletons, DIY evidence collection, and the CPA audit process.</td></tr>
+</table>
 
 ## Install
 
@@ -38,6 +46,17 @@ A few notes:
   Supported slugs include `claude-code`, `cursor`, `github-copilot`, `codex`, and `amp` (plus dozens more).
 - **Global vs project** — installs into your project by default. Add `-g` / `--global` to make it available in every project.
 - **No pointer files** — agents with native Agent Skills support load each skill's `SKILL.md` automatically from its frontmatter `description`, and open `references/*.md` on demand. Nothing else to wire up.
+
+> **Known issue with Claude Code** — `npx skills add` (even with `-a claude-code`, global or project-scoped) can install the skill into `.agents/skills/<name>/` and record it in `skills-lock.json`, without creating the symlink in `.claude/skills/<name>/` that Claude Code actually reads from. If a freshly installed skill doesn't show up, check whether that symlink exists; if it doesn't, create it yourself and reload:
+>
+> ```bash
+> # project-level
+> ln -s ../../.agents/skills/<name> .claude/skills/<name>
+> # global
+> ln -s ~/.agents/skills/<name> ~/.claude/skills/<name>
+> ```
+>
+> Then run `/reload-skills` inside Claude Code so the session picks it up. Tracked upstream: [vercel-labs/skills#744](https://github.com/vercel-labs/skills/issues/744), [#851](https://github.com/vercel-labs/skills/issues/851), [#1355](https://github.com/vercel-labs/skills/issues/1355).
 
 <details>
 <summary><strong>Manual install (advanced)</strong> — for tools without skills.sh support, or if you prefer to vendor the files yourself</summary>

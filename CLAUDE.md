@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-Two parallel trees, intentionally kept separate (see `docs/decision-records/0001-evals-separate-from-skills.md`):
+Two parallel trees, intentionally kept separate (see `docs/decision-records/2026-06-30--evals-separate-from-skills.md`):
 
 ```
 skills/<name>/      # SHIPPED to users — the skills.sh CLI copies this whole dir
@@ -26,13 +26,13 @@ The boundary is the rule: **anything users should receive goes inside `skills/<n
 
 `SKILL.md` is loaded up front, so it must stay **lean** — it's a hub: when-to-use frontmatter, a version-detection step, a table pointing to `references/*.md`, and critical gotchas. Depth belongs in `references/*.md`, which the agent opens only when relevant. When editing, push detail down into `references/` rather than growing `SKILL.md`.
 
-## The kamal skill
+## The skills
 
-Deploys Dockerized apps with Kamal. **Version-aware**: defaults to **Kamal 2.x**; all Kamal 1.9.x content lives *exclusively* in `references/kamal-v1.md`. `SKILL.md` opens with a version-detection step (`kamal version`, or infer from `traefik:`/`.env` → v1 vs `proxy:`/`.kamal/secrets` → v2). When adding version-specific examples, mark them (`# Kamal 2.x only` / `# Kamal 1.x only`) and never mix v1 syntax into the v2 references.
+**kamal** deploys Dockerized apps with Kamal. **Version-aware**: defaults to **Kamal 2.x**; all Kamal 1.9.x content lives *exclusively* in `references/kamal-v1.md`. `SKILL.md` opens with a version-detection step (`kamal version`, or infer from `traefik:`/`.env` → v1 vs `proxy:`/`.kamal/secrets` → v2). When adding version-specific examples, mark them (`# Kamal 2.x only` / `# Kamal 1.x only`) and never mix v1 syntax into the v2 references.
 
-## The soc2 skill
+**pr-review** reviews a diff (branch, PR, staged, or working-tree changes) against a fixed five-lens rubric — correctness, security & data integrity, repo-convention conformance, test coverage, documentation & decision capture — ported from the `dizenz/agent-skills` `code-reviewer` subagent and its review rubric, generalized to be plugin-free and stack-agnostic (Rails + Node/TypeScript). `references/rubric.md` is the single source of truth for the rubric and severity ladder; `SKILL.md` only summarizes it — never duplicate rubric detail back into `SKILL.md`. Read-only by default: the standard review never edits, commits, or pushes; the optional fix loop only runs when a user explicitly asks for it (see `references/workflow.md`). The documentation lens (on by default, switchable off via `.eagerworks/pr-review.json`) turns a diff that makes an existing doc false into a normal severity-rated finding, and an undocumented non-obvious decision into a separate, capped, non-blocking suggestion — never a merge blocker, never fabricated rationale.
 
-Plans and runs a SOC 2 readiness effort. Two behaviors define it and must not be diluted when editing: it **asks a batched intake interview before recommending anything** (`SKILL.md`'s "The Intake Interview" section — never dump the full question bank at once), and it **always outputs a fixed plan shape** (scope statement → gap matrix → five-phase roadmap → top-5 priorities → stated assumptions, per "Producing the Plan"). It defaults to a **DIY-first** tooling stance — no assumption of a compliance platform (Vanta/Drata/Secureframe); `references/tooling.md` covers those only as a closing "when it's worth it" note. `SKILL.md` opens with an engagement-framing step (own company vs. client engagement; Type I vs. Type II; current stage) analogous to kamal's version detection.
+**soc2** plans and runs a SOC 2 readiness effort. Two behaviors define it and must not be diluted when editing: it **asks a batched intake interview before recommending anything** (`SKILL.md`'s "The Intake Interview" section — never dump the full question bank at once), and it **always outputs a fixed plan shape** (scope statement → gap matrix → five-phase roadmap → top-5 priorities → stated assumptions, per "Producing the Plan"). It defaults to a **DIY-first** tooling stance — no assumption of a compliance platform (Vanta/Drata/Secureframe); `references/tooling.md` covers those only as a closing "when it's worth it" note. `SKILL.md` opens with an engagement-framing step (own company vs. client engagement; Type I vs. Type II; current stage) analogous to kamal's version detection.
 
 ## Authoring conventions (from CONTRIBUTING.md)
 

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Starter Apple Privacy Manifest (PrivacyInfo.xcprivacy).
+  Place this file in your app target (or a native module target that needs its own manifest).
+
+  This is a STARTER — every value below is a placeholder illustrating the shape of the file.
+  You must:
+    1. Set NSPrivacyTracking to your actual tracking behavior.
+    2. Replace NSPrivacyTrackingDomains with your real tracking domains, if any.
+    3. Replace NSPrivacyCollectedDataTypes with every data type your app or its SDKs actually
+       collect — see references/permissions-and-privacy.md for the categories.
+    4. Declare an NSPrivacyAccessedAPITypes entry for every "required-reason API" your app or
+       any linked SDK calls (see Apple's list at
+       https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api).
+       Each reason code below (e.g. "C617.1") is an EXAMPLE — pick the code that matches your
+       actual, specific reason for use; using the wrong code is itself a rejection risk.
+
+  See skills/mobile-store-review/references/permissions-and-privacy.md § Apple PrivacyInfo.xcprivacy
+  for enforcement details (ITMS-91053 and the SDK-signature requirement).
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Does this app (or a linked SDK) track users across apps/sites owned by other companies? -->
+	<key>NSPrivacyTracking</key>
+	<false/>
+
+	<!-- If NSPrivacyTracking is true, list every domain contacted for tracking purposes -->
+	<key>NSPrivacyTrackingDomains</key>
+	<array>
+		<!-- <string>ads.example-tracker.com</string> -->
+	</array>
+
+	<!-- One entry per category of data your app or its SDKs collect -->
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeEmailAddress</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- One entry per required-reason API category actually called, with the matching reason code -->
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>C617.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
