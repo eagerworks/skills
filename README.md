@@ -6,11 +6,16 @@ Each skill is plain markdown and works with Claude Code, Cursor, GitHub Copilot,
 
 ## Available skills
 
-| Skill | What it does |
-|---|---|
-| [**kamal**](skills/kamal/) | Zero-downtime [Kamal](https://kamal-deploy.org) deployments (v2.x + 1.9.x): first-time setup, deploys, rollbacks, rolling deploys, `kamal-proxy` + Let's Encrypt SSL, secrets & vault adapters, accessories, builders/multiarch, troubleshooting, and the v1→v2 upgrade. |
-| [**pr-review**](skills/pr-review/) | Code review for Rails and Node/TypeScript diffs: correctness, security & multi-tenant scoping, repo-convention conformance, test coverage against acceptance criteria, and documentation & decision capture (stale docs, undocumented decisions), with a conservative severity ladder, markdown or machine-parseable output, and an optional review-fix loop. |
-| [**rest-api-design**](skills/rest-api-design/) | Design and review REST APIs: resource modeling, HTTP methods & status codes, payload and RFC 9457 error shapes, pagination/filtering, versioning & deprecation, auth, rate limiting, security pitfalls, and OpenAPI 3.1 — with an existing-API survey step so new endpoints match the conventions already in the codebase. |
+<table>
+<colgroup>
+<col width="12%">
+<col width="88%">
+</colgroup>
+<tr><th>Skill</th><th>What it does</th></tr>
+<tr><td><a href="skills/kamal/"><strong>kamal</strong></a></td><td>Zero-downtime <a href="https://kamal-deploy.org">Kamal</a> deployments (v2.x + 1.9.x): first-time setup, deploys, rollbacks, rolling deploys, <code>kamal-proxy</code> + Let's Encrypt SSL, secrets & vault adapters, accessories, builders/multiarch, troubleshooting, and the v1→v2 upgrade.</td></tr>
+<tr><td><a href="skills/pr-review/"><strong>pr-review</strong></a></td><td>Code review for Rails and Node/TypeScript diffs: correctness, security & multi-tenant scoping, repo-convention conformance, test coverage against acceptance criteria, and documentation & decision capture (stale docs, undocumented decisions), with a conservative severity ladder, markdown or machine-parseable output, and an optional review-fix loop.</td></tr>
+<tr><td><a href="skills/rest-api-design/"><strong>rest-api-design</strong></a></td><td>Design and review REST APIs: resource modeling, HTTP methods & status codes, payload and RFC 9457 error shapes, pagination/filtering, versioning & deprecation, auth, rate limiting, security pitfalls, and OpenAPI 3.1 — with an existing-API survey step so new endpoints match the conventions already in the codebase.</td></tr>
+</table>
 
 ## Install
 
