@@ -1,0 +1,84 @@
+{
+  "skill_name": "architecture-design",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Help me design the architecture for my SaaS. It's for managing gym memberships.",
+      "expected_output": "The skill does not propose a stack yet. It notes there is no repo context, states what it already knows (a SaaS for gym memberships), and asks the phase 1 questions — purpose in one sentence, success criterion, non-goals, new vs. replacement — at most four, each with a default the user can accept.",
+      "files": [],
+      "expectations": [
+        "Response asks questions from phase 1 (problem & goals) only, not from later phases",
+        "Response asks at most four questions",
+        "Response offers a default answer for each question so the user can reply 'yes'",
+        "Response does not propose a language, framework, database, or hosting platform yet",
+        "Response says it will continue one phase at a time"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Design the v1 architecture for this project. The repo has a Gemfile with rails 7.2 and pg, a Dockerfile, config/deploy.yml for Kamal deploying to a Hetzner VPS, and .github/workflows/ci.yml running rspec. README says it's an internal tool for our support team to manage refund requests. No docs/ folder yet.",
+      "expected_output": "The skill confirms in one or two lines what the repo already decides — Rails 7.2, PostgreSQL, Kamal on a Hetzner VPS, GitHub Actions CI — and does not ask about language, framework, database, or hosting. It starts the interview at phase 1 with the internal-tool context already applied (e.g. users are the support team) and asks only what is still open.",
+      "files": [],
+      "expectations": [
+        "Response states that Rails, PostgreSQL, Kamal/Hetzner hosting, and GitHub Actions CI are already decided by the repo",
+        "Response does not ask which language, framework, database, or hosting to use",
+        "Response treats the support team as the known user type rather than asking who the users are from scratch",
+        "Response asks the remaining open questions one phase at a time with defaults"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Here's everything: a B2B scheduling tool for ~30 dental clinics in Uruguay, each clinic sees only its own data. Core flows: book appointment, send reminders by WhatsApp/SMS, patient records, monthly billing report. Money flow is booking. Team: 2 Rails devs, 3-month deadline, budget under 300 USD/month, no compliance beyond local privacy law. Availability: an hour down is annoying but not fatal. Latency under 1 s. Data: < 100k appointments/year. Integrations: Twilio for messaging. No public API. Host on Fly.io, staging + prod, devs are on call. Propose the architecture.",
+      "expected_output": "The gate is satisfied, so the skill moves to synthesis and presents a short proposal in chat: ranked drivers (2 devs / 3 months, per-clinic isolation, no double-booking), a modular monolith on Rails with PostgreSQL, a job queue for reminders, shared-database multi-tenancy with a clinic_id scope, Fly.io hosting. It lists alternatives considered (microservices, schema-per-tenant, hosted pub/sub) with why they lost, and asks for objections before writing the document.",
+      "files": [],
+      "expectations": [
+        "Response does not ask further interview questions before proposing",
+        "Response lists ranked architectural drivers derived from the brief",
+        "Response recommends a modular monolith with a single PostgreSQL database and a job queue for reminders",
+        "Response recommends shared-database multi-tenancy with a clinic/tenant scope rather than a database per clinic",
+        "Response names at least one alternative it rejected for a major decision and gives the driver-based reason",
+        "Response asks for objections or confirmation before writing docs/architecture.md"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "We're 2 engineers building an MVP marketplace in 4 months. I want to go with microservices from the start — one for users, one for listings, one for payments, one for notifications — on Kubernetes, so we're ready to scale. Go ahead and design it that way.",
+      "expected_output": "The skill states the trade-off once in a couple of sentences — four services and Kubernetes on a 2-person team in 4 months costs distributed transactions, four pipelines, and ops time, with no named driver — and recommends a modular monolith with those four modules, noting extraction later is a refactor. It asks whether the user still wants services; if the user reaffirms, it proceeds, records the decision as the user's with their reason, and puts the monolith alternative in the decision log.",
+      "files": [],
+      "expectations": [
+        "Response states the trade-off of microservices and Kubernetes for a 2-person team with a 4-month deadline",
+        "Response recommends a modular monolith with users, listings, payments, and notifications as modules",
+        "Response pushes back only once and asks whether the user wants to keep their choice",
+        "Response says that if the user reaffirms, the design will follow their decision and the decision log will record it as a user decision with the alternative noted",
+        "Response does not refuse or silently ignore the user's stated preference"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "The proposal looks good, go ahead and write the document.",
+      "expected_output": "The skill prints the complete architecture document in chat (all sections: header, overview, non-goals, drivers, quality attributes, mermaid diagram, modules, data model, key flows, integrations, infrastructure, cross-cutting, decision log with alternatives, risks & open questions, evolution path), then runs `mkdir -p docs` and saves the identical markdown to docs/architecture.md, leaving it unstaged. It does not scaffold code, create other files, or commit.",
+      "files": [],
+      "expectations": [
+        "Response prints the full document in chat rather than a summary that points to the file",
+        "Response saves the document to docs/architecture.md and creates the docs directory if it does not exist",
+        "Response includes a decision log where every row has alternatives and a driver-based rationale",
+        "Response includes a risks & open questions section listing assumptions taken from defaults",
+        "Response does not create any file other than docs/architecture.md and does not git add, commit, or push"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "We already have docs/architecture.md from three months ago (Rails modular monolith, Postgres, Sidekiq, Fly.io, single-tenant). We just signed a deal that requires supporting multiple companies with isolated data, and the customer needs SSO. Update the architecture.",
+      "expected_output": "The skill reads the existing document, treats its decision log as settled, and runs only the interview phases the change touches (users & tenancy, constraints/compliance, auth). It then proposes shared-database multi-tenancy with a tenant scope and an SSO provider, and delivers an updated docs/architecture.md that keeps existing decision-log rows (marking the single-tenant one superseded) and adds a 'Changes since last version' section.",
+      "files": [],
+      "expectations": [
+        "Response reads the existing docs/architecture.md before asking anything",
+        "Response asks only about what changed (tenancy, SSO, compliance) and does not restart the full seven-phase interview",
+        "Response keeps unchanged decisions such as Rails, Postgres, Sidekiq, and Fly.io as they are",
+        "Response marks the previous single-tenant decision as superseded rather than deleting it",
+        "Response adds a 'Changes since last version' section to the updated document",
+        "Response overwrites docs/architecture.md and leaves it unstaged"
+      ]
+    }
+  ]
+}
