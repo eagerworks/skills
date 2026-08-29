@@ -1,0 +1,84 @@
+{
+  "skill_name": "ui-ux-audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Audit the UI/UX of this project. It's a Rails 7.1 app with ERB views, Hotwire, and Tailwind. Primary flows per the README: sign up, create an invoice, send an invoice. app/views/invoices/_form.html.erb has inputs with placeholders but no <label> tags and validation errors are shown only in the flash. grep for '#[0-9a-fA-F]{6}' across app/views returns 47 matches in 12 files while tailwind.config.js defines brand and danger colors. app/views/invoices/index.html.erb renders a table with no branch for @invoices.empty?. 23 image_tag calls have no alt:. No URL was given and no server is running.",
+      "expected_output": "Verdict Needs work. Blockers: unlabeled inputs on a primary form (4.3) and flash-only validation errors on a primary form (5.2). Gaps: 47 hardcoded colors (2.2), no empty state on the invoices list (6.2), missing alt on images (4.2). Contrast/focus/reflow are ⚪ with the exact screens to check. Every finding — including the 🟢 ones — has a → Recommendation line naming the file. Report printed in full and saved to docs/ui-ux-audit.md, unstaged.",
+      "files": [],
+      "expectations": [
+        "Response grades the unlabeled invoice form inputs as a 🔴 Blocker under accessibility (4.3) and flash-only validation errors as a 🔴 Blocker under forms (5.2), with the overall verdict Needs work",
+        "Response's recommendation for the form names app/views/invoices/_form.html.erb and proposes f.label plus per-field errors associated via aria-describedby, not a generic 'improve accessibility'",
+        "Response grades the 47 hardcoded hex colors as a 🟡 Gap under design system and recommends replacing them with the tokens already in tailwind.config.js",
+        "Response grades the missing @invoices.empty? branch as a 🟡 Gap under feedback states and recommends an empty state with a 'create invoice' action",
+        "Response grades contrast and focus visibility ⚪ Unverifiable from code (no running app) with a concrete verification step, rather than guessing them 🟢",
+        "Response states the report is printed in chat and saved to docs/ui-ux-audit.md without committing it, and does not edit any view file"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review the usability and accessibility of this frontend. Next.js 14 app router, TypeScript, Tailwind with a full theme in tailwind.config.ts, shadcn/ui for every primitive (Button, Input, Dialog, Toast), eslint-plugin-jsx-a11y in recommended mode and it passes. Forms use react-hook-form; errors are rendered in a <FormMessage> under each field. Loading: no loading.tsx or Suspense anywhere — pages await their fetches in the server component so the whole page blocks. Mutations show a toast on success. Delete actions call window.confirm('Are you sure?'). The app is running at http://localhost:3000 and you may browse it.",
+      "expected_output": "Acceptable with gaps (no blockers). 🟢 on design system, form labels/validation, keyboard/focus (shadcn/Radix). Gaps: no loading states / whole page blocked (6.1 and 8.4), generic window.confirm on destructive actions (6.5). A runtime pass is performed at 375/768/1280 with screenshots as evidence; contrast measured in the browser. Every 🟢 has a Keep: recommendation.",
+      "files": [],
+      "expectations": [
+        "Response's verdict is Acceptable with gaps and it does not invent blockers for the design system, form validation, or focus management given shadcn/ui, the theme, and react-hook-form with FormMessage",
+        "Response grades the absence of loading.tsx/Suspense as a 🟡 Gap and recommends adding loading.tsx per route segment or Suspense boundaries around slow fetches, naming the app router convention",
+        "Response grades window.confirm('Are you sure?') as a 🟡 Gap under feedback states and recommends a shadcn AlertDialog that names the object and uses the verb on the confirm button",
+        "Response performs a browser pass against http://localhost:3000 at the default viewports, cites screenshots or computed contrast as evidence, and never starts or restarts the server",
+        "Response includes a → Recommendation line on the 🟢 findings that starts with Keep: and names the practice (e.g. shadcn primitives, jsx-a11y passing)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Can you do a UX review of our mobile app? Expo SDK 51, Expo Router, TypeScript. Primary flow is: log in → view orders list → order detail → mark as delivered. Orders list uses a ScrollView with orders.map(...) and there can be thousands of orders. Several Pressable icons in the header are 28x28 with no hitSlop and no accessibilityLabel. No NetInfo or offline handling; marking as delivered is a POST with no pending state. Every screen root uses SafeAreaView. There's no simulator available to you.",
+      "expected_output": "Needs work. Blockers: unbounded ScrollView+map on a primary list (8.3), no offline handling for a primary write (6.6), no pending/double-submit protection on mark-as-delivered (5.5), unnamed icon-only actions (4.2). Gap: 28pt targets without hitSlop (3.3). Safe areas 🟢. Runtime-only checks are ⚪ noting no simulator; recommendations are RN-specific (FlatList/FlashList, NetInfo, accessibilityLabel, hitSlop).",
+      "files": [],
+      "expectations": [
+        "Response grades ScrollView + map over thousands of orders as a 🔴 Blocker under performance and recommends FlatList or FlashList with keyExtractor and pagination",
+        "Response grades the missing offline handling as a 🔴 Blocker under feedback states for a mobile app with a primary write, recommending NetInfo and queuing or blocking the delivered mutation",
+        "Response grades the mark-as-delivered POST with no pending state as a 🔴 Blocker under forms (5.5) and recommends disabling the control and showing progress while in flight",
+        "Response grades the 28x28 icon Pressables as a 🟡 Gap on target size recommending hitSlop or a 44pt container, and the missing accessibilityLabel as an accessibility finding with the label to add",
+        "Response grades SafeAreaView usage 🟢 with a Keep: recommendation and marks runtime-only checks ⚪ citing the absence of a simulator rather than guessing"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Re-run the UI/UX audit on this repo now that we fixed the form labels. .eagerworks/ui-ux-audit.json contains {\"reportPath\": \"docs/quality/ui-ux-audit.md\", \"dimensions\": {\"performance\": {\"enabled\": false}}, \"primaryFlows\": [{\"name\": \"Checkout\", \"screens\": [\"/checkout\", \"/checkout/confirm\"]}]}. A previous report exists at docs/quality/ui-ux-audit.md where 4.3 was 🔴. Now every input in app/views/checkout has an f.label. Nothing else changed.",
+      "expected_output": "Full re-audit (not a diff), 4.3 now 🟢 with a 'Since last audit' section listing the grade change; performance dimension excluded from scorecard and verdict and disclosed in the footer; report written to docs/quality/ui-ux-audit.md, overwriting the old one, unstaged; the Checkout flow is named in the header and graded first.",
+      "files": [],
+      "expectations": [
+        "Response re-grades every enabled dimension rather than only re-checking 4.3",
+        "Response includes a Since last audit section noting 4.3 moved from 🔴 to 🟢",
+        "Response excludes the performance dimension from the scorecard and verdict and discloses it in the footer as disabled by config",
+        "Response writes the report to docs/quality/ui-ux-audit.md (the configured reportPath), overwriting the previous file, and leaves it unstaged",
+        "Response names the Checkout flow as the primary flow in the report header"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Audit the UI/UX of this app. React + Vite SPA. Design tokens in src/theme/tokens.css as CSS custom properties, consumed everywhere (a grep for literal hex in src/components finds 2, both in a chart legend with a comment explaining why). All primitives come from src/components/ui (Radix-based). Every route has loading, empty, and error states with a shared EmptyState and InlineError, toasts use role=\"status\", deletes use a ConfirmDialog naming the object. Forms use labels, aria-describedby errors, autocomplete attributes, pending submit. Strings go through react-i18next with plural rules. Images use width/height and loading=\"lazy\". Lighthouse CI runs in GitHub Actions. jsx-a11y passes. It's running at http://localhost:5173 and you checked contrast and focus rings there: all pass.",
+      "expected_output": "Verdict Solid, zero blockers and zero gaps. The Work Plan is empty (or states no items). Every 🟢 check still carries a Keep: recommendation naming the practice. No invented findings about style preferences. Report printed and saved.",
+      "files": [],
+      "expectations": [
+        "Response's verdict is Solid with no 🔴 or 🟡 grades",
+        "Response's Work Plan has no rows (or explicitly states there is nothing to do) rather than padding it with preferences",
+        "Response still includes a → Recommendation line starting with Keep: for the 🟢 findings in each dimension, naming the concrete practice (tokens.css, EmptyState/InlineError, ConfirmDialog, react-i18next, Lighthouse CI)",
+        "Response does not downgrade the 2 justified hex values in the chart legend to a 🟡",
+        "Response states the report is printed in full and saved to docs/ui-ux-audit.md"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "What should we fix in the UI of this project? Vue 3 + Nuxt app. tailwind.config.ts defines colors as oklch() values. src/assets/main.css has `*:focus { outline: none; }` with no focus-visible replacement anywhere. The <html> tag in the layout has no lang attribute. Nav is a shared layout with a NuxtLink for each section but no aria-current / active class. I can't give you a URL and nothing is running.",
+      "expected_output": "Needs work. Blocker: global outline:none with no replacement (4.5). Gaps: missing lang (4.7), no active nav state (1.2). Contrast is ⚪ because oklch tokens aren't computed from source and there's no runtime — with the exact token pairs to test. No attempt to start the dev server. Each item has a file-level recommendation.",
+      "files": [],
+      "expectations": [
+        "Response grades the global `*:focus { outline: none; }` with no replacement as a 🔴 Blocker under accessibility (4.5) and recommends a :focus-visible rule in src/assets/main.css",
+        "Response grades the missing lang attribute as a 🟡 Gap and recommends setting it via useHead / nuxt.config app.head.htmlAttrs.lang",
+        "Response grades the missing active nav state as a 🟡 Gap under navigation and recommends aria-current=\"page\" via NuxtLink's active class",
+        "Response grades contrast ⚪ Unverifiable, explaining oklch tokens were not computed from source and listing the token pairs and screens to check, rather than guessing 🟢",
+        "Response does not run `npm run dev`, `nuxt dev`, or any command that starts the app or installs dependencies"
+      ]
+    }
+  ]
+}
