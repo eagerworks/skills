@@ -1,0 +1,32 @@
+{
+  "$comment": "Copy to .eagerworks/ui-ux-audit.json at your repo root. Every field is optional — delete what you don't need. Schema: references/config.md",
+  "reportPath": "docs/ui-ux-audit.md",
+  "primaryFlows": [
+    { "name": "Sign up and onboard", "screens": ["/signup", "/onboarding/*"] },
+    { "name": "Create project", "screens": ["/projects/new", "ProjectForm"] },
+    { "name": "Invite a member", "screens": ["/projects/:id/members", "InviteDialog"] }
+  ],
+  "appUrl": "http://localhost:3000",
+  "viewports": [375, 768, 1280],
+  "wcagLevel": "AA",
+  "runtimePass": true,
+  "locales": ["en"],
+  "analytics": {
+    "tool": "posthog",
+    "trackingPlan": "docs/tracking-plan.md",
+    "consentRequired": true
+  },
+  "marketCheck": true,
+  "dimensions": {
+    "navigation": { "enabled": true },
+    "designSystem": { "enabled": true },
+    "responsiveness": { "enabled": true },
+    "accessibility": { "enabled": true },
+    "forms": { "enabled": true },
+    "feedback": { "enabled": true },
+    "content": { "enabled": true },
+    "performance": { "enabled": true },
+    "flows": { "enabled": true },
+    "instrumentation": { "enabled": true }
+  }
+}
