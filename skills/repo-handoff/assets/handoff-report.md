@@ -1,0 +1,204 @@
+<!--
+Repo Handoff report template.
+Fill every section, delete this comment block, print the whole thing in chat,
+then save it as docs/repo-handoff.md in the analyzed repo (unstaged).
+If the file already exists, carry over every non-empty "Answer:" line first.
+Format rules: references/output-format.md · Never include secret values.
+-->
+
+# Repo Handoff — <repo name>
+
+- **Date:** <YYYY-MM-DD>
+- **Commit:** `<sha>` on `<branch>`
+- **Stack:** <framework · datastore · queue · frontend>
+- **Handoff readiness:** <🔴 Blocked | 🟡 At risk | 🟢 Ready>
+- **Open questions:** <N> (P0: <n> · P1: <n> · P2: <n>) — answered: <n>
+
+## Executive summary
+
+- <what blocks operating the system, with Q refs>
+- <biggest knowledge gaps>
+- <what is in good shape>
+
+## Knowledge inventory
+
+| # | Dimension | Grade | Summary | Questions |
+|---|---|---|---|---|
+| 1 | Overview & architecture | | | |
+| 2 | Environment & setup | | | |
+| 3 | Build, test & quality | | | |
+| 4 | Infrastructure & deploy | | | |
+| 5 | Data | | | |
+| 6 | Third-party services & credentials | | | |
+| 7 | Security & access | | | |
+| 8 | Code health & known debt | | | |
+| 9 | Process & history | | | |
+| 10 | Operations & support | | | |
+
+## Findings by dimension
+
+### 1. Overview & architecture — <grade>
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 1.1 Purpose and users | | |
+| 1.2 Component map | | |
+| 1.3 Domain models | | |
+| 1.4 Decisions recorded | | |
+| 1.5 Non-obvious code explained | | |
+
+### 2. Environment & setup — <grade>
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 2.1 Setup documented and consistent | | |
+| 2.2 Toolchain pinned | | |
+| 2.3 Lockfiles committed | | |
+| 2.4 Env vars enumerated | | |
+| 2.5 Local services declared | | |
+| 2.6 No hidden manual steps | | |
+
+### 3. Build, test & quality — <grade>
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 3.1 Commands exist | | |
+| 3.2 Suite passes today | | |
+| 3.3 Tests where the risk is | | |
+| 3.4 Flaky/skipped tests explained | | |
+| 3.5 Gates in CI | | |
+
+### 4. Infrastructure & deploy — <grade>
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 4.1 Hosting identifiable | | |
+| 4.2 Deploy documented and matches code | | |
+| 4.3 Environments listed | | |
+| 4.4 Rollback documented | | |
+| 4.5 Infra versioned | | |
+| 4.6 Domains, DNS, TLS | | |
+
+### 5. Data — <grade>
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 5.1 Datastores enumerated | | |
+| 5.2 Migrations consistent | | |
+| 5.3 Backups and restore | | |
+| 5.4 PII identified | | |
+| 5.5 Retention defined | | |
+| 5.6 Volume known | | |
+
+### 6. Third-party services & credentials — <grade>
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 6.1 Services enumerated | | |
+| 6.2 Account ownership | | |
+| 6.3 Secret storage | | |
+| 6.4 Rotation planned | | |
+| 6.5 Webhooks listed | | |
+| 6.6 Plans and contracts | | |
+
+**Service inventory**
+
+| Service | Found in | Purpose | Env vars / secrets (names only) |
+|---|---|---|---|
+| | | | |
+
+### 7. Security & access — <grade>
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 7.1 Auth model documented | | |
+| 7.2 No secrets in working tree | | |
+| 7.3 No secrets in history | | |
+| 7.4 Dependency vulnerabilities | | |
+| 7.5 Access inventory | | |
+| 7.6 Admin paths identified | | |
+
+### 8. Code health & known debt — <grade>
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 8.1 Hot spots | | |
+| 8.2 TODO/FIXME density | | |
+| 8.3 Dead code signals | | |
+| 8.4 Dependencies current | | |
+| 8.5 Known debt written down | | |
+
+### 9. Process & history — <grade>
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 9.1 Branching/release model | | |
+| 9.2 Bus factor | | |
+| 9.3 Unfinished work | | |
+| 9.4 Issue tracker | | |
+| 9.5 Activity timeline | | |
+
+**Authorship (last 12 months)**
+
+| Author | Commits | Share |
+|---|---|---|
+| | | |
+
+**Unfinished work**
+
+- <branch/PR — last commit date — what it looks like>
+
+### 10. Operations & support — <grade>
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 10.1 Monitoring / error tracking | | |
+| 10.2 Logging | | |
+| 10.3 Alerting / on-call | | |
+| 10.4 Runbooks | | |
+| 10.5 Scheduled jobs | | |
+| 10.6 Support channels / SLAs | | |
+
+**Scheduled jobs**
+
+| Job | Schedule | Defined in | Safe to re-run |
+|---|---|---|---|
+| | | | |
+
+## Questions for the previous team
+
+### P0 — must be answered before the handoff ends
+
+**Q1 · <Dimension>** — <specialized question citing file:line>
+*Why we ask:* <evidence gap (check x.y grade)>.
+**Answer:**
+
+### P1 — needed within the first month
+
+**Q<n> · <Dimension>** — <question>
+*Why we ask:* <gap>.
+**Answer:**
+
+### P2 — context and history
+
+**Q<n> · <Dimension>** — <question>
+*Why we ask:* <gap>.
+**Answer:**
+
+## Risks and first actions
+
+**Risks**
+
+- <risk — finding ref>
+
+**Recommended first actions**
+
+1. <action> — effort <S/M/L> — <finding/Q ref>
+
+## Access & ownership transfer checklist
+
+- [ ] <system> — currently: <owner or ⚪ unknown> (Q<n>)
+
+---
+
+_Generated by the `repo-handoff` skill · dimensions disabled by config: <none | list> · commands executed: <list with exit codes and runtimes, or "none"> · secrets found in history: <n locations, values not shown | none>_
