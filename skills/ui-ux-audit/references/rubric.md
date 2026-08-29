@@ -4,6 +4,8 @@ This file is authoritative. Grade **every** check below (unless its dimension is
 
 Grades: 🔴 **Blocker** · 🟡 **Gap** · 🟢 **Solid** · ⚪ **Unverifiable from code**. Definitions, the verdict rule, and the recommendation rule are at the end.
 
+Ten dimensions: 1–8 grade the interface as built; 9 grades whether each primary flow is longer than its outcome requires; 10 grades whether the team can measure those flows and decide with data.
+
 "Primary flow" means one of the journeys identified in Discovery step 3. A defect on a primary-flow screen is graded one level harsher than the same defect elsewhere (🟡 → 🔴) when it stops or misleads the user.
 
 ## Dimension 1 — Information architecture & navigation
@@ -189,6 +191,80 @@ jq '.dependencies | keys' package.json 2>/dev/null | rg "moment|dayjs|date-fns|l
 find public/images app/assets/images src/assets -size +500k 2>/dev/null
 ```
 
+## Dimension 9 — Flow simplicity
+
+*Does each primary flow take the minimum steps, decisions, and data the outcome actually requires?* Method, simplification patterns, and a worked example: `references/flow-simplicity.md`.
+
+Evidence for this dimension is a **flow walk**: for every primary flow, the screens in order (`route → file`), the data each step collects, whether that data is required for the outcome, whether the system already knows it, and how many decisions the screen asks for. Without the walk, no 9.x check may be graded 🟡/🔴.
+
+| Check | 🟢 when | 🔴 / 🟡 when |
+|---|---|---|
+| 9.1 Step count matches the outcome | Each primary flow reaches its outcome in the fewest screens its required data allows; every step collects something the outcome needs | 🟡 a step that collects nothing required, or two steps whose fields fit on one screen; 🔴 a primary flow with a mandatory step users can't satisfy (data they don't have yet) |
+| 9.2 Value before non-essential data | The user reaches the first useful screen before being asked for optional/profile/billing data ("ask when needed") | 🟡 an up-front wall (full profile, company details, payment) before first use that no stated policy requires |
+| 9.3 Nothing already known is asked again | Fields the system can prefill or infer (org from invite token, email from session, country from locale, address from previous order) are prefilled or omitted | 🟡 repeated or inferable fields; 🔴 user must re-enter a whole step after a failure on a primary flow (ties to 5.6) |
+| 9.4 Decision load per screen | ≤ 1 primary decision per screen; choices have a sensible default; advanced options collapsed behind progressive disclosure | 🟡 screens with several co-equal choices and no default (pick a plan *and* a region *and* a template on one screen) |
+| 9.5 Confirmations only where irreversible | Confirmation dialogs guard only irreversible actions (6.5); reversible ones use undo; no modal-in-modal or wizard-in-modal | 🟡 "Are you sure?" on save/edit/reversible actions, nested modals, a wizard opened inside a dialog |
+| 9.6 A direct happy path exists | The most frequent task has a direct entry (nav item, "+ New", quick action, keyboard shortcut) and returns the user where they were | 🟡 a common task needs ≥ 3 navigations to start or dumps the user on an unrelated screen after |
+| 9.7 Exit and resume | Multi-step flows longer than ~5 fields can be left and resumed (draft, saved progress, URL per step) — or are short enough not to need it | 🟡 long flows that lose all progress on back/refresh/exit |
+
+```bash
+# Evidence — build the flow walk from these, then read each step's view/component
+bin/rails routes 2>/dev/null | rg -i "sign|onboard|checkout|new|wizard|step"
+rg -n "step|wizard|Stepper|multi-step|currentStep" src app/views app/javascript | head
+rg -n "validates .*presence|required:|required\b" app/models app/views src | head -40   # what each step demands
+rg -n "confirm\(|data-turbo-confirm|Alert\.alert" app/views src | rg -iv "delete|destroy|remove|cancel" | head  # confirms on reversible actions
+rg -n "invite|token|prefill|defaultValue|value: current_" app src | head             # what could be prefilled
+```
+
+```text
+❌ wrong recommendation:  "Simplify the sign-up flow."
+✅ correct recommendation: "Collapse sign-up from 4 screens to 2: (1) email + password + company name
+   prefilled from the invite token (app/views/registrations/new.html.erb); (2) a single optional
+   'Set up your workspace' screen after first login for the 9 company-profile fields, none of which
+   app/models/company.rb requires. Move plan selection to the first paywalled action; drop the
+   data-turbo-confirm on the profile save (reversible) and add an 'Undo' flash instead."
+```
+
+A step is "unnecessary" only when the audit can name what it collects **and** show that the outcome doesn't require it (check the model validations / API contract) or that the system already has it. Legal, compliance, and safety steps (KYC, consent, 2FA enrolment, irreversible money moves) are 🟢 or ⚪ with the question for the PM — never 🟡 on taste.
+
+## Dimension 10 — Product instrumentation & metrics
+
+*Can the team see whether the primary flows work, and make product decisions with data instead of opinions?* Event sets, metric catalogue, privacy checklist, and the (dated) tool landscape: `references/instrumentation.md`.
+
+**Grade cap:** absence of analytics never stops a user, so this dimension yields at most 🟡 — except 10.5, where PII in event payloads is 🔴.
+
+| Check | 🟢 when | 🔴 / 🟡 when |
+|---|---|---|
+| 10.1 A product-events layer exists | A tracker is a dependency **and** initialized in the app shell (PostHog, Mixpanel, Amplitude, Segment, GA4, Plausible, Ahoy in Rails, an in-house events table, …) | 🟡 nothing, or a dependency that's never initialized |
+| 10.2 Primary flows are instrumented | Every primary flow emits a start, its key steps, and a completion event, so a funnel can be built | 🟡 page views only, or some flows only |
+| 10.3 Events are named and shaped consistently | One convention (`object_action`, snake_case, e.g. `invoice_sent`), defined centrally (constants, `track.ts`, a tracking plan doc), properties typed | 🟡 ad-hoc string literals at call sites, mixed conventions |
+| 10.4 Failures and drop-offs are captured | Validation failures, failed mutations, and abandonment on primary forms emit events or reach an error tracker (Sentry, Bugsnag, Honeybadger) with user-facing context | 🟡 silent — the team can't see where people give up |
+| 10.5 Privacy and consent | No PII in event properties (use ids, not emails); consent respected where required (cookie/consent banner, `doNotTrack`, iOS ATT); retention documented | 🔴 PII or payment data in event payloads; 🟡 tracking fires before consent in a consent-required market |
+| 10.6 Metrics are defined and owned | A doc or dashboard names the product metrics per flow (activation, step conversion, time-to-complete, error rate, retention) and who reads them | 🟡 events exist but no metric definitions; ⚪ if it lives in a dashboard the audit can't see |
+| 10.7 Experimentation readiness | Feature flags or an A/B mechanism cover the primary flows, or the project states it doesn't need them yet | 🟡 none on a product that is actively iterating its flows; note (not a gap) for small/internal tools — say which |
+
+```bash
+# Evidence
+jq '.dependencies + .devDependencies | keys' package.json 2>/dev/null | rg -i "posthog|mixpanel|amplitude|segment|analytics|gtag|plausible|rudder|heap|hotjar|clarity"
+rg -n "ahoy|Ahoy" Gemfile app config 2>/dev/null | head
+rg -n "\.track\(|\.capture\(|logEvent\(|gtag\(|plausible\(|ahoy\.track" src app | wc -l
+rg -n "\.track\(|\.capture\(|logEvent\(" src app | rg -o "['\"][a-zA-Z_ .:-]+['\"]" | sort | uniq -c | sort -rn | head -30   # event names + convention
+rg -n "Sentry|Bugsnag|Honeybadger|Rollbar" src app config Gemfile package.json | head
+rg -ln "consent|cookie.*banner|doNotTrack|requestTrackingPermission" src app | head
+rg -n "email:|user\.email|card|phone" $(rg -ln "\.track\(|\.capture\(" src app 2>/dev/null) 2>/dev/null | head   # PII in payloads
+ls docs | rg -i "track|metric|analytics|kpi"
+```
+
+```ts
+// ✅ correct — central definition, ids not PII, funnel-able
+track("invoice_sent", { invoice_id, amount_cents, currency, step: "review" });
+
+// ❌ wrong — literal at the call site, PII in payload, not funnel-able
+posthog.capture("clicked send", { email: user.email, name: user.name });
+```
+
+When 10.1, 10.2, or 10.6 is 🟡, the recommendation is an **Instrumentation plan** (format: `references/output-format.md` § 4): for each primary flow, the events to emit (start / step / complete / fail, with properties), the metric each enables, the product decision that metric informs, and a candidate tool. **Tool rule:** name one or two candidates that fit the stack and scale *as of this skill's date*, then always add the line: *"Before choosing, survey the current market — options, pricing, hosting, and privacy terms change; these candidates are a starting point, not a decision."* If a web-search tool is available, one bounded search to confirm current options is allowed (`references/audit-workflow.md` → Phase 2b); installing, signing up, or adding keys is never allowed. Point at `assets/instrumentation-plan.example.md` as the tracking-plan starter.
+
 ## Grade ladder
 
 - 🔴 **Blocker** — a primary flow can't be completed by some users, a WCAG level A criterion fails, or a primary viewport is broken. Any 🔴 ⇒ verdict **Needs work**.
@@ -198,7 +274,7 @@ find public/images app/assets/images src/assets -size +500k 2>/dev/null
 
 ## Conservatism rule
 
-A grade other than 🟢 must cite evidence: a path and line, a count from a command with its output, a screenshot from the browser pass, or a documented claim that turned out false. If you can't produce that, the check is either 🟢 (you checked and it's fine) or ⚪ (you couldn't check) — never 🟡 on taste. Never 🟢 something you didn't check — in particular contrast, focus visibility, and reflow without a runtime.
+A grade other than 🟢 must cite evidence: a path and line, a count from a command with its output, a screenshot from the browser pass, the flow walk (dimension 9), or a documented claim that turned out false. If you can't produce that, the check is either 🟢 (you checked and it's fine) or ⚪ (you couldn't check) — never 🟡 on taste. Never 🟢 something you didn't check — in particular contrast, focus visibility, and reflow without a runtime. A flow is "too complex" only against its own required data (9.x), and an analytics tool is never presented as the single answer (10.x) — always a dated candidate plus the market-survey line.
 
 ## Recommendation rule
 
@@ -207,6 +283,8 @@ Every check gets a `→ Recommendation:` line, regardless of grade:
 - 🔴 / 🟡 — the concrete change: the file or component to edit, the pattern to apply (name the token, component, attribute, or i18n key), and, where useful, the one-line example. Imperative mood.
 - 🟢 — one line starting with **Keep:** naming the practice that earned the grade, so a re-audit knows what not to regress.
 - ⚪ — **Verify:** the exact action (URL + viewport + element, a DevTools panel, a question for the designer/PM) and what result would make it 🟢 vs. 🔴/🟡.
+- Dimension 9 (🔴/🟡) — the recommendation is the **proposed step sequence**: which steps merge, move, or disappear, which fields get prefilled and from where, naming the files. "Simplify" alone is not a recommendation.
+- Dimension 10 (🟡) — the recommendation is an **Instrumentation plan**: events + properties → metric → decision it informs → candidate tool → the market-survey line.
 
 A check with a grade but no recommendation is incomplete; do not deliver the report until every check has one.
 

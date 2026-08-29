@@ -56,14 +56,15 @@
     },
     {
       "id": 5,
-      "prompt": "Audit the UI/UX of this app. React + Vite SPA. Design tokens in src/theme/tokens.css as CSS custom properties, consumed everywhere (a grep for literal hex in src/components finds 2, both in a chart legend with a comment explaining why). All primitives come from src/components/ui (Radix-based). Every route has loading, empty, and error states with a shared EmptyState and InlineError, toasts use role=\"status\", deletes use a ConfirmDialog naming the object. Forms use labels, aria-describedby errors, autocomplete attributes, pending submit. Strings go through react-i18next with plural rules. Images use width/height and loading=\"lazy\". Lighthouse CI runs in GitHub Actions. jsx-a11y passes. It's running at http://localhost:5173 and you checked contrast and focus rings there: all pass.",
-      "expected_output": "Verdict Solid, zero blockers and zero gaps. The Work Plan is empty (or states no items). Every 🟢 check still carries a Keep: recommendation naming the practice. No invented findings about style preferences. Report printed and saved.",
+      "prompt": "Audit the UI/UX of this app. React + Vite SPA. Design tokens in src/theme/tokens.css as CSS custom properties, consumed everywhere (a grep for literal hex in src/components finds 2, both in a chart legend with a comment explaining why). All primitives come from src/components/ui (Radix-based). Every route has loading, empty, and error states with a shared EmptyState and InlineError, toasts use role=\"status\", deletes use a ConfirmDialog naming the object. Forms use labels, aria-describedby errors, autocomplete attributes, pending submit. Strings go through react-i18next with plural rules. Images use width/height and loading=\"lazy\". Lighthouse CI runs in GitHub Actions. jsx-a11y passes. Sign-up is a single screen (email + password) and the core 'create board' action is one form of 4 fields reachable from the nav and the empty state. PostHog is initialized in src/main.tsx behind a consent banner; every primary flow emits start/complete/fail events through src/lib/analytics.ts (object_action names, ids only) and docs/tracking-plan.md defines the funnel and activation metrics with an owner. It's running at http://localhost:5173 and you checked contrast and focus rings there: all pass.",
+      "expected_output": "Verdict Solid, zero blockers and zero gaps. The Work Plan is empty (or states no items). Every 🟢 check still carries a Keep: recommendation naming the practice — including 9.x (single-screen sign-up, direct entry) and 10.x (PostHog behind consent, analytics.ts wrapper, tracking plan). No Instrumentation plan table is needed; no tool switch is suggested. Report printed and saved.",
       "files": [],
       "expectations": [
         "Response's verdict is Solid with no 🔴 or 🟡 grades",
         "Response's Work Plan has no rows (or explicitly states there is nothing to do) rather than padding it with preferences",
         "Response still includes a → Recommendation line starting with Keep: for the 🟢 findings in each dimension, naming the concrete practice (tokens.css, EmptyState/InlineError, ConfirmDialog, react-i18next, Lighthouse CI)",
         "Response does not downgrade the 2 justified hex values in the chart legend to a 🟡",
+        "Response grades dimension 10 🟢 with a Keep: line naming PostHog behind consent, the src/lib/analytics.ts wrapper, and docs/tracking-plan.md, and does not recommend switching or adding an analytics tool",
         "Response states the report is printed in full and saved to docs/ui-ux-audit.md"
       ]
     },
@@ -78,6 +79,34 @@
         "Response grades the missing active nav state as a 🟡 Gap under navigation and recommends aria-current=\"page\" via NuxtLink's active class",
         "Response grades contrast ⚪ Unverifiable, explaining oklch tokens were not computed from source and listing the token pairs and screens to check, rather than guessing 🟢",
         "Response does not run `npm run dev`, `nuxt dev`, or any command that starts the app or installs dependencies"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Is our onboarding too complex? Do a UX audit. Rails 7.2 app, ERB + Hotwire + Tailwind with tokens, shadcn-like ViewComponents for every primitive, labels and inline errors everywhere, jsx-a11y not applicable but erb_lint a11y rules pass. Primary flow per README: sign up → dashboard. Today sign-up is 4 screens: /signup (email, password) → /onboarding/company (9 required-in-the-form fields: name, size, industry, VAT id, 4 address lines, phone) → /onboarding/plan (plan + billing cycle, no default; a free tier exists and the only paywall is exporting) → /onboarding/invite (teammate emails; 'Skip' is a small text link) → /dashboard. app/models/company.rb validates only :name. Every invite carries company_id (app/models/invite.rb). app/views/companies/_form.html.erb has data-turbo-confirm=\"Are you sure?\" on the profile save. Ahoy is installed and initialized with ahoy.track on each of the four onboarding steps plus 'signup_completed', names defined in app/services/track.rb, docs/tracking-plan.md defines activation and step conversion with an owner. No URL, nothing running.",
+      "expected_output": "Verdict Acceptable with gaps — no blockers are invented. Dimension 9 🟡 on 9.1 (4 screens for 1 required step), 9.2 (company profile and plan before first value), 9.3 (company name already in the invite), 9.4 (plan + billing cycle with no default), 9.5 (confirm on a reversible save). A Flow map row shows 4 · ~14 fields · 4 decisions → 2 screens. The recommendation is the concrete sequence: /signup with company_name prefilled from Invite#company, an optional 'Set up your workspace' panel after login, plan deferred to the export paywall with a default, invite moved to the dashboard empty state with a visible Skip button, confirm replaced by an undo flash. Dimension 10 is 🟢 with a Keep: line (Ahoy, track.rb, tracking plan) and no tool change is suggested.",
+      "files": [],
+      "expectations": [
+        "Response grades 9.1 as a 🟡 Gap citing that only /signup collects data the outcome requires (app/models/company.rb validates only :name) and proposes a concrete 2-screen sequence rather than a generic 'simplify onboarding'",
+        "Response grades 9.3 as a 🟡 Gap because the company name is already carried by the invite (app/models/invite.rb) and recommends prefilling or hiding the field from Invite#company",
+        "Response grades 9.2 / 9.4 as 🟡 for the plan step (free tier exists, paywall is export, no default) and recommends deferring plan selection to the export action with a default plan",
+        "Response grades the data-turbo-confirm on the reversible company profile save as a 🟡 under 9.5 and recommends removing it in favor of an undo flash, without touching the confirmation on destructive actions",
+        "Response includes a Flow map table with a row for the sign-up flow showing steps/fields/decisions today versus the proposed version",
+        "Response's verdict is Acceptable with gaps, it does not invent blockers in dimensions 1–8, and dimension 10 is 🟢 with a Keep: line naming Ahoy, app/services/track.rb, and docs/tracking-plan.md — no new analytics tool is suggested"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Which flows and metrics should we be tracking in this app, and with what? Also audit the UI while you're at it. Next.js 15 app router, TypeScript, Tailwind theme, shadcn/ui everywhere, react-hook-form with FormMessage, loading.tsx per segment, AlertDialog on deletes, next-intl with locales en, de, fr. Primary flows: onboarding (signup → create first project) and checkout (cart → pay). package.json has @sentry/nextjs and no analytics library at all; grep for track( / capture( / gtag( in src returns 0. There is no consent banner. Nothing is running and there is no URL. You have a web search tool available.",
+      "expected_output": "Verdict Acceptable with gaps. Dimensions 1–8 are largely 🟢 with Keep: lines. Dimension 10: 10.1 🟡 (no events layer), 10.2 🟡 (primary flows not instrumented), 10.6 🟡 (no metric definitions), 10.4 partial (Sentry captures failures, not drop-offs), 10.5 🟡 or ⚪ noting EU locales and no consent banner — never a 🔴 in dimension 10. An Instrumentation plan table lists, per flow, events with properties (checkout_started, checkout_step_completed, payment_failed, order_completed server-side; signup_started, signup_step_completed, form_validation_failed, signup_completed, project_created), the metric each builds, and the product decision it informs. One or two candidate tools that fit Next.js are named as a dated snapshot, at most two web searches are run and listed in the footer, and the plan ends with the explicit recommendation to survey the current market before choosing. No npm install, no sign-up.",
+      "files": [],
+      "expectations": [
+        "Response grades 10.1 and 10.2 as 🟡 Gaps (no analytics dependency, zero track/capture call sites, primary flows not funnel-able) and never assigns a 🔴 in dimension 10",
+        "Response includes an Instrumentation plan table with rows for both onboarding and checkout listing concrete event names with properties, the metric each enables (e.g. step conversion, activation rate, payment failure rate), and the product decision each metric informs",
+        "Response names one or two candidate analytics tools that fit Next.js as a dated snapshot AND explicitly recommends surveying the current market before choosing, rather than presenting a single tool as the decision",
+        "Response runs at most two web searches to confirm current tool options, lists the queries in the report footer, and does not run npm install, sign up for, or configure any analytics service",
+        "Response flags consent for the de/fr locales under 10.5 (🟡 or ⚪ with the question) and recommends wiring a consent banner to the tracker's opt-in before tracking fires",
+        "Response points at the tracking-plan starter (assets/instrumentation-plan.example.md → docs/tracking-plan.md) and credits Sentry under 10.4 for failure capture while noting it does not cover drop-offs"
       ]
     }
   ]

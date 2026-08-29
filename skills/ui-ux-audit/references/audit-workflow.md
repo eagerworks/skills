@@ -12,6 +12,8 @@ Look for `.eagerworks/ui-ux-audit.json` at the repo root (`references/config.md`
 2. Read the UI surface in full: route map, layout/shell components, design tokens, i18n setup, shared primitives (`components/ui/*`, `app/components/*`, `app/views/shared/*`), state components (loading/empty/error), `README.md`, design docs, Storybook stories, and existing UI tooling configs (`.eslintrc*` for `jsx-a11y`, `.erb-lint.yml`, `lighthouserc.*`, `playwright.config.*`, `spec/system/*`).
 3. Identify the **primary flows** (config → docs → inferred from routes/nav) and list the screens each one touches. Write this list down — it goes in the report header and decides 🔴 vs 🟡 for several checks.
 4. Build the **screen inventory**: for each primary-flow screen, its file(s), the form/list/detail pattern it follows, and which state components it uses. This is what you grade first.
+5. Do the **flow walk** for each primary flow (`references/flow-simplicity.md`): steps in order, data collected per step, whether the outcome requires it (model validations / API schema), whether the system already knows it, decisions per screen. It is the only evidence dimension 9 accepts.
+6. Take the **analytics inventory** (`references/instrumentation.md`): tracker dependencies and whether one is initialized in the shell, the event call sites and their names, an error tracker, consent handling, feature flags, and any tracking plan / metrics doc under `docs/`. Note what `.eagerworks/ui-ux-audit.json#analytics` claims and verify it.
 
 ```bash
 git rev-parse --show-toplevel
@@ -21,6 +23,8 @@ find app pages src -name "page.tsx" -o -name "*.vue" -o -name "_layout.tsx" 2>/d
 ls config/locales locales src/locales 2>/dev/null
 cat tailwind.config.* theme.ts src/theme/* 2>/dev/null | head -120
 jq '.dependencies + .devDependencies | keys' package.json 2>/dev/null | rg -i "a11y|axe|lighthouse|storybook|shadcn|radix|mui|chakra|paper|reanimated|flash-list"
+jq '.dependencies | keys' package.json 2>/dev/null | rg -i "posthog|mixpanel|amplitude|segment|gtag|plausible|sentry|launchdarkly|flags"
+rg -n "ahoy|flipper|sentry" Gemfile 2>/dev/null; ls docs 2>/dev/null | rg -i "track|metric|analytics"
 ```
 
 ## Phase 2 — The optional runtime pass (the only interactive step)
@@ -61,6 +65,23 @@ curl -X POST http://localhost:3000/projects   # mutates data
 
 Record for every screenshot: URL, viewport, what it shows. Screenshots are evidence — reference them by filename in the report (save them in the scratchpad, not in the repo). Every check you *would* have verified at runtime but couldn't becomes ⚪ with the exact URL + viewport + element to check.
 
+## Phase 2b — The optional market check (web search only)
+
+Dimension 10 recommends analytics tooling. The candidates in `references/instrumentation.md` are a **dated snapshot**; the market changes. If the agent has a web-search tool and config doesn't set `marketCheck: false`:
+
+- run **at most two** searches, scoped to the stack (e.g. `product analytics tools 2026 React Native`, `self-hosted product analytics Rails 2026`);
+- use the results only to confirm, add, or drop candidates in the Instrumentation plan, and cite them there;
+- list the exact queries in the report footer (`web searches: …`).
+
+If no search tool is available (or `marketCheck: false`), use the reference table and say in the plan that it is a snapshot as of the skill's date. In every case the plan ends with the market-survey line — the audit **never** signs up for, installs, configures, or adds keys for any tool.
+
+```bash
+# ❌ wrong — the audit never does these
+npm install posthog-js
+bundle add ahoy_matey
+curl https://app.posthog.com/signup
+```
+
 ## Phase 3 — Grade
 
 Walk `references/rubric.md` dimension by dimension, primary-flow screens first. For each check write the grade, its evidence, **and its recommendation** as you go — the recommendation is not a separate pass, it's part of the finding. Roll each dimension up to its worst check. Disabled dimensions get one line: `_Dimension N disabled by config_`.
@@ -72,13 +93,13 @@ Apply the primary-flow escalation: the same defect is one level harsher on a pri
 Turn every 🔴 and 🟡 into a task, ordered:
 
 1. All 🔴, primary-flow items first, then in the order a designer/developer would naturally fix them (structure before styling: navigation → semantics → forms → states).
-2. All 🟡, ordered by leverage — dimension 2 (tokens/components: fixing the source fixes every screen) and 4 (accessibility) first, then 6, 5, 3, 1, 7, 8.
+2. All 🟡, ordered by leverage — dimension 2 (tokens/components: fixing the source fixes every screen) and 4 (accessibility) first, then 6, 9 (a shorter flow removes whole screens of defects), 5, 3, 1, 7, 8, and 10 last (instrumentation is how the team will *see* the effect of the rest — it goes in the plan, but never ahead of a defect users hit today).
 
-Each task: `#`, dimension, grade, the concrete change (one sentence, imperative, naming the file/component to create or edit and the pattern to apply), effort **S** (< 1 h) / **M** (half a day) / **L** (more), evidence. Point at `assets/ui-states.example.md` for dimension 6 blockers and at `references/accessibility.md` for dimension 4. Don't invent tasks that don't trace to a graded check. Merge tasks that share a fix (e.g. "adopt `<Button>` everywhere" covers several 2.3 findings) and list every evidence location in the row.
+Each task: `#`, dimension, grade, the concrete change (one sentence, imperative, naming the file/component to create or edit and the pattern to apply), effort **S** (< 1 h) / **M** (half a day) / **L** (more), evidence. Point at `assets/ui-states.example.md` for dimension 6 blockers, at `references/accessibility.md` for dimension 4, and at `assets/instrumentation-plan.example.md` for dimension 10. A dimension 9 task states the proposed step sequence; a dimension 10 task says "instrument <flow> per the Instrumentation plan (§ 10)" rather than repeating the table. Don't invent tasks that don't trace to a graded check. Merge tasks that share a fix (e.g. "adopt `<Button>` everywhere" covers several 2.3 findings) and list every evidence location in the row.
 
 ## Phase 5 — Deliver: chat first, then the file
 
-1. Fill `assets/audit-report.md` (format: `references/output-format.md`). Check that **every** check in the findings has a `→ Recommendation:` line — 🟢 and ⚪ included.
+1. Fill `assets/audit-report.md` (format: `references/output-format.md`). Check that **every** check in the findings has a `→ Recommendation:` line — 🟢 and ⚪ included — that § 9 has a Flow map row per primary flow, and that § 10 has an Instrumentation plan (or a **Keep:** line when the flows are already instrumented) ending with the market-survey line.
 2. **Print the complete report in chat** — the whole thing, not a summary.
 3. Save the identical markdown:
 

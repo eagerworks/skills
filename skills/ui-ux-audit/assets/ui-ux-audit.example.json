@@ -11,6 +11,12 @@
   "wcagLevel": "AA",
   "runtimePass": true,
   "locales": ["en"],
+  "analytics": {
+    "tool": "posthog",
+    "trackingPlan": "docs/tracking-plan.md",
+    "consentRequired": true
+  },
+  "marketCheck": true,
   "dimensions": {
     "navigation": { "enabled": true },
     "designSystem": { "enabled": true },
@@ -19,6 +25,8 @@
     "forms": { "enabled": true },
     "feedback": { "enabled": true },
     "content": { "enabled": true },
-    "performance": { "enabled": true }
+    "performance": { "enabled": true },
+    "flows": { "enabled": true },
+    "instrumentation": { "enabled": true }
   }
 }
