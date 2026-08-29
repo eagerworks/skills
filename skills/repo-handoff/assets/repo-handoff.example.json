@@ -1,0 +1,22 @@
+{
+  "$comment": "Copy to .eagerworks/repo-handoff.json at your repo root. Every field is optional — delete what you don't need. Schema: references/config.md",
+  "reportPath": "docs/repo-handoff.md",
+  "runCommands": true,
+  "budgets": { "testSeconds": 600 },
+  "known": {
+    "hosting": "",
+    "ownedServices": []
+  },
+  "dimensions": {
+    "overview": { "enabled": true },
+    "environment": { "enabled": true },
+    "quality": { "enabled": true },
+    "infrastructure": { "enabled": true },
+    "data": { "enabled": true },
+    "services": { "enabled": true },
+    "security": { "enabled": true },
+    "codeHealth": { "enabled": true },
+    "process": { "enabled": true },
+    "operations": { "enabled": true }
+  }
+}

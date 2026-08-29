@@ -1,0 +1,125 @@
+# Repo Handoff — Output Format
+
+The same markdown is printed in chat and saved to `docs/repo-handoff.md`. Fill `assets/handoff-report.md`; every section below is required, in this order.
+
+## 1. Header
+
+```markdown
+# Repo Handoff — <repo name>
+
+- **Date:** 2026-08-29
+- **Commit:** `abc1234` on `main`
+- **Stack:** Rails 7.1 · PostgreSQL · Sidekiq · React (Vite)
+- **Handoff readiness:** 🔴 Blocked | 🟡 At risk | 🟢 Ready
+- **Open questions:** 14 (P0: 6 · P1: 5 · P2: 3) — answered: 0
+```
+
+Verdict is mechanical: any 🔴 in dimensions 2, 4, or 6 → **Blocked**; any other 🔴 or any 🟡 → **At risk**; otherwise **Ready**. ⚪ never changes the verdict but always produces a question.
+
+## 2. Executive summary
+
+At most 10 bullets. Lead with what blocks operating the system, then the biggest knowledge gaps, then what is in good shape. Each bullet references a finding or a question number.
+
+## 3. Knowledge inventory
+
+One row per enabled dimension:
+
+```markdown
+| # | Dimension | Grade | Summary | Questions |
+|---|---|---|---|---|
+| 1 | Overview & architecture | 🟡 | README covers purpose; no component map for the 3 services | Q1–Q2 |
+| 2 | Environment & setup | 🔴 | `bin/setup` references `db/seeds/prod_snapshot.sql`, not in repo | Q3–Q5 |
+…
+```
+
+Dimension grade = worst check grade in that dimension.
+
+## 4. Findings by dimension
+
+For each dimension, one `###` heading, then a table of checks:
+
+```markdown
+### 6. Third-party services & credentials — 🔴
+
+| Check | Grade | Evidence |
+|---|---|---|
+| 6.1 Services enumerated | 🟡 | Found Stripe (`config/initializers/stripe.rb:3`), Sentry (`config/initializers/sentry.rb:1`), SES (`config/environments/production.rb:41`), Twilio (`app/services/sms_sender.rb:8`); README lists only Stripe |
+| 6.2 Account ownership | ⚪ | Not derivable from code |
+| 6.3 Secret storage | 🟢 | `config/credentials/production.yml.enc` + `RAILS_MASTER_KEY` in `.kamal/secrets:2` |
+…
+
+**Service inventory**
+
+| Service | Found in | Purpose | Env vars / secrets (names only) |
+|---|---|---|---|
+| Stripe | `config/initializers/stripe.rb:3` | Payments | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` |
+…
+```
+
+Dimension 6 always includes the **Service inventory** table. Dimension 10 always includes a **Scheduled jobs** table (job, schedule, file, safe-to-rerun: yes/no/unknown). Dimension 9 always includes the **Authorship** summary (`git shortlog` top 5 with percentages) and **Unfinished work** list (branches/PRs).
+
+## 5. Questions for the previous team
+
+The centrepiece. Numbered sequentially across the whole report, grouped by priority, then by dimension:
+
+```markdown
+## Questions for the previous team
+
+### P0 — must be answered before the handoff ends
+
+**Q1 · Infrastructure & deploy** — Where does production run? `README.md:88` describes Heroku, but `fly.toml` and `.github/workflows/deploy.yml:23` deploy to Fly.io. Which is live, and is the Heroku app still billing?
+*Why we ask:* docs and pipeline disagree (check 4.1 🟡).
+**Answer:**
+
+**Q2 · Third-party services** — For **Stripe** (`config/initializers/stripe.rb:3`): which account/email owns it, who is the billing contact, and can ownership be transferred to us? Where does the live `STRIPE_SECRET_KEY` live today?
+*Why we ask:* not derivable from code (checks 6.2, 6.3 ⚪).
+**Answer:**
+
+### P1 — needed within the first month
+…
+
+### P2 — context and history
+…
+```
+
+Rules:
+- Every question names its dimension, cites the evidence gap, and has an empty `**Answer:**` line (or the carried-over answer on a re-run).
+- Never ask what the repo already answers. Never split one service into many questions — one Q per service, with sub-points.
+- Adapt bank questions to the actual finding; a question that could have been asked of any repo is a sign it wasn't specialized enough.
+
+## 6. Risks and first actions
+
+Two lists for the receiving team:
+
+- **Risks** — what can go wrong between now and the previous team's departure (credential expiry, single point of knowledge, unmonitored production, unmerged work). Each references a finding.
+- **Recommended first actions** — ordered, with effort (S/M/L): rotate credentials, gain account ownership, get a deploy through end-to-end, add the missing runbook. Describe — do not perform.
+
+## 7. Access & ownership transfer checklist
+
+A checkbox list built from dimensions 4, 6, 7, and 10 — every account, console, credential, domain, store, and dashboard that must change hands:
+
+```markdown
+- [ ] GitHub org/repo admin — currently: ⚪ unknown (Q9)
+- [ ] Fly.io organization — currently: ⚪ unknown (Q1)
+- [ ] Domain registrar for `your.domain.com` — currently: ⚪ unknown (Q7)
+- [ ] DNS host — currently: ⚪ unknown (Q7)
+- [ ] Stripe account ownership + key rotation — (Q2)
+- [ ] Sentry project — (Q4)
+- [ ] `RAILS_MASTER_KEY` rotation after handoff — (Q2)
+```
+
+Unchecked by design; the receiving team ticks them as transfers complete.
+
+## 8. Footer
+
+```markdown
+---
+_Generated by the `repo-handoff` skill · dimensions disabled by config: none · commands executed: `bundle exec rspec` (2m41s, exit 0), `npm audit --omit=dev` (exit 1, 2 high) · secrets found in history: 1 location, values not shown_
+```
+
+## Rules
+
+- The verdict is mechanical; never soften it.
+- No finding without evidence; no question without an evidence gap.
+- Secret **values** never appear anywhere in the report, only locations and names.
+- Chat output is the full report, then a one-line note: `Saved to docs/repo-handoff.md (unstaged).`
