@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Reviews a diff — a branch, a PR, staged or working-tree changes — against the pr-review skill's rubric (correctness, security & data integrity, repo-convention conformance, test coverage, documentation & decision capture) and returns structured findings with severities. Never edits, commits, or pushes.
-model: opus
+model: opus # default for the isolated review; change to any model your Claude Code supports
 tools: Read, Grep, Glob, Bash
 disallowedTools: Write, Edit, NotebookEdit
 ---

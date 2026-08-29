@@ -32,6 +32,12 @@ assets/
 
 The agent loads [`SKILL.md`](SKILL.md) up front and opens the matching [`references/`](references/) file on demand, so the entrypoint stays lean while the full knowledge base is always available.
 
+## Harness and model
+
+The skill is plain markdown, so it runs in whatever agentic tool loads it — Claude Code, Cursor, GitHub Copilot, Codex, Amp, or any [skills.sh](https://www.skills.sh)-compatible tool. It needs `git` for the diff and, only when the target is a GitHub PR, `gh` for the PR metadata and the report comment; without `gh` the review still runs and prints, it just doesn't post.
+
+**The skill doesn't pick a model.** The review is performed by whatever model the host agent is already running — there is no model setting in `SKILL.md`, `references/`, or `.eagerworks/pr-review.json`. The one place a model is named is the optional Claude Code subagent below, whose frontmatter defaults to `model: opus`; change that line if you want the isolated review to use a different model. In every other harness, the main agent does the whole job — reading, reviewing, and posting to the PR — with its own model.
+
 ## Configuration
 
 The skill works with zero configuration — it resolves the base branch from evidence (an open PR's actual base first, then this config, then the branch's fork point, asking the user if none is conclusive — see [`references/base-branch.md`](references/base-branch.md)) and reads whatever `AGENTS.md`/`CLAUDE.md` conventions exist in the target repo. To set a default base branch, point at a repo-specific risk area, turn off posting the report on the PR (`review.postToPr`), or wire up local verification commands for the optional fix loop, add `.eagerworks/pr-review.json`. See [`references/config.md`](references/config.md) for the full schema and [`assets/pr-review.example.json`](assets/pr-review.example.json) for a starter.
