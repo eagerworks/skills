@@ -60,3 +60,7 @@ The boundary is the rule: **anything users should receive goes inside `skills/<n
 ## skill-creator (vendored tooling)
 
 `.agents/skills/skill-creator/` is a vendored skill (tracked in `skills-lock.json`, sourced from `anthropics/skills`) used to author/eval/optimize skills. It contains the only executable code in the repo (Python under `scripts/` and `eval-viewer/`). Don't hand-edit it as project content — it's a managed dependency.
+
+## decision-record (repo-internal tooling)
+
+`.agents/skills/decision-record/` is a repo-internal skill (hand-written, not vendored, not in `skills-lock.json`) that documents how to write or update a `docs/decision-records/*.md` file for this repo: filename shape, title (one declarative sentence, **no leading number**, **no `Status` field**), the four required sections (Context, Decision, Consequences, Related), and cross-referencing sibling records by filename rather than number. `.claude/skills/decision-record` is a symlink to it so Claude Code auto-discovers it. It is not shipped to skills.sh users — it governs this repo's own documentation practice, not the skills in `skills/`.
