@@ -1,4 +1,4 @@
-# 9. Make the `pr-review` report language a configured setting, never inferred from the conversation
+# Make the `pr-review` report language a configured setting, never inferred from the conversation
 
 - **Date:** 2026-09-01
 

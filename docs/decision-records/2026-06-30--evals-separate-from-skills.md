@@ -1,4 +1,4 @@
-# 1. Keep `evals/` separate from `skills/`
+# Keep `evals/` separate from `skills/`
 
 - **Date:** 2026-06-30
 

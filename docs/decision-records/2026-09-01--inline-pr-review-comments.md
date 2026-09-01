@@ -1,4 +1,4 @@
-# 8. Post `pr-review` findings as an inline GitHub review, not just a summary comment
+# Post `pr-review` findings as an inline GitHub review, not just a summary comment
 
 - **Date:** 2026-09-01
 
