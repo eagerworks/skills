@@ -1,4 +1,4 @@
-# 5. Gate the fix loop behind explicit opt-in, and cap it with three independent stop conditions
+# Gate the fix loop behind explicit opt-in, and cap it with three independent stop conditions
 
 - **Date:** 2026-08-21
 

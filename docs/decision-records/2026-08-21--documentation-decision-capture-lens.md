@@ -1,4 +1,4 @@
-# 4. Add documentation & decision capture as a fifth `pr-review` lens
+# Add documentation & decision capture as a fifth `pr-review` lens
 
 - **Date:** 2026-08-21
 

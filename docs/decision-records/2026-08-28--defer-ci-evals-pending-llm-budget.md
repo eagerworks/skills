@@ -1,4 +1,4 @@
-# 6. Defer running evals in GitHub Actions
+# Defer running evals in GitHub Actions
 
 - **Date:** 2026-08-28
 

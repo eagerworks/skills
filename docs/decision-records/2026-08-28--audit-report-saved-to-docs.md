@@ -1,4 +1,4 @@
-# 7. `loop-engineering-audit` persists its report to `docs/` in the audited repo
+# `loop-engineering-audit` persists its report to `docs/` in the audited repo
 
 - **Date:** 2026-08-28
 
