@@ -6,7 +6,7 @@
 2. **Read the repo's conventions, config, and documentation surface** — `AGENTS.md`/`CLAUDE.md`, `.eagerworks/pr-review.json` if present (`references/config.md`), and enough of the repo's `docs/` tree (an ADR directory, other pages) to know where a decision would be written down and whether this diff makes an existing page false. Lens 5 (`references/rubric.md`) is a guess without it.
 3. **Read every touched file in full**, not just the changed hunks — the diff alone hides context (existing scoping patterns, sibling tests, error-handling style) needed to judge lenses 1–3 correctly. Skip a file only if it matches `review.ignorePaths` in `.eagerworks/pr-review.json` (`references/config.md`) — those files are excluded from the full-file read and produce no findings. If a configured pattern would exclude a schema migration or auth/scoping code, read and review that file anyway and name the mismatch in the report rather than silently applying the pattern.
 4. **Pass all five lenses** from `references/rubric.md` over the change.
-5. **Write the report** — see `references/output-format.md` for the format. If any `ignorePaths` pattern actually matched a touched file, disclose it in the report — a skip is never silent. Same for `review.documentation.enabled: false` — disclose that Lens 5 didn't run rather than just omitting its section silently.
+5. **Write the report** — see `references/output-format.md` for the format, in the language resolved from `review.language` (`references/config.md` → "Report Language" — never the language the conversation happens to be in). If any `ignorePaths` pattern actually matched a touched file, disclose it in the report — a skip is never silent. Same for `review.documentation.enabled: false` — disclose that Lens 5 didn't run rather than just omitting its section silently.
 6. **Post the report to the PR** — only when the scope is a GitHub PR. See "Posting to a PR" below for the preflight, the command, and what to do when `gh` isn't ready.
 
 ## Reviewing Against an Issue or PR
@@ -62,6 +62,8 @@ gh auth status         # is it authenticated?
 - **`gh` is installed but `gh auth status` fails** → same offer, minus the install step: *"…run `gh auth login`, then tell me and I'll post it."*
 - **Authenticated** → continue to posting, then print the URL `gh` returns so the user can find it.
 
+These two offer strings are part of the report artifact — speak them in the language resolved from `review.language`, same as the report itself.
+
 The console report is delivered in every case — a missing or unauthenticated `gh` never blocks or fails the review.
 
 ### Inline mode
@@ -100,7 +102,7 @@ Exact body content for each half: `references/output-format.md` → "Inline Revi
 
 **4. Handle a 422.** The whole POST is atomic — one bad comment rejects the entire review, nothing posts. If it 422s:
    - Re-fetch `head.sha`. If it moved (someone pushed in between), re-diff and go back to step 1 — retry **once**.
-   - Still failing → fall back to summary mode below, using the full console report as the body, and disclose the fallback in one line under the console report: `_Posted as a single summary comment on PR #42 — the inline review failed; see the report above for every finding._`
+   - Still failing → fall back to summary mode below, using the full console report as the body, and disclose the fallback in one line under the console report: `_Posted as a single summary comment on PR #42 — the inline review failed; see the report above for every finding._` (in `review.language`, like the rest of the report)
 
 ### Summary mode
 
@@ -120,6 +122,8 @@ Skip posting entirely when the user says so ("don't post", "just show me") or wh
 _Not posted to PR #42 — postToPr is false._
 ```
 
+This disclosure line is written in `review.language` too, same as every other line in the report.
+
 `review.commentStyle` only chooses *how* to post — it never skips posting on its own; use `postToPr: false` for that.
 
 ### ✅ / ❌
@@ -130,6 +134,8 @@ _Not posted to PR #42 — postToPr is false._
 ✅ correct: the review POST 422s even after a retry → fall back to `gh pr comment <N> --body-file` with the full report, and say so in one line
 ✅ correct: gh not installed → print the report → offer to post once the user installs gh and runs `gh auth login`
 ✅ correct: `review.commentStyle: "summary"` → post exactly like before, one `gh pr comment`, no inline comments
+✅ correct: `review.language: "es"` → console report, inline comments, and summary body all in Spanish; the `### FINDINGS` keys and severity values stay English
+❌ wrong:   write the report in whatever language the user happened to chat in
 ❌ wrong:   post the review and skip the console report because "it's on the PR now"
 ❌ wrong:   post for `git diff --staged` — there is no PR to post to
 ❌ wrong:   post a reformatted summary instead of the same report the console shows

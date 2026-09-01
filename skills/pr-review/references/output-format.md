@@ -1,5 +1,56 @@
 # PR Review — Output Format
 
+## Report Language
+
+Every template on this page is shown in English — that's the built-in default. When `review.language` resolves to something else (`references/config.md` → "Report Language"), translate every human-facing string — headings, the verdict sentence, `**Failure:**`/`**Fix:**`/`**Where:**`/`**Rationale found:**` labels, `_(none)_`, captions, disclosure lines, and the footer — while keeping markdown structure, section order, severity ordering, finding counts, `file:line` anchors, code, commands, and URLs byte-identical to what the English template would produce.
+
+**Never translated, in any language:** the `### FINDINGS` / `### END FINDINGS` / `### DOCUMENTATION` / `### END DOCUMENTATION` sentinels, their field keys (`id`, `severity`, `file`, `claim`, `failure`, `fix`, `subject`, `where`, `why`, `rationale`), the `critical | high | minor` enum, the literal `not stated`, and the `TODO(author):` prefix — these are a machine contract (see "Machine-Parseable Block" below) and translating them would break every parser. Only the prose *values* inside those blocks (the `claim`/`failure`/`fix` sentences) follow `review.language`.
+
+A Spanish worked example, `review.language: "es"`:
+
+```markdown
+## Revisión de PR
+
+**Veredicto:** 1 crítico, 0 alto, 0 menor — no mergear hasta resolver el hallazgo crítico.
+
+### Crítico
+
+- **app/controllers/invoices_controller.rb:12** — `Invoice.find(params[:id])` no está scopeado a la organización del usuario actual.
+  - **Falla:** un usuario autenticado de la Org A puede leer cualquier factura adivinando o incrementando el id, sin importar a qué organización pertenece.
+  - **Arreglo:** scopear a través del caller — `current_user.organization.invoices.find(params[:id])`.
+
+### Alto
+
+_(ninguno)_
+
+### Menor
+
+_(ninguno)_
+```
+
+Its inline comment body (same finding, `commentStyle: "inline"`):
+
+```markdown
+**Crítico** — `Invoice.find(params[:id])` no está scopeado a la organización del usuario actual.
+
+**Falla:** un usuario autenticado de la Org A puede leer cualquier factura adivinando o incrementando el id, sin importar a qué organización pertenece.
+
+**Arreglo:** scopear a través del caller — `current_user.organization.invoices.find(params[:id])`.
+```
+
+Its machine-parseable block, **unchanged** — this is the exception in practice, not just in the abstract:
+
+```text
+### FINDINGS
+- id: F1
+  severity: critical
+  file: app/controllers/invoices_controller.rb:12
+  claim: Invoice.find(params[:id]) no está scopeado a la organización del usuario actual.
+  failure: un usuario autenticado de la Org A puede leer cualquier factura adivinando o incrementando el id.
+  fix: scopear a través del caller — current_user.organization.invoices.find(params[:id]).
+### END FINDINGS
+```
+
 ## Markdown Report (Default)
 
 Use this format for a human reading the review in an IDE or terminal. One verdict line at the top, then findings grouped by severity, each with `file:line`, the claim, the concrete failure scenario, and a one-line fix.
@@ -56,7 +107,7 @@ When there is nothing to report, say so plainly instead of omitting the section:
 
 ## Machine-Parseable Block (Optional)
 
-Use this when another skill, script, or agent needs to parse the output mechanically — for example, feeding findings into an automated fix loop. Not needed for a human reading the review directly.
+Use this when another skill, script, or agent needs to parse the output mechanically — for example, feeding findings into an automated fix loop. Not needed for a human reading the review directly. The `claim`/`failure`/`fix` (and `subject`/`where`/`why`/`rationale`) prose values follow `review.language` like everything else, but the sentinels, field keys, and severity enum never do — see "Report Language" above.
 
 ```text
 ### FINDINGS
@@ -97,7 +148,7 @@ If there are no suggestions, return the literal empty block, same rule as `### F
 
 ## Inline Review Comments (default `commentStyle`)
 
-When `review.commentStyle` is `"inline"` (the default — `references/config.md`), the report is split across a GitHub review's inline comments and its summary body instead of one flat comment. See `references/workflow.md` → "Inline mode" for how a finding is decided anchorable vs. unanchorable.
+When `review.commentStyle` is `"inline"` (the default — `references/config.md`), the report is split across a GitHub review's inline comments and its summary body instead of one flat comment. See `references/workflow.md` → "Inline mode" for how a finding is decided anchorable vs. unanchorable. Both halves follow `review.language` — they're never posted in different languages from each other or from the console report.
 
 **Inline comment body** — one per anchorable finding, posted on its exact line. Same prose the console report uses for that finding, just without repeating the `file:line` prefix (GitHub already shows the line):
 

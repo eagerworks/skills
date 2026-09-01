@@ -13,7 +13,7 @@ Reviews a diff — a branch, a PR, staged changes, or working-tree changes — a
 
 By default this is a **read-only** review: no file is edited, no commit is made, nothing is pushed. See `references/workflow.md` if the user explicitly wants findings fixed automatically.
 
-When the review targets a GitHub PR (`review PR #N`, or the branch under review has an open PR), the report is printed to the console **and** posted to the PR so it stays with the PR and the whole team can read it — by default as a GitHub review with inline comments on each finding's line plus a summary body, or as a single plain comment when `.eagerworks/pr-review.json` sets `review.commentStyle: "summary"`. If `gh` isn't installed or authenticated, the report is still printed and the skill offers to post it once the user sets up the GitHub CLI. See `references/workflow.md` → "Posting to a PR".
+When the review targets a GitHub PR (`review PR #N`, or the branch under review has an open PR), the report is printed to the console **and** posted to the PR so it stays with the PR and the whole team can read it — by default as a GitHub review with inline comments on each finding's line plus a summary body, or as a single plain comment when `.eagerworks/pr-review.json` sets `review.commentStyle: "summary"`. If `gh` isn't installed or authenticated, the report is still printed and the skill offers to post it once the user sets up the GitHub CLI. See `references/workflow.md` → "Posting to a PR". The report is written in English by default, regardless of what language the conversation is in — set `review.language` per repo to change it (`references/config.md`).
 
 ## Scope Detection — Do This First
 
@@ -96,3 +96,5 @@ Copyable templates live in `assets/`:
 8. **Never pad the list to look thorough.** Zero findings is a valid, correct result.
 
 9. **A documentation suggestion (Lens 5B) is never a merge blocker and never counted as a finding** — keep it in its own report section, out of the verdict. And never fabricate a rationale for a decision you can't source from the PR, issue, commits, or code — an unsourced "why" is written as `TODO(author):`, never guessed.
+
+10. **Report language is configured, not inferred.** Write the report in `review.language` (default English) — never in whatever language the conversation happens to be in. The `### FINDINGS` / `### DOCUMENTATION` keys and severity values are never translated. See `references/config.md`.
