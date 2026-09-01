@@ -1,4 +1,4 @@
-# 8. `repo-handoff` treats questions for the previous team as the primary deliverable
+# `repo-handoff` treats questions for the previous team as the primary deliverable
 
 - **Date:** 2026-08-29
 
