@@ -1,4 +1,4 @@
-# 7. `hipaa`'s audit report is a dated file in the audited repo, not terminal output
+# `hipaa`'s audit report is a dated file in the audited repo, not terminal output
 
 - **Date:** 2026-08-28
 
