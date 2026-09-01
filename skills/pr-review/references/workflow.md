@@ -42,9 +42,14 @@ Only run this when the user explicitly asks for findings to be fixed, not by def
 
 ## Posting to a PR
 
-When the scope is a GitHub PR — the user said `review PR #N`, or the branch under review has an open PR (`gh pr view --json number,url`, already run while resolving the base branch) — the report is posted on that PR as a comment, **automatically, after it has been printed to the console**. The point is that the review stays with the PR where the whole team can read it, instead of living only in one person's terminal.
+When the scope is a GitHub PR — the user said `review PR #N`, or the branch under review has an open PR (`gh pr view --json number,url`, already run while resolving the base branch) — the report is posted on that PR, **automatically, after it has been printed to the console**. The point is that the review stays with the PR where the whole team can read it, instead of living only in one person's terminal.
 
 Never post for a staged, working-tree, or branch-without-PR review — there is nothing to post to.
+
+Two shapes, chosen by `review.commentStyle` in `.eagerworks/pr-review.json` (`references/config.md`), default `"inline"`:
+
+- **`"inline"`** — a single GitHub review (`gh api .../pulls/<N>/reviews`) that comments directly on the line each anchorable finding names, plus a summary body carrying the verdict, the unanchorable findings in full, and the Documentation section. This is the mode described below.
+- **`"summary"`** — today's single issue comment, unchanged: see "Summary mode" below.
 
 ### Preflight
 
@@ -55,13 +60,51 @@ gh auth status         # is it authenticated?
 
 - **`gh` is not installed** → print the report as usual, then offer: *"I can post this report on PR #N so the team can read it — install the GitHub CLI (https://cli.github.com) and run `gh auth login`, then tell me and I'll post it."* Don't retry on your own.
 - **`gh` is installed but `gh auth status` fails** → same offer, minus the install step: *"…run `gh auth login`, then tell me and I'll post it."*
-- **Authenticated** → post, then print the comment URL `gh` returns so the user can find it.
+- **Authenticated** → continue to posting, then print the URL `gh` returns so the user can find it.
 
 The console report is delivered in every case — a missing or unauthenticated `gh` never blocks or fails the review.
 
-### Posting
+### Inline mode
 
-Write the report to a temp file and post it. The body is the **same markdown report** shown in the console, plus a footer — see `references/output-format.md` → "PR Comment". Every run creates a new comment; don't edit a previous one (`--edit-last`), so each review round stays visible in the PR timeline.
+**1. Compute which lines are anchorable.** A GitHub review comment can only land on a line that is actually part of the PR's diff (an added, deleted, or context line inside a hunk) — commenting on any other line is rejected. Before writing a single comment, get the diff's commentable lines:
+
+```bash
+gh api --paginate "repos/<owner>/<repo>/pulls/<N>/files" \
+  --jq '.[] | {path: .filename, status, patch: (.patch // null)}'
+```
+
+A file with `patch: null` (binary, too large, or generated) has nothing commentable. For every other file, walk its `patch` to build the set of `path:line` pairs available on `side: RIGHT` (added and context lines) — v1 only anchors to `RIGHT`, single lines, never a `start_line` range.
+
+**2. Split the findings.** A finding is **anchorable** only if it names a `file:line` and that exact pair is in the set from step 1. Everything else — a finding with no line, a line outside a hunk, anything in a `patch: null` file, every Lens 5B documentation suggestion — is **unanchorable** and goes in the summary body instead, in full, under its normal severity heading. Never drop a finding for being unanchorable.
+
+**3. Build and post the review.** Pin the head SHA up front so the review lands on the commit the diff was actually taken from:
+
+```bash
+REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+SHA=$(gh api "repos/$REPO/pulls/<N>" --jq .head.sha)
+
+jq -n --arg sha "$SHA" --rawfile body summary.md '{
+  commit_id: $sha,
+  body: $body,
+  event: "COMMENT",
+  comments: [
+    { path: "app/controllers/invoices_controller.rb", line: 12, side: "RIGHT",
+      body: "**Critical** — not scoped to the current user'\''s organization.\n\n**Failure:** an authenticated user from Org A can read any invoice by guessing or incrementing the id.\n\n**Fix:** scope through the caller — `current_user.organization.invoices.find(params[:id])`." }
+  ]
+}' | gh api --method POST "repos/$REPO/pulls/<N>/reviews" --input - --jq .html_url
+```
+
+`event` is always `"COMMENT"` — never `APPROVE` (a 422 on your own PR, and a merge-blocking policy change this skill doesn't make) or `REQUEST_CHANGES` (same policy concern; the verdict line already says whether it's mergeable).
+
+Exact body content for each half: `references/output-format.md` → "Inline Review Comments".
+
+**4. Handle a 422.** The whole POST is atomic — one bad comment rejects the entire review, nothing posts. If it 422s:
+   - Re-fetch `head.sha`. If it moved (someone pushed in between), re-diff and go back to step 1 — retry **once**.
+   - Still failing → fall back to summary mode below, using the full console report as the body, and disclose the fallback in one line under the console report: `_Posted as a single summary comment on PR #42 — the inline review failed; see the report above for every finding._`
+
+### Summary mode
+
+Write the report to a temp file and post it as an issue comment. The body is the **same markdown report** shown in the console, plus a footer — see `references/output-format.md` → "PR Comment". Every run creates a new comment; don't edit a previous one (`--edit-last`), so each review round stays visible in the PR timeline.
 
 ```bash
 gh pr comment <N> --body-file <report.md>
@@ -71,21 +114,28 @@ Never hard-wrap lines in the body — let GitHub wrap them.
 
 ### Opting out
 
-Skip posting when the user says so ("don't post", "just show me") or when `.eagerworks/pr-review.json` sets `review.postToPr: false` (`references/config.md`). Disclose the skip in one line under the console report:
+Skip posting entirely when the user says so ("don't post", "just show me") or when `.eagerworks/pr-review.json` sets `review.postToPr: false` (`references/config.md`). Disclose the skip in one line under the console report:
 
 ```markdown
 _Not posted to PR #42 — postToPr is false._
 ```
 
+`review.commentStyle` only chooses *how* to post — it never skips posting on its own; use `postToPr: false` for that.
+
 ### ✅ / ❌
 
 ```text
-✅ correct: print the report → gh auth status → gh pr comment 42 --body-file report.md → print the comment URL
+✅ correct: print the report → gh auth status → compute anchorable lines from the diff → post one review with inline comments + summary body → print the review URL
+✅ correct: a finding names a line outside any diff hunk → keep it in the summary body under its severity heading, don't drop it, don't 422 the review over it
+✅ correct: the review POST 422s even after a retry → fall back to `gh pr comment <N> --body-file` with the full report, and say so in one line
 ✅ correct: gh not installed → print the report → offer to post once the user installs gh and runs `gh auth login`
-❌ wrong:   post the comment and skip the console report because "it's on the PR now"
-❌ wrong:   post a comment for `git diff --staged` — there is no PR to post to
+✅ correct: `review.commentStyle: "summary"` → post exactly like before, one `gh pr comment`, no inline comments
+❌ wrong:   post the review and skip the console report because "it's on the PR now"
+❌ wrong:   post for `git diff --staged` — there is no PR to post to
 ❌ wrong:   post a reformatted summary instead of the same report the console shows
-❌ wrong:   post one comment per fix-loop round
+❌ wrong:   post one review per fix-loop round
+❌ wrong:   drop an unanchorable finding instead of moving it into the summary body
+❌ wrong:   use `event: "APPROVE"` or `"REQUEST_CHANGES"` — always `"COMMENT"`
 ```
 
 ## Reviewing a Large Diff

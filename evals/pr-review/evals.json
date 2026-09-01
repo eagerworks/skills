@@ -224,14 +224,14 @@
     },
     {
       "id": 18,
-      "prompt": "Review PR #42 on GitHub. For context: `gh auth status` succeeds, `gh pr diff 42` shows a Rails InvoicesController adding `def show; @invoice = Invoice.find(params[:id]); end` next to an existing `#index` that scopes through `current_user.organization.invoices`, and there is no .eagerworks/pr-review.json in the repo.",
-      "expected_output": "The response prints the markdown report to the console (a critical finding for the unscoped Invoice#show), then — because the scope is a GitHub PR and gh is authenticated — posts that same report as a comment on PR #42 with `gh pr comment 42 --body-file <report>` and reports the comment URL. The posted body is the same markdown report shown in the console plus a footer identifying the skill, not a reformatted summary. It is a new comment (no --edit-last), and no other git/gh mutation happens: no commit, no push, no file edits.",
+      "prompt": "Review PR #42 on GitHub. For context: `gh auth status` succeeds, `gh pr diff 42` shows a Rails InvoicesController adding `def show; @invoice = Invoice.find(params[:id]); end` (this exact line is part of the diff) next to an existing `#index` that scopes through `current_user.organization.invoices`, and there is no .eagerworks/pr-review.json in the repo (so commentStyle defaults to \"inline\").",
+      "expected_output": "The response prints the markdown report to the console (a critical finding for the unscoped Invoice#show), then — because the scope is a GitHub PR, gh is authenticated, and commentStyle defaults to inline — posts a single GitHub review via `gh api .../pulls/42/reviews` with `event: \"COMMENT\"`, an inline comment anchored to the Invoice#show line carrying the critical finding's claim/failure/fix, and a summary body with the verdict line. It reports the review URL. No `event: \"APPROVE\"` or `\"REQUEST_CHANGES\"` is used, and no other git/gh mutation happens: no commit, no push, no file edits.",
       "files": [],
       "expectations": [
         "Response prints the full markdown report to the console before or in addition to posting it, never only posts",
-        "Response posts the report on PR #42 using gh pr comment (e.g. `gh pr comment 42 --body-file ...`) without asking for confirmation first",
-        "Response posts the same markdown report shown in the console, not a reformatted or summarized version",
-        "Response creates a new comment rather than editing a previous one (does not use --edit-last)",
+        "Response posts an inline GitHub review (gh api .../pulls/42/reviews with a comments array), not a plain gh pr comment, since commentStyle defaults to inline",
+        "Response's inline comment for the unscoped Invoice#show finding is anchored to that finding's actual line in the diff",
+        "Response uses event: \"COMMENT\" for the review, never APPROVE or REQUEST_CHANGES",
         "Response performs no other mutation: no commit, no push, no file edits"
       ]
     },
@@ -259,6 +259,43 @@
         "Response still prints the full review report in the console",
         "Response does not silently omit the posting step without mentioning the config opt-out",
         "Response's verdict reflects zero findings rather than padding with nits"
+      ]
+    },
+    {
+      "id": 21,
+      "prompt": "Review PR #42 on GitHub. `gh auth status` succeeds, commentStyle defaults to inline (no .eagerworks/pr-review.json). The diff adds a new Node service, `src/billing/charge.ts`, that correctly scopes every query by orgId. The PR description lists an acceptance criterion — 'a charge cannot be retried after it succeeds' — with no corresponding test anywhere in the diff or the existing test suite.",
+      "expected_output": "The response finds one high-severity finding: the acceptance criterion has no proving test, and it names the file that should contain the test (e.g. a new or existing spec file) rather than a specific line, since no line in the diff represents 'the test that should exist'. Because this finding has no anchorable file:line, the response keeps it in full in the review's summary body rather than as an inline comment, and does not fail or skip posting the review over it. The inline review still posts successfully (no comments needed, or only for other anchorable findings), with this finding fully described in the summary body under the High section.",
+      "files": [],
+      "expectations": [
+        "Response's missing-test finding for the retry acceptance criterion has no specific file:line anchor and is not force-fit onto an arbitrary line",
+        "Response keeps this unanchorable finding in full (claim, failure, fix) in the review's summary body rather than dropping it or reducing it to an index line",
+        "Response still successfully posts the GitHub review despite having an unanchorable finding, with no 422 or failed post reported",
+        "Response does not fabricate a line number just to force the finding into an inline comment"
+      ]
+    },
+    {
+      "id": 22,
+      "prompt": "Review PR #42 on GitHub. This repo's .eagerworks/pr-review.json contains `{ \"review\": { \"commentStyle\": \"summary\" } }` and `gh auth status` succeeds. The diff shows the same unscoped `Invoice.find(params[:id])` in `#show` as before.",
+      "expected_output": "The response prints the markdown report to the console, then posts it as a single plain issue comment with `gh pr comment 42 --body-file <report>` — the same behavior as before inline mode existed — because commentStyle is explicitly set to \"summary\". It does not call `gh api .../pulls/42/reviews` or post any inline line comments, and reports the comment URL.",
+      "files": [],
+      "expectations": [
+        "Response posts with gh pr comment (a plain issue comment), not gh api .../reviews",
+        "Response does not create any inline/line-anchored comments",
+        "Response's posted body is the full markdown report plus footer, unchanged from the pre-inline-mode format",
+        "Response honors commentStyle: \"summary\" as an explicit override of the inline default"
+      ]
+    },
+    {
+      "id": 23,
+      "prompt": "Review PR #42 on GitHub. commentStyle defaults to inline, gh is authenticated, and there's one critical finding with a clean file:line anchor. For context: assume the `gh api .../pulls/42/reviews` POST fails twice in a row with HTTP 422 (validation failed on a comment line), even after re-fetching the head SHA and retrying once.",
+      "expected_output": "The response prints the console report as usual, attempts the inline review, retries once after re-checking the head SHA, and when that also 422s, falls back to posting the full report as a single plain comment via `gh pr comment 42 --body-file <report>`. It discloses in one line that the inline review failed and it fell back to a summary comment, and it does not lose the critical finding — it's fully present in the fallback comment's body. No git/gh mutation happens beyond the one successful fallback post.",
+      "files": [],
+      "expectations": [
+        "Response retries the inline review at most once after a 422 before falling back",
+        "Response falls back to gh pr comment with the full report when the inline review still fails after the retry",
+        "Response discloses in the output that the inline review failed and a summary comment was posted instead",
+        "Response does not lose or omit the critical finding in the fallback comment",
+        "Response does not report the review as failed/aborted to the user — the fallback still delivers the report to the PR"
       ]
     }
   ]

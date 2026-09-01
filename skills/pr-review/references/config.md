@@ -53,11 +53,19 @@ All fields optional.
       "maxSuggestions": 2
     },
 
-    // Post the report as a comment on the PR under review (see references/workflow.md
+    // Post the report to the PR under review (see references/workflow.md
     // → "Posting to a PR"). On by default; only relevant when the scope is a GitHub PR.
     // Set false to keep the review in the console only — the skip is disclosed in the
     // report, never silent.
-    "postToPr": true
+    "postToPr": true,
+
+    // How the report is posted, when postToPr is true. "inline" (default) posts a
+    // GitHub review that comments directly on each finding's line, with a summary
+    // body for the verdict and any finding that can't be anchored to a diff line.
+    // "summary" posts one plain issue comment with the full report, same as this
+    // skill's original behavior — also the automatic fallback if an inline review
+    // fails to post (references/workflow.md → "Handle a 422").
+    "commentStyle": "inline"
   },
 
   // Commands this repo uses to verify a fix during the optional fix loop. Run as-is, in order.
@@ -77,7 +85,8 @@ All fields optional.
     ],
     "ignorePaths": ["db/schema.rb"],
     "documentation": { "enabled": true, "decisionRecordsPath": "docs/adr/" },
-    "postToPr": true
+    "postToPr": true,
+    "commentStyle": "inline"
   },
   "localChecks": ["bundle exec rspec", "bundle exec rubocop"]
 }

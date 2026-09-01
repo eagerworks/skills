@@ -95,9 +95,60 @@ If there are no suggestions, return the literal empty block, same rule as `### F
 ### END DOCUMENTATION
 ```
 
-## PR Comment
+## Inline Review Comments (default `commentStyle`)
 
-When the review targets a GitHub PR (see `references/workflow.md` → "Posting to a PR"), the comment body is the **markdown report above, verbatim** — same verdict line, same severity sections, same Documentation section, same disclosure lines. Don't reformat, summarize, or reorder it for the PR: the comment must read exactly like the console output, so a teammate reading the PR sees what the author saw. Append one footer line so readers know where the comment came from:
+When `review.commentStyle` is `"inline"` (the default — `references/config.md`), the report is split across a GitHub review's inline comments and its summary body instead of one flat comment. See `references/workflow.md` → "Inline mode" for how a finding is decided anchorable vs. unanchorable.
+
+**Inline comment body** — one per anchorable finding, posted on its exact line. Same prose the console report uses for that finding, just without repeating the `file:line` prefix (GitHub already shows the line):
+
+```markdown
+**Critical** — `Invoice.find(params[:id])` is not scoped to the current user's organization.
+
+**Failure:** an authenticated user from Org A can read any invoice by guessing or incrementing the id, regardless of which org it belongs to.
+
+**Fix:** scope through the caller — `current_user.organization.invoices.find(params[:id])`.
+```
+
+**Review summary body** — the verdict line, then every severity section as a one-line scannable index for anchored findings, with unanchorable findings kept in full (same shape as the plain markdown report above) so nothing is lost:
+
+```markdown
+## PR Review
+
+**Verdict:** 1 critical, 1 high, 0 minor — do not merge until the critical finding is fixed.
+
+### Critical
+
+- **app/controllers/invoices_controller.rb:12** — not scoped to the current user's organization. _(commented inline)_
+
+### High
+
+- **spec/requests/invoices_spec.rb** — acceptance criterion "a user cannot view another org's invoice" has no test.
+  - **Failure:** nothing currently asserts the 404/403 behavior for a cross-org request; the scoping bug above could regress silently.
+  - **Fix:** add a request spec that logs in as a user from Org B and asserts a 404 on Org A's invoice id.
+
+### Minor
+
+_(none)_
+
+### Documentation
+
+_(suggestions — not merge blockers, not counted in the verdict)_
+
+...
+
+---
+_Posted by the [eagerworks pr-review](https://github.com/eagerworks/skills/tree/main/skills/pr-review) skill._
+```
+
+The High-severity example above stays in the body **in full** because it has no line number to anchor to (it names a whole file, `spec/requests/invoices_spec.rb`) — never shorten an unanchorable finding to an index line just because anchored ones are shortened. The verdict counts every finding regardless of where it ended up.
+
+Never post the `### FINDINGS` / `### DOCUMENTATION` machine-parseable blocks in either the inline comments or the summary body — those are for scripts, not for people reading the PR. Never hard-wrap lines — let GitHub wrap them.
+
+Zero findings still posts a review — just with an empty `comments` array and the same two-line "0 findings" summary body plus footer, same rule as the summary format below.
+
+## PR Comment (`commentStyle: "summary"`, and the inline-mode fallback)
+
+This is the format used when `review.commentStyle` is `"summary"`, and also the fallback body when inline mode's review POST fails even after a retry (`references/workflow.md` → "Handle a 422"). The comment body is the **markdown report above, verbatim** — same verdict line, same severity sections, same Documentation section, same disclosure lines. Don't reformat, summarize, or reorder it for the PR: the comment must read exactly like the console output, so a teammate reading the PR sees what the author saw. Append one footer line so readers know where the comment came from:
 
 ```markdown
 ## PR Review

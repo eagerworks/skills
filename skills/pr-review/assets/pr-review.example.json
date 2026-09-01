@@ -15,7 +15,8 @@
       "decisionRecordsPath": "docs/decision-records/",
       "maxSuggestions": 2
     },
-    "postToPr": true
+    "postToPr": true,
+    "commentStyle": "inline"
   },
 
   "localChecks": [
