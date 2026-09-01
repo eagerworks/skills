@@ -1,4 +1,4 @@
-# 8. `architecture-design` persists its document to `docs/architecture.md` and writes nothing else
+# `architecture-design` persists its document to `docs/architecture.md` and writes nothing else
 
 - **Date:** 2026-08-29
 
@@ -9,7 +9,7 @@ a *design*, not a review or an audit. Its deliverable — the v1 architecture of
 a system — is produced through a multi-turn interview and is meant to be read
 by the whole team, revised as requirements move, and checked against what
 actually gets built. That makes it the same kind of artifact as
-`loop-engineering-audit`'s report (decision record #7): it outlives the chat
+`loop-engineering-audit`'s report ([2026-08-28--audit-report-saved-to-docs](2026-08-28--audit-report-saved-to-docs.md)): it outlives the chat
 session, it should be diffable across revisions, and its natural home is the
 project's own `docs/`.
 
