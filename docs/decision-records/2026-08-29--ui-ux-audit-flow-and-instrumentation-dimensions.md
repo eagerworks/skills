@@ -1,10 +1,10 @@
-# 9. `ui-ux-audit` grades flow simplicity and product instrumentation as dimensions
+# `ui-ux-audit` grades flow simplicity and product instrumentation as dimensions
 
 - **Date:** 2026-08-29
 
 ## Context
 
-After the first version of `ui-ux-audit` (record #8), two requests came in:
+After the first version of `ui-ux-audit` ([2026-08-29--ui-ux-audit-report-saved-to-docs](2026-08-29--ui-ux-audit-report-saved-to-docs.md)), two requests came in:
 
 1. The audit should be able to say *"this flow is unnecessarily complex, it
    could be simplified like so"* — not only grade the screens, but the length

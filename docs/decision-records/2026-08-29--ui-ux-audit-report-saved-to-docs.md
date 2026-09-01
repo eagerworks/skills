@@ -1,4 +1,4 @@
-# 8. `ui-ux-audit` persists its report to `docs/` and recommends on every item
+# `ui-ux-audit` persists its report to `docs/` and recommends on every item
 
 - **Date:** 2026-08-29
 
@@ -9,7 +9,7 @@
 dimensions and produces a work plan for designers and developers. Two
 questions came up when shaping it:
 
-1. **Where does the report go?** Record #7 decided that an *audit* (as opposed
+1. **Where does the report go?** [2026-08-28--audit-report-saved-to-docs](2026-08-28--audit-report-saved-to-docs.md) decided that an *audit* (as opposed
    to a *review*) is a work plan for the project itself — it outlives the chat,
    is re-run after the work, and should be diffable in git. A UI/UX audit has
    the same shape: the fixes take days, are often done by someone other than
@@ -31,7 +31,7 @@ recommendations of what to do in every item."
    audited repo's root, creating `docs/` if needed. `reportPath` in
    `.eagerworks/ui-ux-audit.json` can move it but not disable it. Fixed
    filename, overwritten on every run, printed in full in chat first, left
-   unstaged — the same four rules as record #7.
+   unstaged — the same four rules as [2026-08-28--audit-report-saved-to-docs](2026-08-28--audit-report-saved-to-docs.md).
 2. **Every check gets a `→ Recommendation:` line, regardless of grade.**
    🔴/🟡 name the file or component and the pattern to apply; 🟢 start with
    **Keep:** and name the practice that earned the grade; ⚪ start with
@@ -58,7 +58,7 @@ recommendations of what to do in every item."
   **Keep:** lines record what earned the grade.
 - A future audit-style skill should adopt both rules unless it has a reason
   not to; a review-style skill (`pr-review`, `mobile-store-review`) stays
-  read-only per record #7.
+  read-only per [2026-08-28--audit-report-saved-to-docs](2026-08-28--audit-report-saved-to-docs.md).
 
 ## Related
 
