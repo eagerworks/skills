@@ -297,6 +297,43 @@
         "Response does not lose or omit the critical finding in the fallback comment",
         "Response does not report the review as failed/aborted to the user — the fallback still delivers the report to the PR"
       ]
+    },
+    {
+      "id": 24,
+      "prompt": "Review this diff from our Rails app before I merge it. Escribime la respuesta y el reporte completo en español, por favor. No hay .eagerworks/pr-review.json en el repo. Este es el diff, para un SaaS multi-tenant donde cada usuario pertenece a exactamente una Organization y las invoices nunca deben ser visibles entre organizaciones:\n\n```diff\ndiff --git a/app/controllers/invoices_controller.rb b/app/controllers/invoices_controller.rb\nindex 1234567..89abcde 100644\n--- a/app/controllers/invoices_controller.rb\n+++ b/app/controllers/invoices_controller.rb\n@@ -8,6 +8,10 @@ class InvoicesController < ApplicationController\n   def index\n     @invoices = current_user.organization.invoices\n   end\n+\n+  def show\n+    @invoice = Invoice.find(params[:id])\n+  end\n end\n```\n\n¿Qué se me pasó?",
+      "expected_output": "The user is chatting in Spanish and explicitly asked for the response and report in Spanish, and there is no .eagerworks/pr-review.json setting review.language. Per the resolution ladder, an explicit per-run instruction outranks the config/AGENTS.md/default chain, so the report is written in Spanish for this run only — headings like '## Revisión de PR', '### Crítico', '**Falla:**'/'**Arreglo:**' — flagging the unscoped Invoice#show as a critical finding. This is the explicit-request exception, not evidence that the skill infers language from the conversation by default.",
+      "files": [],
+      "expectations": [
+        "Response's report is written in Spanish, honoring the user's explicit request for this run",
+        "Response still flags the missing organization scope in #show as critical or high severity",
+        "Response's suggested fix scopes through current_user.organization.invoices.find(params[:id])",
+        "Response does not claim or imply that Spanish is now the repo's configured default — no .eagerworks/pr-review.json is created or edited"
+      ]
+    },
+    {
+      "id": 25,
+      "prompt": "Review PR #42 on GitHub. This repo's .eagerworks/pr-review.json contains `{ \"review\": { \"language\": \"es\", \"commentStyle\": \"inline\" } }` and `gh auth status` succeeds. `gh pr diff 42` shows a Rails InvoicesController adding `def show; @invoice = Invoice.find(params[:id]); end` next to an existing `#index` that scopes through `current_user.organization.invoices`. We are chatting in English right now.",
+      "expected_output": "Even though the conversation is in English, review.language: \"es\" in .eagerworks/pr-review.json is the configured value and the conversation's language is never an input to that choice, so the console report, the inline GitHub comment, and the review summary body are all written in Spanish — headings like '## Revisión de PR', '### Crítico', labels like '**Falla:**' and '**Arreglo:**'. The machine-parseable ### FINDINGS block, if produced, keeps its English field keys (severity, file, claim, failure, fix) and the literal severity value 'critical' untranslated — only the claim/failure/fix prose values would be in Spanish. File paths, code identifiers, and the gh api command are unaffected by the language setting.",
+      "files": [],
+      "expectations": [
+        "Response's console report and inline PR comment are written in Spanish, not English, despite the conversation being in English",
+        "Response uses Spanish headings/labels such as 'Crítico' and 'Falla'/'Arreglo' (or equivalent Spanish wording), not the English 'Critical'/'Failure'/'Fix'",
+        "If a machine-parseable ### FINDINGS block is shown, its field keys and the severity enum value stay in English, unchanged",
+        "Response still posts an inline GitHub review (gh api .../pulls/42/reviews) since commentStyle is inline, anchored to the Invoice#show line",
+        "Response does not translate file paths, code identifiers, or the gh command itself"
+      ]
+    },
+    {
+      "id": 26,
+      "prompt": "Review this diff from our Node/TypeScript service. There's no .eagerworks/pr-review.json in this repo. The diff adds a Prisma query that filters only by `req.body.orgId` instead of the session's org, in a tenant-scoped model. What issues do you see?",
+      "expected_output": "With no .eagerworks/pr-review.json and no stated language convention in AGENTS.md/CLAUDE.md, the report defaults to English — never inferred from the fact that a human happened to write this prompt in English, since the rule is the same regardless of the chat language. The report flags the tenant-scoping bug (trusting orgId from the request body instead of the session) as a critical/high finding, in English, with headings like '## PR Review', '### Critical', '**Failure:**'/'**Fix:**'.",
+      "files": [],
+      "expectations": [
+        "Response's report is written in English, using the default English headings and labels ('## PR Review', 'Critical', 'Failure:', 'Fix:')",
+        "Response flags the Prisma query trusting orgId from the request body (instead of the session) as a critical or high severity finding",
+        "Response's fix directs sourcing orgId from the session/current user context, not from req.body",
+        "Response does not claim the language was inferred from, or depends on, the language the prompt was written in"
+      ]
     }
   ]
 }

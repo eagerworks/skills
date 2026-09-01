@@ -16,7 +16,8 @@
       "maxSuggestions": 2
     },
     "postToPr": true,
-    "commentStyle": "inline"
+    "commentStyle": "inline",
+    "language": "en"
   },
 
   "localChecks": [
