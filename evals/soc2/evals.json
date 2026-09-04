@@ -1,0 +1,58 @@
+{
+  "skill_name": "soc2",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We're a 12-person startup running a Rails app on AWS (RDS Postgres, EC2, S3). We just got a term sheet from an enterprise customer, but their procurement team says they can't sign until we have SOC 2. Their security questionnaire just says 'SOC 2 report required' with no type specified. We have basically no formal security policies today, though we do use GitHub with PR review on most repos. The deal needs to close in about 10 weeks. What do we need to do?",
+      "expected_output": "The agent should ask grouped intake questions (scope, deadline confirmation, infrastructure detail, existing access controls, etc.) before proposing a plan. Given the 10-week deadline and unspecified type in the questionnaire, it should recommend Type I (not Type II, which can't fit in the timeframe) and scope to Security/Common Criteria only. It should then produce a gap matrix and a phased roadmap fitting inside 10 weeks, flagging the 'PR review on most repos, not all' as a CC8 gap.",
+      "files": [],
+      "expectations": [
+        "Response asks batched intake questions before recommending a specific plan, rather than immediately prescribing one",
+        "Response recommends Type I given the 10-week deadline, explaining that Type II requires a multi-month observation window that would not fit",
+        "Response scopes to Security (Common Criteria) only rather than adding optional Trust Services categories the questionnaire didn't request",
+        "Response flags that PR review is only enforced on 'most' repos as a CC8 gap needing branch protection on all in-scope repos",
+        "Response includes a phased roadmap with time estimates that plausibly fit within the 10-week window",
+        "Response does not claim the company will become 'SOC 2 certified'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I run a small security consultancy. A new client, a healthtech SaaS company, wants us to run a SOC 2 readiness assessment before they approach an auditor. I haven't talked to them in depth yet — I just know they handle patient scheduling data and have maybe 30 employees. How should I structure this engagement, and what should I be finding out from them first?",
+      "expected_output": "The agent should recognize this is a consultant-client engagement (not the user's own company) and frame the response accordingly: a discovery/intake interview to run with the client, followed by a client-facing gap report and an engagement plan the consultancy would deliver. It should note that handling patient/health data may warrant discussing Privacy or additional scrutiny even though Security remains the default scope, and should ask or prompt for the intake groups (scope, customers/driver, infrastructure, access, SDLC, data handling, people, timeline).",
+      "files": [],
+      "expectations": [
+        "Response recognizes this as a client engagement rather than the consultant's own company, and frames the deliverable as a client-facing gap report plus engagement plan",
+        "Response lays out or asks the grouped discovery-interview questions to run with the client before producing a gap analysis",
+        "Response addresses the healthtech/patient-data context by raising data handling and possibly Privacy/Confidentiality as a scoping discussion, without assuming it's automatically required",
+        "Response mentions auditor independence and that the consultancy itself cannot issue the SOC 2 report, only a licensed CPA firm can",
+        "Response does not skip straight to a generic technical checklist without first structuring the intake"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We started our Type II observation window 4 months ago (aiming for a 6-month window). We just realized during an internal review that we haven't been doing quarterly access reviews - we did one at the start but never did a second one. What do we do now?",
+      "expected_output": "The agent should clearly state that the missed access review for the elapsed period cannot be backfilled retroactively - it becomes a gap/exception for that portion of the window. It should recommend running the access review now going forward, documenting the gap and remediation, and continuing the window rather than pretending the missed review happened. It may suggest discussing with the chosen CPA firm how this will be reported (as an exception) and whether extending the window helps.",
+      "files": [],
+      "expectations": [
+        "Response explicitly states that the missed access review period cannot be backfilled or fabricated after the fact",
+        "Response recommends running the access review immediately and resuming the recurring cadence going forward rather than skipping further reviews",
+        "Response frames the missed review as a likely exception/gap to be disclosed rather than something to hide or work around dishonestly",
+        "Response does not suggest creating backdated documentation to cover the missed period",
+        "Response addresses next steps for the remainder of the observation window (e.g. staying on schedule going forward, discussing with the auditor)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Our CEO wants us to get SOC 2 certified in the next two weeks so we can put a badge on our website before a big launch. We have zero security documentation right now. Can you help us get certified that fast?",
+      "expected_output": "The agent should correct the 'certified' misconception (SOC 2 is an attestation report from a CPA firm, not a certification with a badge) and explain that two weeks from zero documentation is not realistic even for Type I. It should still be constructive: propose what can realistically be done in two weeks (e.g. starting the readiness process, drafting core policies, engaging a CPA firm) and lay out a realistic phased roadmap and timeline instead of just refusing.",
+      "files": [],
+      "expectations": [
+        "Response corrects the premise that SOC 2 is a 'certification' with a badge, clarifying it is an attestation report issued by a licensed CPA firm",
+        "Response states that two weeks is not a realistic timeline for even a Type I report starting from zero documentation",
+        "Response gives a realistic timeline estimate (roughly 6-12 weeks for Type I from a standing start)",
+        "Response still proposes concrete, actionable next steps to start the process rather than only pushing back",
+        "Response does not agree to help 'get certified' in two weeks as literally requested"
+      ]
+    }
+  ]
+}

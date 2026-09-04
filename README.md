@@ -17,6 +17,7 @@ Each skill is plain markdown and works with Claude Code, Cursor, GitHub Copilot,
 <tr><td><a href="skills/mobile-store-review/"><strong>mobile-store-review</strong></a></td><td>Audits an Expo/React Native or native mobile app — standalone or inside a Turborepo — against the <a href="https://developer.apple.com/app-store/review/guidelines/">Apple App Review Guidelines</a> and <a href="https://play.google.com/about/developer-content-policy/">Google Play Developer Program Policies</a>: permissions & usage descriptions, privacy manifests & App Tracking Transparency, App Privacy vs. Data safety, account deletion, IAP & external payments, SDK/target-API floors, versioning & credentials, and EAS/monorepo build config — output as a severity-graded audit report.</td></tr>
 <tr><td><a href="skills/pr-review/"><strong>pr-review</strong></a></td><td>Code review for Rails and Node/TypeScript diffs: correctness, security & multi-tenant scoping, repo-convention conformance, test coverage against acceptance criteria, and documentation & decision capture (stale docs, undocumented decisions), with a conservative severity ladder, markdown or machine-parseable output, and an optional review-fix loop. When reviewing a GitHub PR, it also posts the report on the PR as a comment, in English by default — configurable per repo via <code>review.language</code>, regardless of what language the conversation is in.</td></tr>
 <tr><td><a href="skills/rest-api-design/"><strong>rest‑api‑design</strong></a></td><td>Design and review REST APIs: resource modeling, HTTP methods & status codes, payload and RFC 9457 error shapes, pagination/filtering, versioning & deprecation, auth, rate limiting, security pitfalls, and OpenAPI 3.1 — with an existing-API survey step so new endpoints match the conventions already in the codebase.</td></tr>
+<tr><td><a href="skills/soc2/"><strong>soc2</strong></a></td><td>SOC 2 readiness planning: a structured intake interview, Trust Services Criteria scoping (Type I/II, system boundary, subservice orgs), a gap analysis and phased roadmap, required policy skeletons, DIY evidence collection, and the CPA audit process.</td></tr>
 </table>
 
 ## Install
@@ -194,9 +195,16 @@ skills/
     references/                 # in-depth docs, loaded on demand
     assets/                     # copyable starter files / templates
     README.md                   # human-facing overview of the skill
+  soc2/                         # another skill, same shape
+    SKILL.md
+    references/
+    assets/
+    README.md
 evals/
   kamal/
     evals.json                  # per-skill eval cases (repo-level harness, not shipped)
+  soc2/
+    evals.json
 ```
 
 ## Adding a new skill
