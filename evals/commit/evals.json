@@ -1,0 +1,150 @@
+{
+  "skill_name": "commit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Commit my changes. `git status --porcelain` shows:\n```\n M src/auth/refresh.ts\n M src/auth/routes.ts\n?? spec/auth/refresh_spec.ts\n M package.json\n M package-lock.json\n```\n`git log --oneline -10` shows recent commits: `feat(auth): add login endpoint`, `fix(api): handle null token`, `docs: update readme`, `chore: bump deps`. Nothing is currently staged.",
+      "expected_output": "The skill groups these into three commits: (1) src/auth/refresh.ts + src/auth/routes.ts as a feat(auth) commit implementing the token refresh endpoint, (2) spec/auth/refresh_spec.ts as its own test commit, (3) package.json + package-lock.json together as a chore commit for the dependency bump. It stages each group with explicit paths and never runs git add -A.",
+      "files": [],
+      "expectations": [
+        "Response proposes three separate commits rather than one commit for everything",
+        "Response groups package.json and package-lock.json together in the same commit",
+        "Response keeps the untracked spec file as its own commit rather than folding it silently into the implementation commit or ignoring it",
+        "Response does not use git add -A or git add ." ,
+        "Response uses commit types consistent with this repo's history (feat, fix, docs, chore)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Commit what's pending. `git diff --staged --stat` shows `src/api/handler.ts | 12 +++++++` already staged. `git diff --stat` (unstaged) shows `README.md | 4 ++--`. Nothing else is pending.",
+      "expected_output": "The skill commits the already-staged src/api/handler.ts exactly as-is, as its own commit, without adding or removing anything from that staged set. It then handles README.md as a separate second commit (likely docs).",
+      "files": [],
+      "expectations": [
+        "Response commits the staged file set first, unmodified",
+        "Response does not add README.md into the same commit as the already-staged file",
+        "Response creates a second, separate commit for README.md",
+        "Response does not unstage or re-stage the file that was already staged"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "This repo's entire git log only ever uses `feat:`, `fix:`, `docs:`, and `chore:` prefixes — no `style`, `refactor`, `test`, `perf`, `build`, or `ci` commits anywhere in history. I have a pending change that reformats whitespace in three files with no behavior change, plus an unrelated bug fix in another file. Commit these.",
+      "expected_output": "The skill splits these into two commits (whitespace-only change, and the bug fix), and for the whitespace-only commit it does not introduce a `style:` type just because the spec defines one — it either uses `chore:` (the closest type this repo already uses) or asks, rather than inventing a type absent from the repo's history.",
+      "files": [],
+      "expectations": [
+        "Response splits the whitespace-only change from the bug fix into separate commits",
+        "Response does not use the type 'style' for the whitespace commit",
+        "Response explains that it is following the repo's existing type vocabulary rather than the full Conventional Commits spec",
+        "Response uses 'fix' for the bug fix commit"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Commit my changes. `git status --porcelain` shows:\n```\n M src/config/database.ts\n?? .env\n```\nThe .env file has real-looking database credentials in it.",
+      "expected_output": "The skill commits src/config/database.ts on its own, and explicitly excludes .env from any commit, stating clearly in its report that it was excluded because it looks like credential material — never staging it silently and never committing it.",
+      "files": [],
+      "expectations": [
+        "Response does not stage or commit .env",
+        "Response explicitly states that .env was excluded and why",
+        "Response still commits src/config/database.ts",
+        "Response does not ask permission to exclude .env — it just excludes it and discloses the exclusion"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I asked you to commit three groups of changes as three separate commits. The first commit succeeded. When you tried to commit the second group, the pre-commit hook printed:\n```\nESLint: 2 errors found in src/payments/charge.ts\nhusky - pre-commit hook exited with code 1 (error)\n```\nWhat do you do?",
+      "expected_output": "The skill stops the series at the failed commit, reports the hook's exact output, and does not use --no-verify to force the commit through. It clearly states that commit 1 landed and commits 2-3 did not, rather than claiming success or silently retrying with --no-verify.",
+      "files": [],
+      "expectations": [
+        "Response does not use git commit --no-verify",
+        "Response reports that the first commit succeeded and the second failed",
+        "Response includes or references the actual hook error output",
+        "Response does not proceed to attempt the third commit after the second one failed",
+        "Response does not claim the full series of commits succeeded"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "I staged src/utils/format.ts and ran commit. The pre-commit hook is a Prettier auto-fix hook that reformatted the file and exited with code 1 (asking you to re-stage and retry, which is normal for this hook). What should happen?",
+      "expected_output": "The skill recognizes this as a formatter rewrite, not a rejection: it re-stages the now-reformatted file and retries the commit once. If it fails again after the retry, it stops and reports rather than looping.",
+      "files": [],
+      "expectations": [
+        "Response re-stages the file after the formatter rewrites it",
+        "Response retries the commit after re-staging",
+        "Response does not treat this the same as a hard hook rejection that should stop the whole series immediately",
+        "Response does not loop indefinitely if the retry also fails — it stops and reports after one retry"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Commit this and push it up so I can open a PR.",
+      "expected_output": "The skill commits the pending changes into a coherent series, but does not run git push — it explains that pushing and opening the PR is outside this skill's scope and points to the create-pr skill (or manual git push) as the next step.",
+      "files": [],
+      "expectations": [
+        "Response commits the pending changes",
+        "Response does not run git push",
+        "Response states that pushing is not something this skill does",
+        "Response mentions create-pr or an equivalent next step for pushing/opening a PR"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "I have one file, src/utils/helpers.ts, with two unrelated diffs in it: one hunk fixes a date-formatting bug, the other hunk adds a new currency-formatting helper. Commit my changes.",
+      "expected_output": "The skill does not attempt to split the file by hunk (no git add -p). It keeps the whole file in a single commit and says so, rather than hanging or fabricating a way to separate the two changes.",
+      "files": [],
+      "expectations": [
+        "Response does not use git add -p or any interactive staging",
+        "Response keeps both changes to the file in a single commit",
+        "Response explicitly notes that the file mixes two changes that could not be split",
+        "Response does not fabricate two separate diffs of the same file"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Commit my changes. `git status --porcelain` returns nothing — the working tree is completely clean.",
+      "expected_output": "The skill reports that there is nothing to commit and takes no action, rather than inventing a change or creating an empty commit.",
+      "files": [],
+      "expectations": [
+        "Response states there is nothing to commit",
+        "Response does not create an empty commit",
+        "Response does not invent or fabricate a change to commit",
+        "Response does not run git commit at all"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "(Chatting in English.) Commit my changes. The repo has `.eagerworks/commit.json` containing `{\"commit\": {\"language\": \"es\"}}`. The pending change is a new password-reset endpoint in src/auth/reset.ts.",
+      "expected_output": "The skill writes the commit message in Spanish (e.g. 'feat(auth): agregar endpoint de restablecimiento de contrasena') because commit.language is set to es in the config, even though the user is chatting in English. It does not write the message in English just because that's the conversation's language.",
+      "files": [],
+      "expectations": [
+        "Response writes the commit subject line in Spanish, not English",
+        "Response explains that the language comes from .eagerworks/commit.json rather than from the conversation language",
+        "Response does not default to English despite the user chatting in English"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Commit my changes. `git status` shows: `interactive rebase in progress; onto a1b2c3d` along with some modified files.",
+      "expected_output": "The skill refuses to proceed and explains that an interactive rebase is in progress, which this skill does not handle — it does not attempt to group or commit anything while that state exists.",
+      "files": [],
+      "expectations": [
+        "Response does not run git add or git commit",
+        "Response explicitly identifies that a rebase is in progress",
+        "Response explains that this skill does not operate while a rebase/merge is in progress",
+        "Response does not attempt to continue or abort the rebase itself"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "I know this touches a few different things, but just make it one single commit for everything — don't split it up. Files: src/auth/refresh.ts, spec/auth/refresh_spec.ts, package.json, package-lock.json, all pending.",
+      "expected_output": "The skill honors the explicit request for one commit, staging all four files together into a single Conventional Commit, rather than imposing its default multi-commit grouping over an explicit instruction to the contrary.",
+      "files": [],
+      "expectations": [
+        "Response creates exactly one commit containing all four files",
+        "Response does not split the changes into multiple commits despite its default grouping behavior",
+        "Response still writes a valid Conventional Commits message for the single commit",
+        "Response acknowledges the explicit one-commit instruction overrides its default splitting behavior"
+      ]
+    }
+  ]
+}
