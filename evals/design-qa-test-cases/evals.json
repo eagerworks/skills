@@ -1,0 +1,197 @@
+{
+  "skill_name": "design-qa-test-cases",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Design QA test cases for this feature. Ticket LIN-482: 'Users can apply a coupon code at checkout. A valid, unexpired, unused coupon reduces the cart subtotal.' The repo has this validation in app/models/coupon.rb: `validates :subtotal_threshold, numericality: { greater_than_or_equal_to: 10 }` and the checkout controller checks `cart.subtotal >= coupon.subtotal_threshold` before allowing redemption. No Figma link or screenshot was provided, and there's no Figma MCP connected in this session. A .eagerworks/design-qa-test-cases.json already exists with testCases.scope set to [\"manual\", \"automated\"].",
+      "expected_output": "The plan includes a happy-path case for AC-1, boundary cases at $9.99 (rejected) and $10.00 (accepted) derived from the actual validation, and marks any layout/visual case under a '⚪ Not verifiable without more input' section rather than describing a checkout page layout that was never shown.",
+      "files": [],
+      "expectations": [
+        "Response includes boundary test cases at exactly $9.99 and $10.00, citing the validates numericality rule as the source rather than a round number like $0 or $100",
+        "Response does not describe or assume any specific visual layout, styling, or UI copy for the coupon field since no design source was provided",
+        "Response explicitly states that design/visual cases are not verifiable without a Figma link or screenshot rather than silently omitting them",
+        "Response does not fabricate a Figma frame or screenshot content that was never given"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Design QA test cases for the feature described at https://mycompany.atlassian.net/browse/PROJ-991. There is no Jira MCP connected in this session and the `jira` CLI is not installed, so that URL cannot actually be fetched.",
+      "expected_output": "The response does not invent acceptance criteria from the URL or ticket key alone. It explains the ticket can't be fetched (no Jira integration reachable) and asks the user to paste the ticket's text or description instead of guessing what PROJ-991 might contain.",
+      "files": [],
+      "expectations": [
+        "Response does not invent or guess acceptance criteria for PROJ-991 based on the URL or ticket number alone",
+        "Response explicitly states it could not fetch the ticket (no Jira MCP or CLI reachable)",
+        "Response asks the user to paste the ticket's text/description rather than proceeding with assumptions",
+        "Response does not produce a full test-case plan before receiving the actual feature description"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Design test cases for this AC: 'Expired coupons are rejected.' There's no other detail in the ticket about what counts as expired, and the codebase has a `Coupon#expired?` method that just checks `expires_at < Time.current` with no timezone handling visible in the diff.",
+      "expected_output": "The response flags that 'expired' is ambiguous with respect to timezone (server UTC instant vs. the user's local calendar day) and raises it as an open question for the PO rather than silently picking one interpretation and writing a boundary case around it.",
+      "files": [],
+      "expectations": [
+        "Response identifies that the AC does not specify whether expiry is evaluated in UTC or the user's local timezone",
+        "Response raises this as an explicit open question for the PO rather than silently assuming one interpretation",
+        "Response does not fabricate a precise boundary test case (e.g. 'test at exactly 23:59:59 user-local time') as if the ambiguity were resolved",
+        "Response still produces a general negative-path case that an expired coupon is rejected, separate from the unresolved boundary question"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Design QA test cases for this feature: 'Add a `updated_at` timestamp badge to the admin dashboard header showing when the page's data was last refreshed. It's read-only, has no user input, is fed from an already-existing, already-tested `Dashboard#last_refreshed_at` method, and only appears in the admin dashboard header.'",
+      "expected_output": "A small, honest plan: a couple of happy-path cases (badge shows a formatted timestamp, updates on refresh) and no invented boundary, permission, state-machine, or integration cases, since none of those apply to a read-only display fed by an already-tested method. The response does not pad the plan with unrelated generic QA checklist items to look thorough.",
+      "files": [],
+      "expectations": [
+        "Response produces a small number of cases (roughly 2-4) rather than padding the plan to look more thorough",
+        "Response does not invent boundary, permission-matrix, or state-transition cases for a feature that has no bounded input, no roles, and no state machine",
+        "Response does not add generic checklist items (e.g. 'test on mobile', 'check loading spinner') that don't trace to anything this specific feature touches",
+        "Response's cases each trace to either the stated behavior or a code signal, not to a generic QA checklist"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Design test cases for coupon redemption. The repo has spec/models/coupon_spec.rb with this passing test: `it \"rejects a coupon below the minimum cart threshold\" do expect(described_class.new(cart, coupon).valid?).to be false end` for a cart under the $10 minimum. testCases.automation.crossReferenceExistingTests is true (the default).",
+      "expected_output": "The boundary case for a cart below the minimum threshold is listed but marked as already covered, citing spec/models/coupon_spec.rb, rather than presented as a new gap needing QA attention.",
+      "files": [],
+      "expectations": [
+        "Response marks the below-minimum-threshold case as already covered by the existing spec, citing spec/models/coupon_spec.rb",
+        "Response does not list this case as 'New' or as an uncovered gap requiring QA effort",
+        "Response still includes the case in the plan (as covered) rather than omitting it entirely",
+        "Response's overall coverage summary distinguishes covered cases from new ones"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Design test cases for the password-reset flow. The repo's .eagerworks/design-qa-test-cases.json has testCases.scope set to [\"manual\"] only.",
+      "expected_output": "The plan contains only manual test cases with no 'Automate: Yes' recommendations or automation framework/level columns, honoring the scope restriction, and states that automated cases were filtered out by config.",
+      "files": [],
+      "expectations": [
+        "Response's cases are all presented as manual, with no case marked for automation",
+        "Response does not include automation framework or level details for any case",
+        "Response mentions that scope is restricted to manual per config, rather than silently filtering with no explanation",
+        "Response does not refuse to produce a plan just because automation is excluded"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "This looks like a solid test plan for the coupon feature. Now go ahead and write the actual Playwright test file for the P0 cases.",
+      "expected_output": "The skill declines to write test code, restating that its role is to design and specify cases, not implement them, and points back at the specification (case titles, level, framework name, suggested file path) it already produced so a developer can implement it.",
+      "files": [],
+      "expectations": [
+        "Response declines to write Playwright (or any) test code",
+        "Response explains that this skill designs test cases and does not implement automated tests",
+        "Response points back at the already-produced specification (case name, level, suggested file) rather than just refusing with no alternative",
+        "Response does not include any actual Playwright/test-framework source code in its reply"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Design QA test cases for LIN-990, described as 'add team invitations by email.' Also push the finished plan to Linear when done. For context: there is no Linear MCP connected in this session, and no Linear CLI is installed.",
+      "expected_output": "The full chat test-case plan for team invitations is still produced and printed in full. The skill does not fail or block on the missing Linear integration — it says the plan could not be pushed to Linear because no Linear integration is reachable, and offers to push once one is connected, or suggests pasting the plan manually.",
+      "files": [],
+      "expectations": [
+        "Response still produces and prints the full test-case plan despite the missing Linear integration",
+        "Response does not claim the plan was pushed to Linear",
+        "Response explicitly states that no Linear MCP or CLI is reachable in this session",
+        "Response offers to push once Linear is connected, or suggests the user paste the plan manually, rather than just failing silently"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "I ran this skill on LIN-482 last week and got a set of test cases. The ticket's acceptance criteria have since changed (a new AC was added about a maximum discount cap), and I'm running the skill again on the updated ticket now.",
+      "expected_output": "The skill re-derives the full case set from the current ticket and code without referencing or trying to preserve 'TC-01'/'TC-02'-style identifiers from a hypothetical prior run, since it has no registry that could make such IDs stable across runs. Cases are identified by title, not by a reused or incremented numeric ID.",
+      "files": [],
+      "expectations": [
+        "Response does not use or reference TC-01, TC-02, or any other sequential/synthetic case ID scheme",
+        "Response identifies cases by descriptive title rather than by a numbered identifier",
+        "Response does not claim to preserve stable IDs across runs of the skill",
+        "Response includes a case for the new maximum-discount-cap acceptance criterion"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Design QA test cases for the new checkout coupon feature. For context: this is the first time this skill has been run in this repo — there is no .eagerworks/design-qa-test-cases.json file present.",
+      "expected_output": "Before designing cases, the skill runs its first-run setup: it asks (via a short set of questions) for report language, case format, manual/automated scope, and an optional push destination — checking what integrations are actually reachable first — then writes .eagerworks/design-qa-test-cases.json with the answers, states what was written, and proceeds with the test-case plan.",
+      "files": [],
+      "expectations": [
+        "Response runs or describes a setup step asking about language, format, scope, and push destination before proceeding",
+        "Response indicates it checks which integrations are actually reachable before offering a push destination, rather than listing every possible tool",
+        "Response states that .eagerworks/design-qa-test-cases.json was written with the chosen settings",
+        "Response continues on to produce the test-case plan in the same turn after setup, rather than stopping after just writing the config"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Design QA test cases for the checkout coupon feature. For context: .eagerworks/design-qa-test-cases.json already exists in this repo with testCases.language set to \"es\" and testCases.format set to \"gherkin\".",
+      "expected_output": "The skill does not re-run the interactive setup or ask setup questions again since a config file already exists. It reads the existing config and produces the plan in Spanish, using Gherkin (Given/When/Then) formatting for the cases.",
+      "files": [],
+      "expectations": [
+        "Response does not ask setup questions (language/format/scope/push destination) since a config file already exists",
+        "Response's test case bodies are written in Spanish",
+        "Response's test case bodies use Given/When/Then (Gherkin) structure rather than the numbered-steps default",
+        "Response does not overwrite or ask to reconfigure the existing config file"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "Design QA test cases for a new feature. This is the first run in this repo (no config file exists yet). For context: this session has no MCP tools connected at all (no Linear, Jira, Notion, or Figma), and neither `gh` nor `jira` nor any other relevant CLI is installed or on PATH.",
+      "expected_output": "During first-run setup, the skill still asks about language, format, and scope, but skips asking about a push destination entirely (since nothing reachable was found) and sets the destination to \"none\" without presenting it as a question with no real options.",
+      "files": [],
+      "expectations": [
+        "Response does not present a push-destination question listing tools that are not actually reachable in this session",
+        "Response either skips the push-destination question entirely or explains no destinations are currently reachable",
+        "Response still asks about language, format, and scope during setup",
+        "Response sets or describes the push destination as \"none\" for this run"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Design QA test cases for the checkout coupon feature. This is the first run in this repo. When asked the setup questions, the user replies: \"actually, don't bother configuring anything, just run it with defaults for now.\"",
+      "expected_output": "The skill proceeds with built-in defaults for this run (English, steps format, manual+automated scope, no push) and does not write a .eagerworks/design-qa-test-cases.json file, since the user declined setup. It still produces the full test-case plan.",
+      "files": [],
+      "expectations": [
+        "Response does not write or claim to write a .eagerworks/design-qa-test-cases.json file after the user declines setup",
+        "Response proceeds to produce the full test-case plan using built-in defaults",
+        "Response does not keep re-prompting the user to configure after they've declined once in this run",
+        "Response does not treat the decline as an error or refuse to continue"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Design QA test cases for coupon voiding. The repo has this Rails policy: `class CouponPolicy < ApplicationPolicy; def void?; user.admin_of?(record.organization); end; end`. There is no other permission check on this action anywhere else in the code.",
+      "expected_output": "The plan includes a permissions case for an admin of the coupon's organization succeeding at voiding it, and a case for a non-admin member of the same organization being denied — the two roles the policy actually distinguishes — without inventing a full cross product of every conceivable role (e.g. a 'super-admin' or 'guest' role that doesn't appear anywhere in the code).",
+      "files": [],
+      "expectations": [
+        "Response includes a case where an org admin can void the coupon (allowed)",
+        "Response includes a case where a non-admin member of the same organization is denied",
+        "Response cites the CouponPolicy#void? method as the source of the permission rule",
+        "Response does not invent additional roles (e.g. 'super-admin', 'guest', 'billing-only') that have no corresponding check in the given code"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "Design QA test cases for coupon status changes. The repo has: `enum status: { draft: 0, active: 1, expired: 2, redeemed: 3 }` on the Coupon model, with the only code paths being: draft -> active (via an activate! method), active -> redeemed (via a redeem! method), and active -> expired (via a scheduled job). No code path exists for redeemed -> active or expired -> redeemed.",
+      "expected_output": "The plan includes cases for each legal transition (draft->active, active->redeemed, active->expired) as happy paths, plus negative cases asserting that redeemed->active and expired->redeemed are not possible (e.g. calling activate! on a redeemed coupon has no effect or raises), since those transitions exist in the enum's cross-product but have no supporting code path.",
+      "files": [],
+      "expectations": [
+        "Response includes happy-path cases for draft to active, active to redeemed, and active to expired transitions",
+        "Response includes at least one negative case asserting that redeemed to active is not possible",
+        "Response includes at least one negative case asserting that expired to redeemed is not possible",
+        "Response does not claim transitions exist that were not described in the code (e.g. draft to redeemed directly)"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "Estamos charlando en español, pero .eagerworks/design-qa-test-cases.json no existe y AGENTS.md no menciona ningún idioma para los reportes de QA. Diseñá los casos de test para la funcionalidad de cupones de checkout.",
+      "expected_output": "Aside from the setup questions (which may be conducted in the conversation's language), once language is resolved during setup and no explicit choice or repo convention points to Spanish, the default written into the config and used for the report is English — not automatically Spanish just because the conversation is in Spanish.",
+      "files": [],
+      "expectations": [
+        "Response does not assume the report language should be Spanish merely because the conversation is in Spanish",
+        "Response's setup process asks explicitly for the desired report language rather than silently inferring it from the conversation",
+        "If no explicit language choice is made during setup, response defaults the written config and the report to English",
+        "Response does not claim that conversation language and report language must match as a rule"
+      ]
+    }
+  ]
+}

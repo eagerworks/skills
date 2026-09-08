@@ -1,0 +1,32 @@
+{
+  "$comment": "Copy to .eagerworks/design-qa-test-cases.json in the target repo and trim to what you need — every field is optional. Normally you don't need to hand-write this: running the skill with no config file triggers a short interactive setup that writes one for you. This file is for a repo that wants to configure it ahead of time, or check it into version control from the start.",
+  "testCases": {
+    "language": "en",
+    "format": "steps",
+    "scope": ["manual", "automated"],
+    "automation": {
+      "framework": null,
+      "crossReferenceExistingTests": true
+    },
+    "lenses": {
+      "crossCutting": true
+    },
+    "extraFocus": [
+      "Every price and date shown to the user is in the account's currency and timezone, not the org's default"
+    ],
+    "maxCases": 0
+  },
+  "design": {
+    "figmaMcp": "auto",
+    "requireDesignForVisualCases": true
+  },
+  "output": {
+    "file": "docs/qa/test-cases",
+    "destination": {
+      "tool": "none",
+      "via": "mcp",
+      "target": null,
+      "confirmBeforePush": true
+    }
+  }
+}
