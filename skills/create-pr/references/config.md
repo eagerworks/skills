@@ -8,6 +8,17 @@
 
 `baseBranch` is one exception: an already-open PR's actual base outranks it whenever the branch under review already has one — see `references/base-branch.md`.
 
+## PR language
+
+`pr.language` has its own ladder, separate from Resolution Order above — the same shape `pr-review` uses for `review.language`:
+
+1. An explicit instruction in the user's request for this run (e.g. "open this PR in English") — wins, once, without touching the config file.
+2. `pr.language` in `.eagerworks/create-pr.json`.
+3. A stated convention in the target repo's `AGENTS.md`/`CLAUDE.md`.
+4. Built-in default: **English.**
+
+**The language the user is chatting in is never an input to this ladder.** A developer working in English still gets a PR written in `es` if that's what the repo's config says — the PR is a team-facing artifact on GitHub, not a reply to the user, and its language must be deterministic regardless of which language happens to drive the conversation.
+
 ## Schema
 
 All fields optional.
@@ -41,7 +52,9 @@ All fields optional.
 
     // Language the PR title and description are written in — a BCP-47 tag or a
     // plain language name ("en", "es", "pt-BR"). Default "en", regardless of what
-    // language the conversation is in.
+    // language the conversation is in. An explicit one-off instruction in the
+    // user's request for this run overrides this for that run only — see
+    // "PR language" above.
     "language": "en",
 
     // Section headings and order for the description. Unset uses the default:

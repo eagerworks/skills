@@ -57,8 +57,8 @@ Copyable templates live in `assets/`:
 3. **Never guess the base branch.** If the open PR, the config, `gh-merge-base`, and the fork point don't converge on one branch, ask — see `references/base-branch.md`.
 4. **Never hand-wrap paragraphs.** Always pass the body with `--body-file`; never `--body "...\n..."` with escaped newlines.
 5. **Never tick a checklist box for something that wasn't actually run or added.** An inapplicable item keeps its own wording and appends `— N/A, <reason>`; it's never silently deleted or replaced with a bare `N/A — <reason>`.
-6. **Never invent an image or video URL.** No screenshot available yet means an explicit placeholder and a question to the user, not a guessed link — see `references/screenshots.md`.
+6. **Never invent an image or video URL, and never commit a screenshot into the repo just to reference it.** No screenshot available yet means an explicit placeholder and a question to the user, not a guessed link or a binary added to git history — see `references/screenshots.md`.
 7. **A PR already open for this branch gets edited, never duplicated.** `gh pr edit`, not a second `gh pr create`.
 8. **Never invent labels.** Pick only from `gh label list`; an empty label set beats a wrong one.
 9. **Don't paste the whole diff into the description.** Summarize what matters; `git diff --stat` and `git log --oneline` are for your own context, not the PR body.
-10. **PR title and description language is configured, not inferred.** Write in `pr.language` (default English) regardless of what language the conversation is in — see `references/config.md`.
+10. **PR title and description language is configured, not inferred.** Write in `pr.language` (default English) regardless of what language the conversation is in, unless the user explicitly names a language for this one PR — see `references/config.md`.

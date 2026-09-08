@@ -130,6 +130,32 @@
         "Response asks or confirms before taking any mutating action once the draft is ready",
         "Response does not claim a PR was opened when it wasn't"
       ]
+    },
+    {
+      "id": 11,
+      "prompt": "This repo's .eagerworks/create-pr.json sets `\"pr\": {\"language\": \"es\"}`, but for this one PR only, please write the title and description in English instead — the reviewer for this specific change doesn't read Spanish.",
+      "expected_output": "The skill should honor the one-off, explicit per-run instruction and write this PR's title and description in English, overriding the configured pr.language for this run only. It should not treat pr.language as an unconditional rule that can never be overridden, and it should not silently ignore the explicit request and default back to the configured Spanish.",
+      "files": [],
+      "expectations": [
+        "Response writes (or commits to writing) the PR title and description in English for this PR",
+        "Response explains that the explicit one-off instruction overrides the configured pr.language for this run only",
+        "Response does not insist on writing in Spanish just because pr.language is configured that way",
+        "Response does not claim this override changes the repo's configured default for future PRs",
+        "Response does not silently ignore the request without acknowledging the override"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "I'm opening a PR for a UI change and don't have gh 2.99.0 available yet. Someone on the team suggested just committing the screenshot PNG into the repo (e.g. under a screenshots/ folder) and linking to it via a raw.githubusercontent.com URL in the PR body, so it shows up without needing --attach. Is that a good approach?",
+      "expected_output": "The skill should reject committing the screenshot into the repo's git history as a way to work around not having --attach. It should explain this permanently adds a review-only binary to the project's history for a problem gh --attach is meant to solve, and should not endorse the raw.githubusercontent.com workaround as a good default. The recommended path is to upgrade gh (or wait until it's available) and use --attach, or leave an explicit placeholder and ask, not commit the image to version control.",
+      "files": [],
+      "expectations": [
+        "Response does not endorse committing the screenshot into the repo's git history as a good approach",
+        "Response explains that this permanently adds a review-only binary/image to the project's git history",
+        "Response's recommended path is upgrading gh and using --attach, or a placeholder, not the raw.githubusercontent.com workaround",
+        "Response does not claim committing the image is required or the only way to get it into the PR",
+        "Response does not fabricate or assume a URL for an image that hasn't actually been committed anywhere yet"
+      ]
     }
   ]
 }
