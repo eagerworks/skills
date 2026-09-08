@@ -21,6 +21,8 @@ Stop at the first rung that produces an actual file on disk.
    ```
    Never fabricate an image or video URL, and never link to a file that doesn't exist in the repo or on disk.
 
+The image only needs to exist on local disk long enough for `--attach` to upload it — it is never added to the git tree for this purpose. See "What not to do" below.
+
 ## B. Attaching with the GitHub CLI
 
 ```bash
@@ -66,4 +68,5 @@ Alt text goes after `#` in the `--attach` value; it's what makes the uploaded as
 - **Don't use the undocumented `uploads.github.com/user-attachments/assets` endpoint.** It works with a bearer token today, but it's an unsupported internal API with no stability guarantee — the same job now has an official, documented flag.
 - **Don't rely on the GitHub MCP server for this.** The official `github/github-mcp-server` has no attachment-upload capability as of this writing ([github/github-mcp-server#738](https://github.com/github/github-mcp-server/issues/738), open) — it's blocked on GitHub not exposing a public upload API, which `--attach` bypasses by driving the same client-side flow the web UI uses.
 - **Don't host the image externally** (S3, a GitHub Release asset, a base64 data URI) as a first resort — that's a heavier workaround for a problem `--attach` now solves directly. Reach for it only if the user explicitly asks for external hosting for some other reason (e.g. the file exceeds `--attach`'s size limit).
+- **Don't commit the screenshot into the repo's git history** (e.g. `git add screenshots/foo.png && git push`, then linking it via a `raw.githubusercontent.com` URL) as a way to get it into the PR body. This permanently adds a review-only binary to the project's history for every future clone, and it's exactly the kind of workaround `--attach` exists to make unnecessary. The one exception is a screenshot that belongs in the repo for an unrelated reason the user asked for (e.g. `assets/PrivacyInfo.xcprivacy`-style fixtures, documentation images meant to live in `docs/`) — never do it solely to work around not having `--attach`.
 - **Don't invent a URL** of any kind — an unavailable screenshot is a placeholder and a question, never a guess.
