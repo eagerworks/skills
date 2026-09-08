@@ -28,6 +28,26 @@ The boundary is the rule: **anything users should receive goes inside `skills/<n
 
 ## The skills
 
+**design-qa-test-cases** designs a QA test-case plan for a feature — it never writes test
+code (see `docs/decision-records/2026-09-07--qa-skill-designs-cases-never-writes-test-code.md`).
+`references/techniques.md` is the single source of truth for its eight lenses (happy
+paths, boundaries, negative paths, permissions, state transitions, data/lifecycle,
+integration/async, cross-cutting UX); `SKILL.md` only summarizes it. Installed in the
+project's own repo so it can scan the code — validations for boundary values, policies for
+the role × action matrix, enums for state transitions, existing tests for a coverage
+cross-reference (`references/code-scan.md`). Feature intake accepts a ticket URL, a diff,
+or plain text; design intake accepts a Figma MCP, a Figma link, a screenshot, or an
+existing screen — never inventing either (`references/intake.md`). Unlike every other
+skill in this collection, it writes its own `.eagerworks/design-qa-test-cases.json` via a
+short interactive setup on first run or on request, rather than shipping only a
+hand-copied example (`references/config.md`; see
+`docs/decision-records/2026-09-07--first-run-setup-writes-skill-config.md`). Cases carry
+no synthetic IDs — identity is the case title, traceability is a `Verifies:` field, not a
+matrix (`docs/decision-records/2026-09-07--test-cases-carry-no-synthetic-ids.md`). The
+chat report is always delivered; saving a file (`output.file`) and pushing to a QA tool
+(`references/integrations.md`) are both optional, config-driven, and never block the chat
+report when unreachable.
+
 **kamal** deploys Dockerized apps with Kamal. **Version-aware**: defaults to **Kamal 2.x**; all Kamal 1.9.x content lives *exclusively* in `references/kamal-v1.md`. `SKILL.md` opens with a version-detection step (`kamal version`, or infer from `traefik:`/`.env` → v1 vs `proxy:`/`.kamal/secrets` → v2). When adding version-specific examples, mark them (`# Kamal 2.x only` / `# Kamal 1.x only`) and never mix v1 syntax into the v2 references.
 
 **loop-engineering-audit** audits a repository for readiness to be developed through autonomous agent loops ("loop engineering") across seven dimensions — agent-facing context, reproducible environment, fast deterministic verification, test coverage, task definition surface, CI & merge gates, guardrails — graded 🔴 Blocker / 🟡 Gap / 🟢 Ready / ⚪ Unverifiable, rolled up to a mechanical verdict and an ordered **Work Plan**. `references/rubric.md` is the single source of truth for checks and grades; `SKILL.md` only summarizes it. It has exactly **one write**: the report is printed in full in chat and saved to `docs/loop-engineering-audit.md` in the audited repo (fixed name, overwritten, never committed — see `docs/decision-records/2026-08-28--audit-report-saved-to-docs.md`). It may execute the project's lint/typecheck/test/build once to measure them, never setup/migrate/install/deploy commands (`references/audit-workflow.md`).
