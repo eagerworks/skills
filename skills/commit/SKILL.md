@@ -1,11 +1,12 @@
 ---
 name: commit
 description: >-
-  Groups uncommitted work into a series of coherent Conventional Commits — one commit per
-  logical change, staged by path, with the type/scope vocabulary inferred from the repo's own
-  git history — instead of sweeping the whole working tree into a single commit. Use when
-  asked to "commit this", "commit my changes", "make a commit", "split this into commits",
-  or to write a commit message for work already staged.
+  Commits everything modified or new in the working tree by default, grouped into a series of
+  coherent Conventional Commits — one commit per logical change, staged by path, with the
+  type/scope vocabulary inferred from the repo's own git history — instead of sweeping
+  everything into a single commit. Configurable per repo to ask before including new files.
+  Use when asked to "commit this", "commit my changes", "commit everything", "make a commit",
+  "split this into commits", or to write a commit message for work already staged.
 metadata:
   author: eagerworks
   version: "1.0.0"
@@ -13,7 +14,7 @@ metadata:
 
 # Commit Skill
 
-Turns whatever is uncommitted into a small series of well-formed [Conventional Commits](https://www.conventionalcommits.org/) — one commit per logical change, not one commit for the whole working tree. It reads the repo's own git history to learn its real type/scope vocabulary rather than assuming the full spec is in use, and it never guesses at a genuine judgment call: an ambiguous file gets one question, not a silent decision.
+Turns whatever is uncommitted into a small series of well-formed [Conventional Commits](https://www.conventionalcommits.org/) — one commit per logical change, not one commit for the whole working tree. By default it commits **everything** modified or new that it safely can, including untracked files; a repo that wants it to stop and confirm instead sets `commit.includeUntracked` in `.eagerworks/commit.json` (`references/config.md`). It reads the repo's own git history to learn its real type/scope vocabulary rather than assuming the full spec is in use, and it never guesses at a genuine judgment call: an ambiguous file gets one question, not a silent decision.
 
 **Mutation posture.** Committing is the point of this skill, so `git add` and `git commit` don't need a separate confirmation once the user has asked for a commit — but the mandate stops there. It never pushes, amends, rebases, resets, or creates a branch; that's `create-pr`'s job once the commits exist (see `docs/decision-records/2026-09-07--create-pr-write-posture.md` for the precedent this inherits).
 

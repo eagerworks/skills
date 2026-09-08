@@ -6,7 +6,7 @@
     "requireScope": false,
     "subjectMaxLength": 72,
     "language": "en",
-    "includeUntracked": "ask",
+    "includeUntracked": "always",
     "maxCommitsPerRun": 5,
     "signoff": false,
     "trailers": []

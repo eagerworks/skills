@@ -10,7 +10,7 @@ The hard part of this skill isn't writing a Conventional Commit message — it's
 
 Work down this ladder; each rung only applies to what the rung above it didn't already claim.
 
-0. **An untracked file follows `commit.includeUntracked` before anything else applies.** Default is `ask` — confirm once, for the whole batch of new files, before any of them enter a group at all. Only a file that clears this gate moves on to the ladder below. See `references/config.md`.
+0. **An untracked file follows `commit.includeUntracked` before anything else applies.** Default is `always` — a new file is committed like any other change, no confirmation needed, so the skill actually commits everything modified or new by default. A repo that wants a confirmation step instead sets `includeUntracked: "ask"`; `"never"` leaves new files out of every commit entirely. The hard exclusion list below applies regardless of this setting — an untracked `.env` is still never staged. See `references/config.md`.
 1. **A non-empty index is already a decision.** If `git diff --staged` shows anything, that exact set is commit #1, unmodified — the user (or an earlier step) already curated it. Don't add or remove files from it before committing it.
 2. **An explicit instruction in the request.** "Commit just the auth stuff" or "put the migration in its own commit" wins over any inference below.
 3. **Change intent — implementation files.** Files that implement one behavior change belong together.

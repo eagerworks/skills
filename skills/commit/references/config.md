@@ -1,6 +1,6 @@
 # Commit — Configuration
 
-`.eagerworks/commit.json`, at the target repo's root, is **entirely optional**. The skill works with no config file at all — it infers the type and scope vocabulary from `git log`, groups by change intent, and defaults to English commit messages. Add the file only when a repo needs to override a default.
+`.eagerworks/commit.json`, at the target repo's root, is **entirely optional**. The skill works with no config file at all — by default it commits everything modified or new that it safely can (see the hard exclusion list in `references/grouping.md`), infers the type and scope vocabulary from `git log`, groups by change intent, and writes English commit messages. Add the file only when a repo needs to override a default — for example, to have the skill ask before including new files instead of committing them outright.
 
 ## Resolution order
 
@@ -44,10 +44,14 @@ All fields optional.
     // "Commit message language" above.
     "language": "en",
 
-    // Untracked files found in the working tree: "ask" (default) confirms
-    // before including any of them in a group, "always" includes them like
-    // any other change, "never" leaves them out of every commit entirely.
-    "includeUntracked": "ask",
+    // Untracked files found in the working tree: "always" (default) includes
+    // them like any other change — the skill commits everything modified or
+    // new that it can, by default. "ask" confirms before including any of
+    // them in a group instead. "never" leaves them out of every commit
+    // entirely. The hard exclusion list (.env, credentials, node_modules,
+    // build output, screenshots — see references/grouping.md) applies
+    // regardless of this setting.
+    "includeUntracked": "always",
 
     // Stop and check in after this many commits in a single run, rather than
     // creating an unbounded series unattended.
@@ -76,7 +80,7 @@ All fields optional.
 }
 ```
 
-## Example — Node/TypeScript app requiring scopes, non-English messages
+## Example — Node/TypeScript app requiring scopes, non-English messages, and confirmation on new files
 
 ```jsonc
 {
@@ -84,6 +88,7 @@ All fields optional.
     "types": ["feat", "fix", "perf", "refactor", "test", "chore"],
     "requireScope": true,
     "language": "pt-BR",
+    "includeUntracked": "ask",
     "trailers": ["Reviewed-by: platform-team"]
   }
 }

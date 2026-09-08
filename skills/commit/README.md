@@ -1,6 +1,6 @@
 # commit
 
-A portable agent skill for turning a dirty working tree into a series of well-formed [Conventional Commits](https://www.conventionalcommits.org/) — one commit per logical change, staged by explicit path, instead of a single commit for everything that happens to be uncommitted. Works with Claude Code, Cursor, GitHub Copilot, Codex, Amp, and any agentic coding tool that can read markdown files.
+A portable agent skill that commits everything modified or new in the working tree by default — grouped into a series of well-formed [Conventional Commits](https://www.conventionalcommits.org/), one commit per logical change, staged by explicit path, instead of a single commit for everything that happens to be uncommitted. A repo that wants confirmation before new files get committed can turn that off in config. Works with Claude Code, Cursor, GitHub Copilot, Codex, Amp, and any agentic coding tool that can read markdown files.
 
 ## What it covers
 
@@ -9,6 +9,7 @@ A portable agent skill for turning a dirty working tree into a series of well-fo
 - Message vocabulary inferred from the repo's own `git log`, falling back to the full Conventional Commits type set only when the repo's history doesn't already show a narrower one in use
 - A hard exclusion list — `.env`, credentials, `node_modules`, build output, screenshots, uncommented debug leftovers — disclosed in the report rather than silently dropped
 - Honest handling of git hooks: a rejection stops the series and reports the hook's output; a formatter that rewrites files gets one retry, never `--no-verify`
+- Commits untracked (new) files by default like any other change (`commit.includeUntracked: "always"`) — a repo that wants a confirmation step instead, or wants new files left out entirely, sets `"ask"` or `"never"` in config
 - Optional per-repo configuration for allowed types/scopes, whether a scope is required, untracked-file handling, a per-run commit cap, and the language commit messages are written in (`commit.language`, English by default regardless of what language the conversation is in)
 
 ## What it doesn't do
@@ -55,7 +56,7 @@ Excluded: .env (credential material, never committed)
 
 ## Configuration
 
-The skill works with zero configuration — it infers the type/scope vocabulary from `git log` and defaults to English commit messages. To pin a fixed type or scope list, require a scope, cap commits per run, or change the language messages are written in (`commit.language`), add `.eagerworks/commit.json`. See [`references/config.md`](references/config.md) for the full schema and [`assets/commit.example.json`](assets/commit.example.json) for a starter.
+The skill works with zero configuration — it commits everything it safely can by default, infers the type/scope vocabulary from `git log`, and defaults to English commit messages. To pin a fixed type or scope list, require a scope, cap commits per run, have it ask before including new files (`commit.includeUntracked: "ask"`), or change the language messages are written in (`commit.language`), add `.eagerworks/commit.json`. See [`references/config.md`](references/config.md) for the full schema and [`assets/commit.example.json`](assets/commit.example.json) for a starter.
 
 ## Install
 
