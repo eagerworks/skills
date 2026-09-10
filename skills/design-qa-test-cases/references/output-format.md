@@ -2,20 +2,11 @@
 
 ## Report Language
 
-Every template on this page is shown in English — the built-in default. When
-`testCases.language` resolves to something else (`references/config.md`), translate every
-human-facing string — headings, labels, case bodies, disclosure lines — while keeping
-markdown structure, section order, and `file:line` citations byte-identical to what the
-English template would produce.
+Every template on this page is shown in English — the built-in default. When `testCases.language` resolves to something else (`references/config.md`), translate every human-facing string — headings, labels, case bodies, disclosure lines — while keeping markdown structure, section order, and `file:line` citations byte-identical to what the English template would produce.
 
-**Never translated:** the `### TEST_CASES` sentinel and its JSON keys/enums (`title`,
-`verifies`, `lens`, `priority`, `automate`, `level`, `framework`, `status`, `steps`,
-`expected`), and the literal status values `New` / `covered`. Only the prose *values*
-inside those fields follow `testCases.language`.
+**Never translated:** the `### TEST_CASES` sentinel and its JSON keys/enums (`title`, `verifies`, `lens`, `priority`, `automate`, `level`, `framework`, `status`, `steps`, `expected`), and the literal status values `New` / `covered`. Only the prose _values_ inside those fields follow `testCases.language`.
 
-**The language of the conversation is never an input** — same invariant as `pr-review`'s
-`review.language`. A QA chatting in Spanish still gets an English plan unless config or the
-repo's `AGENTS.md`/`CLAUDE.md` says otherwise.
+**The language of the conversation is never an input** — same invariant as `pr-review`'s `review.language`. A QA chatting in Spanish still gets an English plan unless config or the repo's `AGENTS.md`/`CLAUDE.md` says otherwise.
 
 ## Markdown Report (Default)
 
@@ -69,24 +60,13 @@ repo's `AGENTS.md`/`CLAUDE.md` says otherwise.
 
 Rules for each section:
 
-- **Header line** (`**Source:** … **Design:** … **Code scanned:** …`) always states what
-  was actually available — `**Design:** none available` is a valid, expected value, not an
-  omission.
-- **Coverage line** — the P0/P1/P2 counts and the covered count are the report's one-line
-  summary; always present, even at "0 P0, 0 P1, 0 P2" for a feature with only ambiguities.
-- **Priority sections** — omit a priority section entirely if it has zero cases and
-  `testCases.scope`/`maxCases` didn't filter it out; don't print an empty table with
-  `_(none)_` the way `pr-review`'s severity sections do — a QA plan with no P2s is normal,
-  not a gap to call out.
-- **`### Acceptance criteria with no case`** — only present when at least one AC has zero
-  cases; omit entirely otherwise.
-- **`### ⚪ Not verifiable without more input`** — only present when at least one visual/UX
-  case was withheld for lack of a design source; state what's missing and how to provide it.
-- **`### Open questions for the PO`** — only present when Lens 1/Ambiguities produced at
-  least one; numbered, each naming the specific AC or case it blocks.
-- Any config-driven skip — a disabled lens, `crossReferenceExistingTests: false`,
-  `maxCases` truncation, `scope` filtering out a side — gets its own one-line disclosure at
-  the bottom, same "never silent" rule as `pr-review`'s `ignorePaths`:
+- **Header line** (`**Source:** … **Design:** … **Code scanned:** …`) always states what was actually available — `**Design:** none available` is a valid, expected value, not an omission.
+- **Coverage line** — the P0/P1/P2 counts and the covered count are the report's one-line summary; always present, even at "0 P0, 0 P1, 0 P2" for a feature with only ambiguities.
+- **Priority sections** — omit a priority section entirely if it has zero cases and `testCases.scope`/`maxCases` didn't filter it out; don't print an empty table with `_(none)_` the way `pr-review`'s severity sections do — a QA plan with no P2s is normal, not a gap to call out.
+- **`### Acceptance criteria with no case`** — only present when at least one AC has zero cases; omit entirely otherwise.
+- **`### ⚪ Not verifiable without more input`** — only present when at least one visual/UX case was withheld for lack of a design source; state what's missing and how to provide it.
+- **`### Open questions for the PO`** — only present when Lens 1/Ambiguities produced at least one; numbered, each naming the specific AC or case it blocks.
+- Any config-driven skip — a disabled lens, `crossReferenceExistingTests: false`, `maxCases` truncation, `scope` filtering out a side — gets its own one-line disclosure at the bottom, same "never silent" rule as `pr-review`'s `ignorePaths`:
   ```markdown
   _Lens 8 (cross-cutting UX) disabled by config._
   _12 P2 cases omitted — maxCases: 20._
@@ -94,11 +74,9 @@ Rules for each section:
 
 ## Case Formats (`testCases.format`)
 
-The per-case body above is the `steps` format (default). Two others, chosen per `testCases.format`
-in config — same case, three renderings:
+The per-case body above is the `steps` format (default). Two others, chosen per `testCases.format` in config — same case, three renderings:
 
-**`gherkin`** — `Given/When/Then`, with `Scenario Outline` + `Examples` for a boundary set
-sharing one shape:
+**`gherkin`** — `Given/When/Then`, with `Scenario Outline` + `Examples` for a boundary set sharing one shape:
 
 ```gherkin
 Scenario Outline: Coupon accepted only at or above the minimum cart total
@@ -113,8 +91,7 @@ Scenario Outline: Coupon accepted only at or above the minimum cart total
     | 10.00    | accepted |
 ```
 
-**`table`** — one row per case, for pasting into a spreadsheet or an external tool that
-doesn't read markdown case bodies:
+**`table`** — one row per case, for pasting into a spreadsheet or an external tool that doesn't read markdown case bodies:
 
 ```markdown
 | Case | Verifies | Priority | Preconditions | Steps | Expected | Automate | Level | Status |
@@ -124,10 +101,7 @@ doesn't read markdown case bodies:
 
 ## Machine-Parseable Block (`### TEST_CASES`)
 
-Optional, for a script or a follow-up automation task to consume the plan mechanically —
-same sentinel pattern as `pr-review`'s `### FINDINGS`. Never printed unless the run is
-explicitly for that purpose (config or an explicit request) — it's noise for a human
-reading the plan directly.
+Optional, for a script or a follow-up automation task to consume the plan mechanically — same sentinel pattern as `pr-review`'s `### FINDINGS`. Never printed unless the run is explicitly for that purpose (config or an explicit request) — it's noise for a human reading the plan directly.
 
 ```text
 ### TEST_CASES
@@ -145,10 +119,7 @@ reading the plan directly.
 ### END TEST_CASES
 ```
 
-`slug` is derived from the title (kebab-case, ASCII) — **not** a sequential counter; see
-`docs/decision-records/2026-09-07--test-cases-carry-no-synthetic-ids.md`. If two cases
-title-collide, disambiguate the slug with the lens (`-boundary`, `-negative`), never with a
-running number. If there is nothing to report, return the literal empty block:
+`slug` is derived from the title (kebab-case, ASCII) — **not** a sequential counter; see `docs/decision-records/2026-09-07--test-cases-carry-no-synthetic-ids.md`. If two cases title-collide, disambiguate the slug with the lens (`-boundary`, `-negative`), never with a running number. If there is nothing to report, return the literal empty block:
 
 ```text
 ### TEST_CASES
@@ -157,8 +128,4 @@ running number. If there is nothing to report, return the literal empty block:
 
 ## Saving to a File (`output.file`)
 
-Off by default. When `output.file` is set (e.g. `docs/qa/test-cases`), save the identical
-markdown report — not a reformatted or summarized version — to
-`<output.file>/<feature-slug>.md`, creating the directory if missing. The chat report is
-still printed in full first; the file is a copy of the deliverable, never a replacement for
-it. See `assets/test-cases-report.md` for the template.
+Off by default. When `output.file` is set (e.g. `docs/qa/test-cases`), save the identical markdown report — not a reformatted or summarized version — to `<output.file>/<feature-slug>.md`, creating the directory if missing. The chat report is still printed in full first; the file is a copy of the deliverable, never a replacement for it. See `assets/test-cases-report.md` for the template.

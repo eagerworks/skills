@@ -1,65 +1,46 @@
 # Design QA Test Cases — Configuration and Setup
 
-Unlike `pr-review` and `loop-engineering-audit`, whose config files are entirely optional
-and hand-copied from an `assets/*.example.json` if a repo wants one, this skill **writes**
-`.eagerworks/design-qa-test-cases.json` itself, once, via a short interactive setup — see
-`docs/decision-records/2026-09-07--first-run-setup-writes-skill-config.md` for why. This
-file documents both the setup flow and the schema it produces.
+Unlike `pr-review` and `loop-engineering-audit`, whose config files are entirely optional and hand-copied from an `assets/*.example.json` if a repo wants one, this skill **writes** `.eagerworks/design-qa-test-cases.json` itself, once, via a short interactive setup — see `docs/decision-records/2026-09-07--first-run-setup-writes-skill-config.md` for why. This file documents both the setup flow and the schema it produces.
 
 ## When Setup Runs
 
 - The config file doesn't exist yet in the target repo, **or**
 - The user explicitly asks to configure/reconfigure the skill.
 
-Never on any other run — once the file exists, the skill reads it silently like any other
-config, same as every other skill in this collection.
+Never on any other run — once the file exists, the skill reads it silently like any other config, same as every other skill in this collection.
 
 ## The Setup Flow
 
-1. **Probe what's actually reachable** before asking about a push destination — checking
-   first means the question only ever lists real options (see
-   `references/integrations.md` → "Detecting What's Actually Reachable"):
+1. **Probe what's actually reachable** before asking about a push destination — checking first means the question only ever lists real options (see `references/integrations.md` → "Detecting What's Actually Reachable"):
    - MCP tools available in this session (Linear, Notion, Jira/Atlassian, Figma).
    - CLIs on `PATH` and authenticated (`gh auth status`, `jira`).
 2. **Ask, using `AskUserQuestion`** (four questions, single round):
    - **Language** — the language test-case plans are written in. Default `en`.
    - **Format** — `steps` (default), `gherkin`, or `table`.
    - **Scope** — manual, automated, or both (default both).
-   - **Push destination** — `none` (default) plus only the destinations that probed as
-     reachable in step 1; if nothing probed as reachable, skip this question entirely and
-     set `tool: "none"` without asking.
-3. **Write** `.eagerworks/design-qa-test-cases.json` with the answers, filling every other
-   key with its built-in default (see Schema below).
-4. **Say what was written** — the resolved config, in one short block — then continue with
-   the run that triggered setup.
+   - **Push destination** — `none` (default) plus only the destinations that probed as reachable in step 1; if nothing probed as reachable, skip this question entirely and set `tool: "none"` without asking.
+3. **Write** `.eagerworks/design-qa-test-cases.json` with the answers, filling every other key with its built-in default (see Schema below).
+4. **Say what was written** — the resolved config, in one short block — then continue with the run that triggered setup.
 
 **Escape hatches:**
-- If the target isn't a writable location (no git repo, read-only filesystem, or the user
-  declines when asked), run this invocation with in-memory defaults and write nothing —
-  say so in one line rather than retrying or erroring.
-- Declining setup once doesn't disable it forever — the next run with no config file still
-  offers it, since "no file" and "user said no" aren't distinguishable without writing
-  something, and writing a sentinel just to remember a decline is more state than the
-  decision is worth.
+
+- If the target isn't a writable location (no git repo, read-only filesystem, or the user declines when asked), run this invocation with in-memory defaults and write nothing — say so in one line rather than retrying or erroring.
+- Declining setup once doesn't disable it forever — the next run with no config file still offers it, since "no file" and "user said no" aren't distinguishable without writing something, and writing a sentinel just to remember a decline is more state than the decision is worth.
 
 ## Resolution Order (once a config exists)
 
-For every setting: `.eagerworks/design-qa-test-cases.json` → conventions stated in
-`AGENTS.md`/`CLAUDE.md` → the skill's built-in default. A later source only fills in what
-an earlier one didn't set.
+For every setting: `.eagerworks/design-qa-test-cases.json` → conventions stated in `AGENTS.md`/`CLAUDE.md` → the skill's built-in default. A later source only fills in what an earlier one didn't set.
 
 ## Report Language
 
 `testCases.language` has its own ladder, same shape as `pr-review`'s:
 
-1. An explicit instruction in the user's request for this run ("write these in Spanish") —
-   wins, once, without touching the config file.
+1. An explicit instruction in the user's request for this run ("write these in Spanish") — wins, once, without touching the config file.
 2. `testCases.language` in the config.
 3. A stated convention in the target repo's `AGENTS.md`/`CLAUDE.md`.
 4. Built-in default: **English.**
 
-**The language the user is chatting in is never an input to this ladder** — see
-`references/output-format.md` → "Report Language".
+**The language the user is chatting in is never an input to this ladder** — see `references/output-format.md` → "Report Language".
 
 ## Schema
 
