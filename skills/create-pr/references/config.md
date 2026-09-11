@@ -85,6 +85,21 @@ All fields optional.
       // A command that produces a fresh screenshot on demand. Never run without
       // confirming with the user first, since it may start a server or a browser.
       "captureCommand": null
+    },
+
+    // Manual test cases under "## Test plan" -> "### Manual" — see
+    // references/manual-test-cases.md. On by default.
+    "manualTestCases": {
+      // Set false to drop the ### Manual subsection entirely. A run that does so
+      // discloses it in the description rather than silently omitting it.
+      "enabled": true,
+
+      // Optional cap on scenarios in the subsection. Unset (default): no cap —
+      // the skill writes as many real scenarios as the diff supports. When set,
+      // over the cap the highest-risk scenarios are kept (security/permissions,
+      // then data integrity, then regression-prone paths) and the description
+      // says how many were dropped.
+      "maxScenarios": null
     }
   }
 }
@@ -119,7 +134,8 @@ All fields optional.
       "mode": "auto",
       "uiPaths": ["apps/web/**"],
       "artifactPaths": ["playwright-report/**/*.png", "test-results/**/*.png"]
-    }
+    },
+    "manualTestCases": { "maxScenarios": 3 }
   }
 }
 ```

@@ -156,6 +156,84 @@
         "Response does not claim committing the image is required or the only way to get it into the PR",
         "Response does not fabricate or assume a URL for an image that hasn't actually been committed anywhere yet"
       ]
+    },
+    {
+      "id": 13,
+      "prompt": "My diff adds a `role` check so that only Admins can see the \"Delete project\" button on `/projects/:id/settings`, and the DELETE /api/projects/:id endpoint now returns 403 for non-admins. There's no .eagerworks/create-pr.json. Write the Test plan -> Manual subsection for this PR.",
+      "expected_output": "The skill should write one or more concrete, tickable scenarios under ### Manual, each with a one-line Setup (environment, actor/role), individual unchecked steps naming the exact route/endpoint, and a final Expected step with a precise pass condition (e.g. the button absent and a 403 with a JSON body, not just \"it's blocked\"). Every checkbox ships unticked, and no step assumes the reader has seen the diff.",
+      "files": [],
+      "expectations": [
+        "Response writes at least one scenario under a ### Manual subsection with a numbered #### heading",
+        "Response includes a one-line Setup stating the actor/role and environment for each scenario",
+        "Response's steps name the exact route or endpoint (e.g. /projects/:id/settings, DELETE /api/projects/:id) rather than vague instructions like 'go to settings'",
+        "Response's final step is an Expected step with a precise pass condition, not a vague 'works correctly'",
+        "Response leaves every checkbox unticked ([ ], not [x]), since the scenarios have not actually been run"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "My diff is a pure internal refactor: I extracted the OrderSerializer's formatting logic into a private method with no behavior change, and the existing specs already cover it. There's no .eagerworks/create-pr.json. What should the Test plan -> Manual subsection say?",
+      "expected_output": "The skill should not fabricate manual test scenarios for a change with no observable behavior difference. It should write the ### Manual subsection with a one-line explanation of why there's nothing to test manually (a behavior-preserving refactor covered by existing specs), rather than inventing scenarios to fill the section or omitting the subsection entirely.",
+      "files": [],
+      "expectations": [
+        "Response does not fabricate manual test scenarios for this refactor",
+        "Response still includes a ### Manual subsection rather than omitting it entirely",
+        "Response's ### Manual subsection states a concrete reason nothing applies (e.g. behavior-preserving refactor covered by existing specs)",
+        "Response does not pad the section with generic or unrelated scenarios just to have something to show",
+        "Response does not claim the refactor was manually verified when it wasn't"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "My diff only changes the API: POST /api/invoices now validates that `amount` is a positive integer and returns a 422 with a field-level error otherwise. Nothing in the UI touches this endpoint yet, and no apps/web or resources/views directories are touched by the diff. There's no .eagerworks/create-pr.json. Should the Test plan -> Manual subsection have anything in it?",
+      "expected_output": "The skill should still produce manual test scenarios, since this is observable behavior (an API contract change) even though no UI path is touched. It should not treat 'no UI path touched' as equivalent to 'nothing to test manually' — the gate for manual test cases is broader than the UI-visibility gate used for the Screenshots section.",
+      "files": [],
+      "expectations": [
+        "Response produces at least one manual test scenario for this change despite no UI path being touched",
+        "Response's scenario exercises the actual endpoint (e.g. via curl or an HTTP client) with both a valid and an invalid amount",
+        "Response does not conclude 'nothing to test manually' solely because no UI path was touched",
+        "Response's Expected step distinguishes the 422 field-level error case from a generic failure",
+        "Response does not require or reference a Screenshots section as a precondition for writing manual test cases"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "This repo's .eagerworks/create-pr.json sets `\"pr\": {\"manualTestCases\": {\"enabled\": false}}`. My diff changes UI behavior that would otherwise get manual test scenarios. What should the Test plan section look like?",
+      "expected_output": "The skill should omit the ### Manual subsection's scenarios per the config, but should not silently drop it without a trace — it should disclose in the description that manual test cases are disabled by config, consistent with this repo's non-silent-skip convention for other opt-outs.",
+      "files": [],
+      "expectations": [
+        "Response does not write manual test scenarios, honoring manualTestCases.enabled: false",
+        "Response's description includes a visible disclosure that manual test cases are disabled by config",
+        "Response does not silently omit any mention of the Manual subsection without explanation",
+        "Response still writes the ### Automated subsection normally, unaffected by this setting",
+        "Response does not claim manual testing was performed or is unnecessary for reasons other than the config setting"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "My diff adds an Admin-only bulk-export feature that requires signing in as a user with the Admin role, but this repo has no documented seed data or test accounts anywhere (no seeds.rb, no fixtures, no README section about test users). There's no .eagerworks/create-pr.json. Write the manual test scenario's Setup line and first step.",
+      "expected_output": "The skill should not invent a plausible-looking test account, email, or password for the Admin role. Since no test account is documented anywhere in the repo, it should leave an explicit TODO(author) line asking the author which account to use, rather than fabricating credentials like admin@acme.com / a guessed password.",
+      "files": [],
+      "expectations": [
+        "Response does not invent a specific email, username, or password for the Admin test account",
+        "Response includes an explicit TODO(author) line naming what's missing (an Admin test account)",
+        "Response does not claim a seed file or fixture exists when none was found",
+        "Response's step still names the actual feature or route being tested, only the account detail is flagged as unknown",
+        "Response does not skip writing the scenario entirely just because one detail is missing"
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "This repo's .eagerworks/create-pr.json sets `\"pr\": {\"manualTestCases\": {\"maxScenarios\": 3}}`. My diff is large and plausibly has six distinct manual scenarios: a permissions check, a data-integrity check on a migration, a regression on an existing search filter, a UI copy change, a tooltip hover state, and a button color change. Write the ### Manual subsection.",
+      "expected_output": "The skill should cap the subsection at 3 scenarios, keeping the highest-risk ones (permissions, data integrity, and the search regression) over the cosmetic ones (copy, tooltip, button color), and should disclose in one line that scenarios were cut and on what basis, rather than silently dropping three of them or padding/splitting scenarios to land exactly on the cap.",
+      "files": [],
+      "expectations": [
+        "Response includes at most 3 scenarios in the ### Manual subsection",
+        "Response prioritizes the permissions and data-integrity scenarios over the purely cosmetic ones (copy, tooltip, button color)",
+        "Response discloses in the description that scenarios were capped, stating how many were kept versus dropped",
+        "Response does not split or artificially multiply scenarios just to reach or stay under the numeric cap",
+        "Response does not silently omit the cut scenarios without any mention of the cap"
+      ]
     }
   ]
 }
