@@ -87,11 +87,11 @@ Anything the skill cannot source from the repo, the issue, or the conversation �
 
 1. **Never invent a credential, token, or real-looking email.** Placeholders only (`qa+viewer@acme.test`), the same secret-hygiene rule this repo's skills already model.
 2. **Every box ships unticked.** `create-pr` does not run manual tests; Critical Gotcha #5 in `SKILL.md` already forbids ticking anything that wasn't actually done, and that includes manual scenarios.
-3. **Never pad to reach `maxScenarios`.** Two real scenarios beat five padded ones — zero is a valid, correct result when nothing qualifies.
-4. **Over the cap** (`pr.manualTestCases.maxScenarios`, default 5), keep the highest-risk scenarios first — security/permissions, then data integrity, then regression-prone paths — and say in one line how many were kept and on what basis:
+3. **No cap by default, and never pad.** `pr.manualTestCases.maxScenarios` is unset by default — write as many scenarios as the diff genuinely supports, however many that is. Two real scenarios beat five padded ones; ten real scenarios beat five arbitrarily dropped ones — zero is a valid, correct result when nothing qualifies.
+4. **Only when a repo sets `maxScenarios` explicitly**, keep the highest-risk scenarios first — security/permissions, then data integrity, then regression-prone paths — and say in one line how many were kept and on what basis:
 
    ```markdown
-   _Showing 5 of 7 scenarios — kept the ones touching permissions and data integrity; see the diff for the rest._
+   _Showing 5 of 7 scenarios — kept the ones touching permissions and data integrity; see the diff for the rest (pr.manualTestCases.maxScenarios: 5)._
    ```
 
 ## Language and disclosure

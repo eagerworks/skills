@@ -25,8 +25,7 @@
       "captureCommand": null
     },
     "manualTestCases": {
-      "enabled": true,
-      "maxScenarios": 5
+      "enabled": true
     }
   }
 }

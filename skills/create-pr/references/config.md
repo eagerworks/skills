@@ -94,10 +94,12 @@ All fields optional.
       // discloses it in the description rather than silently omitting it.
       "enabled": true,
 
-      // Cap on scenarios in the subsection. Over the cap, the highest-risk
-      // scenarios are kept (security/permissions, then data integrity, then
-      // regression-prone paths) and the description says how many were dropped.
-      "maxScenarios": 5
+      // Optional cap on scenarios in the subsection. Unset (default): no cap —
+      // the skill writes as many real scenarios as the diff supports. When set,
+      // over the cap the highest-risk scenarios are kept (security/permissions,
+      // then data integrity, then regression-prone paths) and the description
+      // says how many were dropped.
+      "maxScenarios": null
     }
   }
 }
