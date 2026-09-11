@@ -21,7 +21,7 @@ In this exact order:
 | `## Problem` | What was broken or missing, with concrete evidence — file paths, error messages, measured numbers. |
 | `## Solution` | How it was solved and why that approach — key decisions and trade-offs, not a line-by-line retelling of the diff. |
 | `## Screenshots` / `## Demo` | **Required when the change is visible in the UI.** Never invent an image or video URL — if none exists yet, see `references/screenshots.md` and leave an explicit placeholder rather than omitting the section. |
-| `## Test plan` | Reproducible steps with the exact commands **and the observed result** (e.g. `88/88 passed`, `338 passing`), not "ran the tests". |
+| `## Test plan` | Two subsections. `### Automated` — reproducible steps with the exact commands **and the observed result** (e.g. `88/88 passed`, `338 passing`), not "ran the tests". `### Manual` — tickable, self-contained scenarios for whoever reviews the PR's quality — see `references/manual-test-cases.md`. |
 | `## Checklist` | Derived per-repo — see "Deriving the checklist" below — with boxes reflecting what was actually done. |
 
 `pr.sections` in `.eagerworks/create-pr.json` overrides this list entirely when set.
@@ -82,3 +82,4 @@ Set `pr.titleFormat: "free"` in `.eagerworks/create-pr.json` to skip the Convent
 - Don't collapse an N/A item down to a bare `N/A — <reason>` — keep the original item text so a reader can tell which check it's answering.
 - Don't paste the whole diff into the description — summarize what matters.
 - Don't leave a PR unassigned when `pr.assignSelf` is true, and don't invent labels that aren't in `gh label list`.
+- Don't ship a manual test scenario the diff doesn't support, and don't tick a manual test box — `references/manual-test-cases.md`'s boxes always ship unticked.

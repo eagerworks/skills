@@ -30,7 +30,7 @@ Never guess. In order: (1) an already-open PR's actual base; (2) `.eagerworks/cr
 
 ## Description
 
-Default structure, in order: `Summary` → `Problem` → `Solution` → `Screenshots`/`Demo` (required when the change is UI-visible) → `Test plan` → `Checklist`. If the repo has its own `.github/pull_request_template.md`, **ask** whether to use it as-is or replace it with this structure — never decide silently either way. Every paragraph is one line in the source (GitHub wraps it for display); never hand-wrap at 80/100 columns. The checklist has no fixed core — it's derived from tooling actually detected in the repo, or from `.eagerworks/create-pr.json`. Full detail: `references/description.md`.
+Default structure, in order: `Summary` → `Problem` → `Solution` → `Screenshots`/`Demo` (required when the change is UI-visible) → `Test plan` → `Checklist`. `Test plan` splits into `### Automated` (commands and observed results) and `### Manual` (tickable, self-contained scenarios for whoever reviews the PR's quality — `references/manual-test-cases.md`). If the repo has its own `.github/pull_request_template.md`, **ask** whether to use it as-is or replace it with this structure — never decide silently either way. Every paragraph is one line in the source (GitHub wraps it for display); never hand-wrap at 80/100 columns. The checklist has no fixed core — it's derived from tooling actually detected in the repo, or from `.eagerworks/create-pr.json`. Full detail: `references/description.md`.
 
 ## Screenshots
 
@@ -44,11 +44,12 @@ Required when the diff touches a UI path and none is available yet. Look for one
 | Resolving which branch to open the PR against | `references/base-branch.md` |
 | Description structure, PR-template handling, the no-hand-wrap rule, deriving the checklist | `references/description.md` |
 | Getting and attaching screenshots, the `gh` version gate, the placeholder rule | `references/screenshots.md` |
+| Deriving manual test cases, scenario and step shape, the applicability rule | `references/manual-test-cases.md` |
 | The optional `.eagerworks/create-pr.json` config schema | `references/config.md` |
 
 Copyable templates live in `assets/`:
 - `assets/create-pr.example.json` — starter config, with a Rails and a Node example
-- `assets/pr-description.template.md` — copyable description skeleton
+- `assets/pr-description.template.md` — copyable description skeleton, including a commented manual-scenario skeleton
 
 ## Critical Gotchas
 
@@ -62,3 +63,4 @@ Copyable templates live in `assets/`:
 8. **Never invent labels.** Pick only from `gh label list`; an empty label set beats a wrong one.
 9. **Don't paste the whole diff into the description.** Summarize what matters; `git diff --stat` and `git log --oneline` are for your own context, not the PR body.
 10. **PR title and description language is configured, not inferred.** Write in `pr.language` (default English) regardless of what language the conversation is in, unless the user explicitly names a language for this one PR — see `references/config.md`.
+11. **Never fabricate a manual test step, a credential, or a scenario the diff doesn't support.** An unknown (a staging URL, a test account) becomes a `TODO(author):` line, not a guess; manual test boxes always ship unticked — see `references/manual-test-cases.md`.

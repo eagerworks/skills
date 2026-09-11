@@ -23,6 +23,10 @@
       "uiPaths": ["apps/web/**", "apps/mobile/**"],
       "artifactPaths": ["playwright-report/**/*.png", "test-results/**/*.png", "cypress/screenshots/**/*.png"],
       "captureCommand": null
+    },
+    "manualTestCases": {
+      "enabled": true,
+      "maxScenarios": 5
     }
   }
 }
