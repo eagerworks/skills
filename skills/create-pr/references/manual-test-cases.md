@@ -72,15 +72,19 @@ This is the part that makes a scenario actually testable by someone who hasn't r
 - A step must be executable without reading the diff or this PR's code.
 - Each step is one line — the no-hand-wrap self-check in `references/description.md` already allows lines starting with `- [`.
 
-Anything the skill cannot source from the repo, the issue, or the conversation — a staging URL, a test account, a feature-flag name — becomes a `TODO(author):` line, never a guess:
+Anything the skill cannot source from the repo, the issue, or the conversation — a staging URL, a test account, a feature-flag name — becomes a `TODO(author):` line, never a guess. The missing detail is what gets flagged, not the rest of the step: still name the actual feature, screen, or route the step exercises, even when the account or flag it needs is TODO'd — a step that only says "sign in" and drops the feature it was meant to unlock isn't executable either.
 
 ```markdown
 ❌ wrong — a fabricated credential
 - [ ] Sign in as `admin@acme.com` / `Password123!`
 
-✅ correct — flagged for the author to fill in
+❌ wrong — the missing account swallowed the rest of the step
 <!-- TODO(author): which staging account has the Admin role for this test? -->
 - [ ] Sign in as an Admin (account TBD — see TODO above)
+
+✅ correct — flagged for the author to fill in, feature still named
+<!-- TODO(author): which staging account has the Admin role for this test? -->
+- [ ] Sign in as an Admin (account TBD — see TODO above) and open `/admin/exports/bulk`
 ```
 
 ## Hard rules
