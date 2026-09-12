@@ -26,7 +26,7 @@ what's visible in source code. Administrative and physical safeguards are organi
 legal in nature — a repo can contain a *policy document about* them, but code review cannot
 confirm the policy is actually followed, that a physical facility is secured, or that a legal
 agreement is validly executed. Treat a policy doc's presence as evidence a process is *documented*,
-never as evidence it's *operating* — same discipline `soc2` applies to its own policies.
+never as evidence it's *operating* — same discipline `audit-soc2` applies to its own policies.
 
 ## Business Associate Agreements
 

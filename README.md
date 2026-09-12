@@ -44,6 +44,10 @@ Each skill is plain markdown and works with Claude Code, Cursor, GitHub Copilot,
 |:---|
 | Audits a codebase and its infrastructure config against the [HIPAA Security Rule](https://www.hhs.gov/hipaa/for-professionals/security/index.html): locates PHI in data models, logs, error trackers, analytics, and outbound LLM/API calls, checks §164.312 technical safeguards (access control, audit controls, integrity, authentication, transmission security), and routes BAA/administrative obligations to a human — output as a severity-graded audit report written to a dated file in the repo. |
 
+| [audit-soc2](skills/audit-soc2/) |
+|:---|
+| Plans and runs a SOC 2 readiness effort: a structured intake interview, Trust Services Criteria scoping (Type I/II, system boundary, subservice orgs), a gap analysis and phased roadmap, required policy skeletons, DIY evidence collection, and the CPA audit process. |
+
 | [mobile-store-review](skills/mobile-store-review/) |
 |:---|
 | Audits an Expo/React Native or native mobile app — standalone or inside a Turborepo — against the [Apple App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) and [Google Play Developer Program Policies](https://play.google.com/about/developer-content-policy/): permissions & usage descriptions, privacy manifests & App Tracking Transparency, App Privacy vs. Data safety, account deletion, IAP & external payments, SDK/target-API floors, versioning & credentials, and EAS/monorepo build config — output as a severity-graded audit report. |
@@ -232,9 +236,17 @@ skills/
     assets/                     # copyable starter files / templates
     README.md                   # human-facing overview of the skill
     CHANGELOG.md                # per-version history + what config/files to update
+  audit-soc2/                   # another skill, same shape
+    SKILL.md
+    references/
+    assets/
+    README.md
+    CHANGELOG.md
 evals/
   kamal/
     evals.json                  # per-skill eval cases (repo-level harness, not shipped)
+  audit-soc2/
+    evals.json
 ```
 
 ## Adding a new skill
