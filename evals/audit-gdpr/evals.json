@@ -1,0 +1,83 @@
+{
+  "skill_name": "audit-gdpr",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We're a 6-person US company in Austin. Our product is a B2B invoicing web app — English only, prices in USD, we only advertise on US podcasts and US LinkedIn, all customers are US businesses, everything runs in us-east-1. Looking at our analytics, about 3% of our website visitors have European IP addresses, and a couple of them signed up for the free trial. Our board asked us to get GDPR compliant. Can you audit the codebase and tell us what we need to fix?",
+      "expected_output": "The agent runs the Art 3 territorial-scope gate before producing any findings and concludes GDPR most likely does not apply: no establishment in the Union (Art 3(1)), and Art 3(2)(a) requires the offering of goods or services to be targeted at data subjects in the Union — mere accessibility of a website, USD-only pricing, and US-only marketing point away from targeting. Art 3(2)(b) monitoring is not evidenced by ordinary server logs. It names the concrete changes that would flip the analysis (an EU establishment, EU-targeted pricing/marketing, deliberate behavioural monitoring of EU users, or becoming a processor for an in-scope controller) and declines to produce a graded finding list or write a report.",
+      "files": [],
+      "expectations": [
+        "Response concludes GDPR most likely does not apply, reasoning explicitly from Art 3 territorial scope — neither Art 3(1) establishment nor Art 3(2) targeting/monitoring being met",
+        "Response grounds the Art 3(2)(a) analysis in whether the company targets or offers services to data subjects in the Union, rather than in how sensitive the data is or how many EU visitors there are",
+        "Response names at least two concrete changes that would bring the company into scope (e.g. an EU establishment, EU-targeted pricing/currency/language/advertising, deliberate behavioural monitoring of EU users, or acting as a processor for an in-scope controller)",
+        "Response does not produce a graded list of GDPR findings, a gap matrix, or a dated audit report for this scenario",
+        "Response does not conclude that GDPR applies merely because some website visitors have EU IP addresses or because a couple of EU users signed up"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We're a GmbH headquartered in Berlin, about 40 employees. We're building an internal HR tool for ourselves — headcount planning, absence tracking, performance reviews. All 40 employees are non-EU nationals on remote contracts, and the app is hosted on a server in Singapore, so someone on the team is arguing GDPR doesn't apply to it. Before we write any code: where do we stand?",
+      "expected_output": "The agent applies the scoping gates to a scenario with no code to read yet. Gate 1: GDPR applies via Art 3(1) — the company has an establishment in the Union and the processing happens in the context of that establishment's activities, regardless of where the processing itself takes place, so neither the employees' nationality/residence nor the Singapore hosting takes it out of scope (Singapore hosting is a separate Chapter V transfer question, not a scope question). Gate 2: the company is the controller for its own employee data. It flags layers a code audit can't settle — Art 88/German employment law, Art 9 special-category treatment of absence/sickness records, Art 35 DPIA triggers for performance evaluation — and asks for the third gate (where data flows) before grading anything.",
+      "files": [],
+      "expectations": [
+        "Response concludes GDPR applies via Art 3(1) establishment in the Union, and states this holds regardless of where the processing itself takes place",
+        "Response classifies the company as the controller for its own employee data",
+        "Response flags at least one layer beyond the Regulation itself that a code audit cannot settle and routes it to a human — member-state employment law under Art 88, or special category treatment of absence/sickness data under Art 9",
+        "Response does not make GDPR's applicability depend on the employees' nationality or residence, or treat the Singapore hosting as taking the processing out of scope (it may note it separately as a Chapter V transfer question)",
+        "Response does not produce graded findings or a report without first establishing where personal data actually flows — it asks for that instead"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Audit our Node/TypeScript app for GDPR please. We sell a white-label helpdesk to European retailers — they upload their own customers' names, emails, order history and support tickets into our system, and we just store it and show it back to them. We also run our own product analytics over all of it to see which features get used. One of our devs is worried we never collected consent from any of those end customers. What do we need to do?",
+      "expected_output": "The agent classifies the company as a processor for the retailers' end-customer data — the retailers are the controllers responsible for the lawful basis and Art 13 notices, not the processor. It gives the processor-specific obligation set: an Art 28(3) contract with each controller before data flows, Art 28(2) sub-processor authorization, Art 28(3)(e) assistance with data-subject rights (a tenant-scoped export/delete capability), Art 28(3)(g) deletion/return at contract end, and Art 30(2) records. The critical trap: running its own product analytics over customer data is processing for its own purposes, which under Art 28(10) makes it a controller for that specific processing, requiring its own basis — likely beyond the retailers' instructions. It does not tell the company to collect consent from the retailers' end customers itself.",
+      "files": [],
+      "expectations": [
+        "Response classifies the company as a processor for the uploaded end-customer data and the retailers as the controllers, locating responsibility for the lawful basis and Art 13 notices with the controllers",
+        "Response gives at least three processor-specific obligations with article references — e.g. an Art 28(3) contract before data flows, Art 28(2) sub-processor authorization, Art 28(3)(e) assistance with data-subject rights, or Art 30(2) records",
+        "Response identifies running its own product analytics over customer data as processing for its own purposes that makes it a controller for that processing (Art 28(10)), and/or as going beyond the retailers' instructions",
+        "Response does not instruct the company to collect consent from the retailers' end customers itself, or propose an end-customer consent banner as the fix",
+        "Response does not assert that the company has its own Art 33(1) 72-hour obligation to notify a supervisory authority"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "A customer sent us a right-to-erasure request. Here's what our Rails app does:\n\n```ruby\n# app/models/user.rb\nclass User < ApplicationRecord\n  acts_as_paranoid            # sets deleted_at, row stays\n  has_many :orders\n  has_many :invoices\n  after_commit :reindex, on: [:create, :update]  # pushes to Elasticsearch\nend\n\n# app/jobs/segment_sync_job.rb — nightly, sends all users to Segment and our Redshift warehouse\n```\n\nWe also keep nightly Postgres snapshots for 35 days, and invoices are kept for 10 years because our accountant says we have to. Our deletion endpoint calls `user.destroy` (which is the paranoid soft delete). Have we satisfied the request?",
+      "expected_output": "The agent grades the soft delete as an Art 17 failure: acts_as_paranoid retains the row, so the request isn't satisfied. It enumerates the other locations the data persists — the Elasticsearch index, the Segment/Redshift downstream copies, the snapshots — and raises Art 19's duty to notify recipients the data was disclosed to, naming Segment. On backups it's practical, not absolutist: expiring them on rotation with the deletion re-applied on restore is acceptable, not a 🔴. On invoices it applies Art 17(3)(b): a statutory accounting obligation is a lawful reason to retain the minimum necessary data — the action is to minimise and document what's retained, not delete records the org is legally required to keep.",
+      "files": [],
+      "expectations": [
+        "Response identifies the acts_as_paranoid soft delete (user.destroy leaving the row with deleted_at) as failing to satisfy Art 17 erasure, citing the code",
+        "Response enumerates at least two further locations the personal data persists — the Elasticsearch index, Segment, the Redshift warehouse, or the nightly snapshots",
+        "Response raises the Art 19 duty to notify recipients the data was disclosed to, naming Segment as a concrete recipient from the code",
+        "Response treats the 10-year invoice retention as permissible under Art 17(3) as a legal obligation, framing the action as minimising and documenting what's retained rather than as a blocker to fix",
+        "Response does not require immediate purging or rewriting of the nightly snapshots as the only acceptable remediation (accepting rotation expiry plus documented re-deletion on restore instead), and does not advise deleting the invoice records subject to the statutory retention obligation"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "We're a Berlin GmbH with EU customers. Our Next.js app has this in app/layout.tsx:\n\n```tsx\n<Script src=\"https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX\" strategy=\"afterInteractive\" />\n<Script src=\"https://connect.facebook.net/en_US/fbevents.js\" strategy=\"afterInteractive\" />\n```\n\nWe show a cookie banner in the corner with a single \"Accept\" button and a link to our cookie policy. When someone clicks Accept we run `UPDATE users SET marketing_opt_in = true WHERE id = ?`. We also have IP anonymization turned on in GA. Is our consent setup compliant?",
+      "expected_output": "The agent finds three failures. First, both tags load unconditionally before any consent decision — storing or accessing information on the user's device for non-essential purposes requires prior consent under Art 5(3) of the ePrivacy Directive as implemented in German national law, independently of the GDPR basis; GA's IP anonymisation doesn't remove that requirement. Second, an Accept-only banner isn't valid consent: no genuine choice, no withdrawal as easy as giving (Art 7(3)), a policy link is information, not consent. Third, a single boolean column can't demonstrate consent under Art 7(1) — a real record needs a timestamp, the notice/policy version, and the specific purposes consented to. It also flags the Meta Pixel's collection-and-transmission phase as likely joint controllership with Meta under Art 26, not a simple processor relationship, and does not offer legitimate interest as an alternative basis for the pixel.",
+      "files": [],
+      "expectations": [
+        "Response identifies that both tags load before any consent decision and that prior consent is required under Art 5(3) of the ePrivacy Directive (or its national implementation), as a requirement separate from the GDPR lawful basis",
+        "Response identifies the Accept-only banner as invalid consent, citing at least one of: no genuine choice, withdrawal not as easy as giving under Art 7(3), or a cookie-policy link not constituting consent",
+        "Response identifies that a single marketing_opt_in boolean cannot demonstrate consent under Art 7(1), naming at least two fields a valid consent record needs (timestamp, notice/policy version, specific purposes)",
+        "Response flags the Meta Pixel as raising joint controllership with Meta under Art 26 for the collection/transmission of the data, rather than treating Meta purely as a processor",
+        "Response does not accept the banner, the cookie-policy link, or GA's IP anonymisation as satisfying the consent requirement, and does not propose Art 6(1)(f) legitimate interest as an alternative basis for the advertising pixel"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "We're a French SaaS. Two AI features I want checked: (1) we send each incoming support ticket body to a US LLM provider's API to draft a reply — tickets routinely contain the customer's name, email, order details, and sometimes things like \"I need to return this because of my diabetes\"; (2) we fine-tuned a model on two years of historical tickets so it matches our tone. We strip the customer's name from the prompt before sending in feature 1. Standard API plan, default settings. What's our GDPR exposure?",
+      "expected_output": "The agent identifies four things. The LLM provider is a processor for feature 1, needing an Art 28(3) contract before data flows, with the default account settings' training/retention configuration flagged as something to verify — a vendor training on submitted data acts beyond instruction and becomes a controller for that processing under Art 28(10). The US API call is a restricted transfer under Chapter V regardless of Art 3 already applying, so it asks which mechanism is relied on (Art 45 adequacy via current DPF listing, or Art 46(2)(c) SCCs plus a transfer impact assessment) rather than asserting one. The diabetes mention is Art 9 special-category data in free text, needing both an Art 6(1) basis and a separate Art 9(2) condition — name-stripping doesn't change that. The fine-tune: a model trained on personal data may itself retain it, so deleting the source tickets later wouldn't satisfy an Art 17 request — the basis question has to be settled at training time.",
+      "files": [],
+      "expectations": [
+        "Response identifies the LLM provider as a processor requiring an Art 28(3) contract before personal data flows, and flags the default retention/training-on-input settings as something to verify rather than assume",
+        "Response identifies the call to the US API as a Chapter V restricted transfer and asks which mechanism is relied on (Art 45 adequacy, or Art 46(2)(c) SCCs plus a transfer impact assessment) rather than asserting one is in place",
+        "Response identifies the diabetes mention as Art 9 special-category data arriving in free text, requiring both an Art 6(1) basis and a separate Art 9(2) condition",
+        "Response flags that the fine-tuned model may itself contain personal data, so deleting the source tickets would not satisfy a later Art 17 erasure request",
+        "Response does not state a specific vendor's current DPA terms or certification status as settled fact, and does not treat stripping the customer's name from the prompt as resolving the personal-data, transfer, or Art 9 questions"
+      ]
+    }
+  ]
+}
