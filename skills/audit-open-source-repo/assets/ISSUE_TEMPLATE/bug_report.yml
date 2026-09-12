@@ -1,0 +1,45 @@
+# Starter bug report form. Point Contributor Readiness Plan rows closing
+# checks 5.1, 5.2 at this file — see references/dimensions.md.
+# Save to .github/ISSUE_TEMPLATE/bug_report.yml.
+name: Bug report
+description: Report something that isn't working as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, including what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The smallest set of steps that reliably triggers it.
+      placeholder: |
+        1. Run '...'
+        2. See error '...'
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The version, commit, or tag you're running.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, runtime version, and anything else relevant.
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      render: shell
+    validations:
+      required: false

@@ -1,0 +1,49 @@
+{
+  "$comment": "Copy to .eagerworks/audit-open-source-repo.json at your repo root. Every field is optional — delete what you don't need. Schema: references/config.md",
+  "reportPath": "docs/open-source-audits",
+  "language": "en",
+  "project": {
+    "audience": "public",
+    "contributionAgreement": "none",
+    "type": "application"
+  },
+  "runCommands": true,
+  "commands": {
+    "format": "npm run format:check",
+    "lint": "npm run lint",
+    "typecheck": "npm run typecheck",
+    "test": "npm test",
+    "check": "npm run check"
+  },
+  "budgets": {
+    "testSeconds": 600,
+    "lintSeconds": 120,
+    "ciMinutes": 20,
+    "firstReviewDays": 14,
+    "staleOpenPrDays": 90
+  },
+  "history": {
+    "prSample": 20,
+    "issueSample": 20,
+    "commitSample": 30,
+    "maintainers": []
+  },
+  "plan": {
+    "maxItems": 25
+  },
+  "dryRun": {
+    "enabled": true
+  },
+  "dimensions": {
+    "discoverability": { "enabled": true },
+    "contributionContract": { "enabled": true },
+    "community": { "enabled": true },
+    "timeToFirstBuild": { "enabled": true },
+    "taskSurface": { "enabled": true },
+    "codeOrientation": { "enabled": true },
+    "executableGuidelines": { "enabled": true },
+    "selfVerification": { "enabled": true },
+    "forkSafeCi": { "enabled": true },
+    "reviewAndRelease": { "enabled": true }
+  }
+}
