@@ -261,7 +261,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for authoring conventions.
 
 Every tool reads the same `SKILL.md` and `references/` files. Re-run `npx skills add eagerworks/skills --skill <name>` to pull the latest version (or, on a manual install, update your vendored copy) and every agent picks up the changes — there is no per-tool content to keep in sync.
 
-Each skill also carries a `CHANGELOG.md` and a semver `metadata.version` in `SKILL.md`'s frontmatter. Before or after updating, check the skill's `CHANGELOG.md` (in your vendored copy, or on GitHub) for anything landed between the version you had and the one you're pulling — entries call out, under a **Config** heading, any `.eagerworks/<name>.json` key or other file you need to add or change for the new behavior to apply.
+Each skill also carries a `CHANGELOG.md` and a semver `metadata.version` in `SKILL.md`'s frontmatter. Before or after updating, check the skill's `CHANGELOG.md` (in your vendored copy, or on GitHub) for anything landed between the version you had and the one you're pulling — entries call out, under a **Config** heading, any `.eagerworks/<name>.json` key or other file you need to add or change for the new behavior to apply. The repo-level [`CHANGELOG.md`](CHANGELOG.md) tracks when each skill was added or had a notable release, with links out to the per-skill detail.
 
 The progressive-disclosure design means the agent loads only `SKILL.md` up front, while the full knowledge base is always available to open on demand.
 
