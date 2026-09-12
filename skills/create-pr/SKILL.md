@@ -4,7 +4,7 @@ description: >-
   Opens (or updates) a pull request with a conventional title, an evidence-backed description, and a real verification checklist — resolving the base branch from evidence, attaching screenshots via the GitHub CLI when the change is visible in the UI, and asking rather than guessing at every genuine judgment call. Use when asked to "open a PR", "create a pull request", "push this and make a PR", "ship this branch", or to fix up an existing PR's title, description, or checklist.
 metadata:
   author: eagerworks
-  version: "1.0.0"
+  version: "1.2.0"
 ---
 
 # Create Pull Request Skill

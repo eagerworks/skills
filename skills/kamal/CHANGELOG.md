@@ -2,9 +2,15 @@
 
 All notable changes to this skill are documented here. Versions match `metadata.version` in `SKILL.md`'s frontmatter. When a change adds, renames, or removes a config key, or requires creating a new file in the consuming repo, that's called out under **Config** so an upgrade doesn't need to be reverse-engineered from the diff.
 
-**Note:** version bumps were not tracked commit-by-commit before this file existed, so the entry below is a cumulative baseline — see `git log -- skills/kamal` for the full commit history.
+## [1.0.1] - 2026-08-28
 
-## [1.0.0] - 2026-06-30
+### Changed
+- Shortened the frontmatter `description` to ~60 words (one sentence on what the skill does, one "Use when..." sentence with the highest-signal triggers) since skills.sh renders it verbatim as the page summary, `og:description`, and JSON-LD; switched `>` to `>-` to drop a trailing newline that leaked into that metadata. Verified against all 27 eval prompts across the collection before landing (24/27 matched identically; the 3 misses were mid-workflow prompts that never matched by description either way).
+- Added `metadata: {author, version}` to the frontmatter, establishing this changelog's version tracking.
+
+## [1.0.0] - 2026-06-02
+
+Initial release.
 
 ### Added
 - Deploys and troubleshoots Kamal apps, version-aware: defaults to Kamal 2.x, with all 1.9.x content isolated to `references/kamal-v1.md`.

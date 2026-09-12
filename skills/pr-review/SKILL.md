@@ -4,7 +4,7 @@ description: >-
   Reviews a branch, PR, staged, or working-tree diff for correctness, security, repo-convention, test-coverage, and documentation gaps, returning severity-rated findings without editing code. Use when asked to "review my branch/PR", "is this ready to merge", "check this diff before I push", "does this need an ADR", or to apply fixes for findings from a previous review round. When the target is a GitHub PR, the same report is also posted to the PR — as inline comments on each finding's line plus a summary, by default — so the whole team can read it.
 metadata:
   author: eagerworks
-  version: "1.0.0"
+  version: "2.1.0"
 ---
 
 # PR Review Skill
