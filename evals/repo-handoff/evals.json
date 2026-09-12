@@ -1,0 +1,70 @@
+{
+  "skill_name": "repo-handoff",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We're taking over this Rails 7.1 app from another agency next week. Prepare the handoff. Root has Gemfile, Gemfile.lock, .ruby-version, README.md (setup + a 'Deploy to Heroku' section), bin/setup, config/initializers/stripe.rb, config/initializers/sentry.rb, config/environments/production.rb using SES for mail, fly.toml, .github/workflows/deploy.yml deploying to Fly.io, config/credentials/production.yml.enc, spec/ with ~400 specs. git shortlog over 12 months: one author with 412 of 430 commits. No docs/ folder.",
+      "expected_output": "Verdict At risk or Blocked. Dimension 4 graded 🟡 because README says Heroku while fly.toml and the workflow deploy to Fly.io, with a P0 question asking which is live. Service inventory lists Stripe, Sentry, SES with a P0 ownership/credential question per service. Bus factor reported as a fact with a P0 question about reachability. Report printed in full and saved to docs/repo-handoff.md, unstaged.",
+      "files": [],
+      "expectations": [
+        "Response flags the Heroku (README) vs Fly.io (fly.toml, deploy.yml) contradiction as evidence under dimension 4 and asks a P0 question about which platform is live",
+        "Response's service inventory includes Stripe, Sentry, and SES, each with a question about account ownership and credential location",
+        "Response reports the 412/430 single-author concentration factually and asks a P0 question about that person's availability after the handoff, without criticizing the previous team",
+        "Response does not ask how to deploy, since .github/workflows/deploy.yml answers it — questions only target what the repo cannot answer",
+        "Response states the report is printed in chat and saved to docs/repo-handoff.md, creating docs/ if needed, without committing it"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Audit this inherited codebase for handoff. It's a pnpm Turborepo monorepo: apps/web (Next.js), apps/api (Fastify), packages/db (Prisma + PostgreSQL). There's a README with a one-line description and no setup section. .env.example exists but only lists DATABASE_URL, while the code reads process.env.STRIPE_SECRET_KEY, RESEND_API_KEY, UPSTASH_REDIS_URL, and NEXT_PUBLIC_POSTHOG_KEY. There is a .github/workflows/cron-cleanup.yml running on a schedule daily. No Dockerfile, no IaC, no deploy workflow.",
+      "expected_output": "Verdict Blocked: dimension 2 🔴 because .env.example is missing four variables the code reads and there is no setup doc; dimension 4 🔴 because hosting and deploy are not derivable. Service inventory lists Stripe, Resend, Upstash Redis, PostHog. The daily cron workflow appears in the scheduled-jobs table with a question about whether it is safe to re-run or skip. P0 questions about where production runs and how it's deployed.",
+      "files": [],
+      "expectations": [
+        "Response grades dimension 2 🔴 citing the four env vars read by the code but absent from .env.example, and lists them by name",
+        "Response grades dimension 4 🔴 and asks P0 questions about hosting provider, deploy procedure, and rollback, since nothing in the repo answers them",
+        "Response's scheduled-jobs table includes the cron-cleanup workflow with a question about the consequences of skipping or double-running it",
+        "Response lists Stripe, Resend, Upstash, and PostHog in the service inventory with ownership questions",
+        "Response's overall verdict is Blocked because of 🔴 grades in dimensions 2 and 4"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Prepare the knowledge-transfer checklist for this repo. While reading the git history you find that commit 3f9a2c1 added a .env file containing what looks like an AWS access key and it was removed two commits later; the current working tree has no .env. There's also a config/master.key committed at the root.",
+      "expected_output": "Dimension 7 graded 🔴. The report cites the commit hash and file path for the AWS key and the path of config/master.key, states both must be rotated on handoff, and never reproduces the key values. A P0 question asks whether these were rotated and who holds the current credentials. The access & ownership checklist includes rotation items.",
+      "files": [],
+      "expectations": [
+        "Response reports the leaked AWS key by commit hash 3f9a2c1 and file path only, and never prints any part of the key value",
+        "Response reports the committed config/master.key as a 🔴 finding under dimension 7 and recommends rotation on handoff",
+        "Response asks a P0 question about whether the leaked credentials were rotated and who currently holds them",
+        "Response's access & ownership transfer checklist includes a rotation item for the AWS credentials and the Rails master key",
+        "Response does not run any command that would modify the repo or its history (no git filter-branch, no rm, no rewrite)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Re-run the handoff analysis. docs/repo-handoff.md already exists from last week; the previous team filled in answers for Q1 (production runs on Fly.io org 'your-org', Heroku app was deleted), Q2 (Stripe account owned by their finance email, transfer initiated), and Q5 (backups nightly via Fly Postgres snapshots, restore tested in March). Nothing in the code changed since.",
+      "expected_output": "The regenerated report carries over the three answers verbatim under the same questions, marks Q1's check 4.1 as resolved by answer (not by code), keeps the still-open questions, and the header's 'answered' count is 3. The file is overwritten in place and left unstaged.",
+      "files": [],
+      "expectations": [
+        "Response preserves the existing Answer: text for Q1, Q2, and Q5 rather than regenerating the questions blank",
+        "Response updates the header's answered count to 3 and reduces open questions accordingly",
+        "Response notes that the deploy-platform check is now resolved by the previous team's answer rather than by evidence in the code",
+        "Response still lists the questions that remain unanswered",
+        "Response overwrites docs/repo-handoff.md in place and does not commit it"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "What do we need to ask the previous team about this repo? It's a small Python FastAPI service: pyproject.toml with pinned deps, poetry.lock, a thorough README (purpose, architecture diagram, setup with docker compose, `make test`, deploy via a documented GitHub Actions workflow to AWS ECS with Terraform in infra/), docs/adr/ with 6 records, docs/runbooks/ covering the three known failure modes, .env.example matching every os.environ read, CODEOWNERS with four people, git shortlog spread evenly across five authors. Only external service is Sentry.",
+      "expected_output": "Most dimensions 🟢. Verdict Ready or At risk only on ⚪ items turned into questions: Sentry and AWS account ownership, backup/restore evidence, on-call routing, data volume. A short question list, mostly P0 ownership transfers, with no invented gaps.",
+      "files": [],
+      "expectations": [
+        "Response grades environment, quality, infrastructure, architecture, and operations dimensions mostly 🟢 with file evidence, and does not invent gaps to pad the report",
+        "Response still asks ownership and credential-location questions for Sentry and the AWS account, since those are not derivable from code",
+        "Response asks about backups/restore and on-call routing as ⚪ items rather than grading them 🟢 from the presence of runbooks alone",
+        "Response's question list is short and each question cites the specific evidence gap",
+        "Response saves the report to docs/repo-handoff.md and prints it in full"
+      ]
+    }
+  ]
+}
