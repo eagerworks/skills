@@ -1,0 +1,83 @@
+{
+  "skill_name": "audit-seo",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Can you audit the technical SEO of our production site, https://www.acmewidgets.com? We've been live there for 2 years, this is not a staging URL. I already pulled a couple of things so you don't have to: `curl -sI https://www.acmewidgets.com` returns `HTTP/2 200` with a response header `X-Robots-Tag: noindex`. `curl -s https://www.acmewidgets.com/robots.txt` returns exactly:\n```\nUser-agent: *\nDisallow: /\n```\nEverything else about the site looks normal — valid sitemap, HTTPS everywhere, unique titles and descriptions on the pages I checked.",
+      "expected_output": "The agent should recognize the X-Robots-Tag: noindex header and the sitewide Disallow: / in robots.txt as production-blocking indexation issues, grade dimension 1 (crawlability & indexation) 🔴, and reach an overall verdict of Blocked. Both issues should appear at the top of the Work Plan with a concrete fix (remove the noindex header, change Disallow: / to allow crawling) and cite the exact evidence given. The agent should confirm this is production (not staging) before grading it a blocker, and should state the report will be saved to a dated file under docs/seo-audits/.",
+      "files": [],
+      "expectations": [
+        "Response grades the X-Robots-Tag: noindex header and/or the Disallow: / robots.txt rule as a 🔴 Blocker in the crawlability/indexation dimension",
+        "Response states the overall verdict is Blocked (not At risk or Healthy)",
+        "Response's Work Plan lists removing the noindex signal and fixing the robots.txt Disallow rule as top-priority items, each citing the specific evidence given (the header value / the robots.txt content)",
+        "Response confirms or reasons about this being the production site (not a staging/preview build) before grading the noindex as a blocker, rather than grading it blindly",
+        "Response states the report will be saved to a dated file under docs/seo-audits/ (not an overwritten fixed filename)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We don't have a public URL yet — everything's still on localhost. Can you audit the technical SEO of our Next.js app router repo from the source? Here's what's relevant: `app/page.tsx` starts with `\"use client\"` and has no `metadata` export and no `generateMetadata` function anywhere in the file or its layout. There is no `app/sitemap.ts` and no `app/robots.ts` anywhere in the repo — I checked with `find . -name 'sitemap.ts' -o -name 'robots.ts'` and got nothing back.",
+      "expected_output": "The agent should recognize it's in Code mode (no reachable URL given) and grade from source only — it should not attempt to fetch any URL, and should not run `next build` or any build/dev command to inspect rendered output. It should flag the missing metadata export, the client-only main page (a JS-rendering risk), and the missing sitemap.ts/robots.ts as findings, while marking any check that needs a live response (actual response headers, real rendered DOM, real redirect behavior) as ⚪ rather than guessing.",
+      "files": [],
+      "expectations": [
+        "Response operates in Code mode and does not claim or imply it fetched a live URL, since none was given",
+        "Response does not run or suggest running a build command (e.g. `next build`) to inspect output",
+        "Response flags the missing `metadata`/`generateMetadata` export on the main page as a finding (structured data/metadata dimension)",
+        "Response flags the absence of `app/sitemap.ts` and `app/robots.ts` as a finding (crawlability dimension)",
+        "Response marks runtime-only checks (e.g. actual rendered DOM vs. raw HTML, real response headers) as ⚪ Unverifiable rather than asserting a grade for them"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "While you're auditing our site, can you also tell us: what's our current Google ranking for the search term 'ergonomic office chairs', roughly how many people search that term per month, and how does our organic traffic compare to Herman Miller's?",
+      "expected_output": "The agent should decline to produce a ranking position, a search volume number, or a traffic comparison, since none of those are measurable from a fetch of the site — they require Google Search Console, a keyword-research tool, and analytics/third-party traffic data respectively. It should mark these as ⚪ Unverifiable and name the specific tool that would actually answer each (Search Console or a rank tracker for ranking, Keyword Planner or a similar tool for search volume, GA4/Plausible plus a third-party tool like Ahrefs/Semrush for the traffic comparison), rather than giving any estimated number.",
+      "files": [],
+      "expectations": [
+        "Response does not state a specific ranking position for 'ergonomic office chairs'",
+        "Response does not state a specific or estimated monthly search volume number for that term",
+        "Response does not state a specific or estimated traffic comparison figure against Herman Miller",
+        "Response marks all three requests as ⚪ Unverifiable (or clearly declines them) rather than silently omitting them",
+        "Response names at least one concrete tool for each category (e.g. Search Console/a rank tracker for ranking, Keyword Planner for search volume, analytics/a third-party tool for traffic) that would actually answer the request"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Can you do a full SEO audit of https://www.brightleafstudio.com? Here's everything I have from checking it myself: robots.txt allows everything and correctly lists the sitemap; sitemap.xml is valid XML and every URL in it returns 200; every page I sampled (home, /about, /services, /blog/our-first-post) has a unique <title> under 60 characters and a unique meta description under 160 characters; every page has exactly one <h1>; the homepage has valid JSON-LD for Organization and WebSite with SearchAction, and the blog post has valid Article JSON-LD with headline, image, and datePublished all present and matching the visible content; the whole site is HTTPS-only with http:// redirecting 301 to https://; raw HTML (fetched with curl, no JS) already contains the full text content of every page I checked, matching what a browser renders.",
+      "expected_output": "Given this evidence, the agent should reach a Healthy verdict with no 🔴 or 🟡 findings across the dimensions covered by the given evidence, and an empty or near-empty Work Plan. It should not invent problems or pad the Work Plan with unsupported style preferences to appear thorough — a clean audit is a valid, complete result.",
+      "files": [],
+      "expectations": [
+        "Response reaches an overall verdict of Healthy given the evidence provided",
+        "Response's Work Plan is empty or contains no items that aren't directly supported by a gap in the evidence given",
+        "Response does not report a 🔴 or 🟡 grade for crawlability, metadata, or structured data given the clean evidence for each",
+        "Response does not fabricate a finding not supported by the pasted evidence (e.g. does not claim a missing canonical tag or a JS-rendering problem when raw HTML was stated to already match rendered content)",
+        "Response explicitly states or implies that a clean/passing result is a legitimate outcome rather than treating the audit as incomplete without any findings"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "We're doing a combined audit today — here's our repo and our live site https://app.northwindgear.io. In `app/layout.tsx` there's a hardcoded canonical tag: `<link rel=\"canonical\" href=\"https://staging.northwindgear.io\" />` used on every page regardless of environment. I confirmed with `curl -sI https://app.northwindgear.io` that this canonical does get served on the production domain too — it's the same layout file for both. One more thing: we already ran this exact audit earlier today and there's already a file at docs/seo-audits/2026-09-12-full-site.md from that run — please don't lose it.",
+      "expected_output": "The agent should identify the hardcoded canonical pointing at the wrong host as a finding (grade it 🔴 or 🟡 depending on severity reasoning), trace it to the specific source line in app/layout.tsx, and confirm via the live response that the issue actually reaches production rather than assuming from the code alone. When saving the report, it must not overwrite docs/seo-audits/2026-09-12-full-site.md — it should use a numeric suffix (e.g. 2026-09-12-full-site-2.md) or a different slug for today's second run.",
+      "files": [],
+      "expectations": [
+        "Response identifies the canonical tag pointing at the wrong host (staging.northwindgear.io) as a finding in the crawlability & indexation dimension (canonical tag check)",
+        "Response cites app/layout.tsx as the source of the hardcoded canonical, tracing the live symptom back to the code (Combined mode)",
+        "Response references or uses the curl confirmation that the wrong canonical is actually served on the production domain, rather than treating it as merely a code smell",
+        "Response explicitly avoids overwriting docs/seo-audits/2026-09-12-full-site.md and states it will use a numeric suffix or otherwise distinct filename for today's second report",
+        "Response does not claim the canonical issue is unfixable or requires anything beyond a source change to app/layout.tsx"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Once you've audited our site, go ahead and just fix the meta tags and structured data issues directly in our repo. Also — separately — can you suggest a few private blog networks or link exchange partners we could use to build backlinks faster?",
+      "expected_output": "The agent should decline to apply fixes directly to the repo as part of the audit — the Work Plan describes the fix, applying it is a separate explicit step the skill doesn't do by default — and should decline the link-building request, since private blog networks and link exchanges are black-hat/manipulative link schemes against search engine guidelines. It should offer the Work Plan as the deliverable for the first ask, and either refuse or redirect to legitimate link-earning practices for the second, without silently going along with either request.",
+      "files": [],
+      "expectations": [
+        "Response does not directly edit files in the repo to apply meta-tag or structured-data fixes as part of this audit",
+        "Response states that the Work Plan describes the fixes and that applying them would be a separate, explicit step",
+        "Response declines or refuses the request for private blog networks / link exchange partners",
+        "Response identifies private blog networks / link exchanges as a black-hat or manipulative tactic against search engine guidelines, rather than simply ignoring the request",
+        "Response does not silently comply with either request without addressing why (no direct repo edits, no black-hat recommendations)"
+      ]
+    }
+  ]
+}
