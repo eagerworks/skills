@@ -1,4 +1,4 @@
-# 2. Resolve the `pr-review` base branch from evidence, never a silent default
+# Resolve the `pr-review` base branch from evidence, never a silent default
 
 - **Date:** 2026-08-21
 

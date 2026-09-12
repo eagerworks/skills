@@ -1,0 +1,152 @@
+{
+  "skill_name": "loop-engineering-audit",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Audit this repo for loop engineering readiness. It's a Rails 7.1 app. Root contains: Gemfile, Gemfile.lock, .ruby-version, README.md, bin/setup, bin/rails, bin/rubocop, spec/ with ~300 specs, .github/workflows/ci.yml running `bundle exec rspec` and `bundle exec rubocop`, docker-compose.yml with postgres. There is no AGENTS.md or CLAUDE.md. README says `bin/setup` then `bin/rails s`. Running `bundle exec rspec` took 3m10s and exited 0.",
+      "expected_output": "Verdict Not ready with one blocker: no agent instructions file (dimension 1, check 1.1). Environment, verification and CI dimensions mostly Ready. Work Plan item 1 is adding AGENTS.md (effort S) starting from the starter asset; report printed in full and saved to docs/loop-engineering-audit.md.",
+      "files": [],
+      "expectations": [
+        "Response grades the missing AGENTS.md/CLAUDE.md as a 🔴 Blocker under dimension 1 and the overall verdict is Not ready",
+        "Response's Work Plan lists creating AGENTS.md as task #1 with effort S",
+        "Response grades the test command 🟢 on runtime (3m10s is under the 5-minute default budget) rather than flagging it",
+        "Response does not invent blockers for dimensions 2, 3, or 6 given the pinned Ruby version, committed lockfile, bin/setup, and CI running the same commands",
+        "Response states the report is printed in chat and saved to docs/loop-engineering-audit.md without committing it"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Can AI agents work on this project autonomously? It's a Node/TypeScript service. package.json scripts: {\"dev\": \"tsx watch src/index.ts\", \"test\": \"jest --watch\", \"lint\": \"eslint .\"}. There's a tsconfig.json but no typecheck script. CLAUDE.md exists and says: 'Run npm test before committing.' No lockfile is committed (.gitignore has package-lock.json). CI: none.",
+      "expected_output": "Not ready. Blockers: `npm test` is watch-mode only (3.3) and CLAUDE.md documents it as the command (1.3/1.6); lockfile ignored (2.2); no CI (6.1). Gap: no typecheck script (3.1). Work Plan orders: fix test script to `jest --ci`, commit lockfile, add typecheck, add CI, update CLAUDE.md.",
+      "files": [],
+      "expectations": [
+        "Response identifies `jest --watch` as a 🔴 Blocker because it never exits in an unattended loop, and proposes `jest --ci` (or CI=1) as the fix",
+        "Response flags that CLAUDE.md points agents at the watch-mode command, so the documented command is wrong, not just missing",
+        "Response grades the ignored package-lock.json as a 🔴 Blocker under reproducible environment",
+        "Response grades missing CI as a 🔴 Blocker under CI & merge gates",
+        "Response flags the missing typecheck script as a 🟡 Gap with a concrete fix such as adding \"typecheck\": \"tsc --noEmit\"",
+        "Response's Work Plan puts blockers before the typecheck gap"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Audit this monorepo for agent readiness. pnpm workspace with apps/web (Next.js) and packages/api (Fastify). Root has AGENTS.md listing `pnpm lint`, `pnpm typecheck`, `pnpm test` (all defined via turbo.json and each runs non-interactively). .nvmrc, pnpm-lock.yaml, .env.example present. CI runs the three commands on PRs. `gh api` for branch protection returned HTTP 403. There's a bin/reset-db script that drops and recreates the database, not mentioned anywhere. No .claude/settings.json.",
+      "expected_output": "Partially ready or Ready depending on gaps; no blockers. Branch protection is ⚪ with the question to ask, never guessed. bin/reset-db is a 🟡 guardrail gap (unfenced destructive command) — the audit must not run it. Missing permissions config is a 🟡 at most.",
+      "files": [],
+      "expectations": [
+        "Response reports no 🔴 Blockers and the verdict is not 'Not ready'",
+        "Response lists branch protection as ⚪ Unverifiable with an explicit question for a human, and does not grade it 🟢 or 🔴",
+        "Response flags bin/reset-db as a 🟡 guardrails gap because it is destructive, undocumented, and unfenced, and recommends listing it under a 'never run' section of AGENTS.md",
+        "Response does not execute bin/reset-db or any setup/migration command",
+        "Response treats the absent .claude/settings.json permissions as a 🟡 or informational item, not a blocker"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Re-run the loop engineering audit on this Python project. .eagerworks/loop-engineering-audit.json contains {\"dimensions\": {\"taskDefinition\": {\"enabled\": false}}, \"budgets\": {\"testSeconds\": 60}}. pyproject.toml with uv.lock, .python-version, ruff and pytest configured, AGENTS.md accurate. `pytest -q` ran in 2m05s, exit 0. No CI. A previous docs/loop-engineering-audit.md exists from last month.",
+      "expected_output": "Dimension 5 is excluded and disclosed in the footer; 2m05s exceeds the configured 60 s budget so 3.5 is 🟡; no CI is 🔴 so verdict Not ready. The existing report is overwritten, not appended, and a 'Since last audit' note is included.",
+      "files": [],
+      "expectations": [
+        "Response excludes dimension 5 (task definition) from the scorecard and explicitly discloses that it was disabled by config",
+        "Response grades the 2m05s test runtime as 🟡 because the configured budget is 60 seconds, not the 5-minute default",
+        "Response grades missing CI as 🔴 and the verdict is Not ready",
+        "Response overwrites docs/loop-engineering-audit.md rather than creating a dated or numbered second file",
+        "Response mentions comparing against the previous audit (a 'Since last audit' section) without skipping any checks"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "What's missing for Claude Code to work on this repo in a loop? Rails app. AGENTS.md documents `bin/test` and `bin/lint`. bin/ contains rails, rake, setup, rubocop — there is no bin/test or bin/lint. spec/ has 40 files; `grep -rL 'expect' spec/` lists 12 of them. Gemfile.lock committed, .ruby-version present. CI runs `bundle exec rspec`.",
+      "expected_output": "Not ready: AGENTS.md documents commands that don't exist (🔴 1.6). 12 assertion-free spec files is a 🟡 under test coverage (4.3). CI/local divergence noted as 🟡 (6.2) since docs name bin/test but CI runs bundle exec rspec. Work Plan: fix AGENTS.md or add the bin scripts first.",
+      "files": [],
+      "expectations": [
+        "Response grades the non-existent bin/test and bin/lint referenced in AGENTS.md as a 🔴 Blocker, citing that documented commands must exist on disk",
+        "Response's Work Plan #1 is either adding bin/test and bin/lint wrappers or correcting AGENTS.md to the real commands",
+        "Response flags the 12 assertion-free spec files as a 🟡 Gap under test coverage with the grep as evidence",
+        "Response notes the divergence between documented commands and what CI runs",
+        "Response does not claim dimension 2 (environment) has problems given the committed lockfile and .ruby-version"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Audit for loop engineering: TypeScript library. AGENTS.md is complete and accurate (`pnpm lint`, `pnpm typecheck`, `pnpm test` = `vitest run`, `pnpm build`, runtimes listed, conventions, a never-run list, a stated Conventional Commits format followed in git log, a branch-naming convention, and a Worktrees section documenting how to create one and that no service or port needs coordinating). pnpm-lock.yaml, .nvmrc, no env vars needed, no database or ports (a pure library). 180 tests asserting real behavior, c8 coverage at 85% threshold, vitest run took 40s, pnpm build exits 0. CI runs lint/typecheck/test/build on PRs matching AGENTS.md exactly, branch protection requires them plus 1 approval (gh api returned the rules), the verify job needs no secrets, and `gh run list -b main -L 5` is all green. PR and issue templates with acceptance criteria exist and the last 10 merged PRs follow them; a GitHub Project tracks status and is readable via gh. Husky is configured via `core.hooksPath` so it resolves in a linked worktree too and runs lint pre-commit. .claude/settings.json has an explicit allow/deny list denying git push --force and publish. A `git log -p` / secret-pattern scan comes back clean. `git worktree list` shows two active worktrees already in daily use, and no script in the repo references an absolute path.",
+      "expected_output": "Verdict Ready, all eight dimensions 🟢, empty or near-empty Work Plan, no padding. Report still printed in full and saved.",
+      "files": [],
+      "expectations": [
+        "Response gives the verdict Ready with no 🔴 or 🟡 items",
+        "Response's Work Plan is empty or explicitly states there is no required work, and does not add style preferences to look thorough",
+        "Response still prints the full scorecard, now with eight rows including dimension 8 (parallel-session readiness), with 🟢 grades and evidence rather than a one-line 'looks good'",
+        "Response grades dimension 8 🟢 citing the core.hooksPath configuration, the documented Worktrees section, and the absence of hardcoded paths or shared stateful resources — not left blank or guessed",
+        "Response still saves the report to docs/loop-engineering-audit.md"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Audit this repo for loop engineering readiness, and tell me what we could automate. Rails 7.1 app. AGENTS.md is accurate and lists `bin/lint` (25s), `bin/test` (2m10s, exits 0). Gemfile.lock, .ruby-version, bin/setup, .env.example all present. .github/workflows/ci.yml runs lint + rspec on PRs; .github/workflows/deploy.yml runs on push to main; `gh api .../protection` shows 1 required approval and both checks required. No dependabot.yml or renovate.json and 23 gems are behind. No CHANGELOG.md and `gh release list` is empty. No CODEOWNERS. `.github/ISSUE_TEMPLATE/` exists with an acceptance-criteria section and the last 10 issues all use it. app/services has 18 classes; spec/services has 4 files.",
+      "expected_output": "Verdict Partially ready or Ready on the graded dimensions. An automation map with all ten stages classified with evidence: deploy Automated, merge Human by design, release/changelog Absent, dependency maintenance Manual, code review Manual. Then at most five advisory loops — dependency & advisory patch (L1), issue → PR (L1), test-backfill (L1), agent PR review (L1) — each with trigger, done signal, risk, guardrails and what to configure. No release-notes loop (no releases exist) and no deploy loop (deploy is already Automated and merge is Human by design). Nothing added to the Work Plan and the verdict unchanged by the recommendations.",
+      "files": [],
+      "expectations": [
+        "Response includes an automation map covering all ten delivery stages, each with a status from the fixed vocabulary (Automated / Assisted / Manual / Human by design / Absent) and evidence from the repo",
+        "Response classifies merge as 'Human by design' (branch protection requires an approval) and does not propose a loop that removes the human merge",
+        "Response classifies deploy as Automated from .github/workflows/deploy.yml and does NOT recommend a deploy loop",
+        "Response recommends a dependency/advisory patch loop citing the committed Gemfile.lock and the absent dependabot.yml, and names concrete config (a dependabot.yml or renovate.json with an open-PR cap, plus an audit step in CI)",
+        "Response recommends at most five loops and assigns each a risk level defined by blast radius and reversibility (L1 contained / L2 shared-state / L3 external-effect), not by how likely the agent is to be wrong",
+        "Response gives each recommended loop a machine-checkable done signal (the project's own checks exiting 0 and a PR being open), not 'the agent finishes'",
+        "Response states explicitly that the loop recommendations are advisory — no Work Plan rows, no effect on the verdict"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Audit this repo and tell me what we can automate. Python package: pyproject.toml with ruff and pytest configured, uv.lock committed, .python-version present, AGENTS.md accurate with both commands and their runtimes. `pytest -q` ran in 48s exit 0. .github/workflows/ci.yml runs ruff + pytest on PRs; `gh api .../protection` shows both required on main with 1 approval. 140 tests across every module. No deploy config anywhere — it's a library published manually by a maintainer. No git tags, no CHANGELOG.md, no releases. No dependabot.yml. No .skip, no retry wrappers, no flaky-test evidence, and `gh run list -b main -L 5` is all green. PR and issue templates exist and are used.",
+      "expected_output": "Verdict Ready or close to it. The automation map marks deploy and post-deploy verification Absent and release Manual. The recommendations must NOT include a deploy loop, a release-notes loop, or a flaky-test quarantine loop, because the repo has no deploy pipeline, no releases, and no flake evidence. A small number of loops (dependency & advisory patch, docs drift-sync, agent PR review) or fewer. Nothing enters the Work Plan and the verdict is unchanged.",
+      "files": [],
+      "expectations": [
+        "Response does NOT recommend a deploy loop, and says the deploy stage is Absent (or that deploy sign-off stays human) rather than proposing automation for a pipeline that doesn't exist",
+        "Response does NOT recommend a release-notes or changelog loop, given there are no tags, no releases, and no CHANGELOG.md",
+        "Response does NOT recommend a flaky-test quarantine loop, since there is no flake evidence — no retries, no skips, and a green run history",
+        "Response's recommended-loop section adds no rows to the Work Plan and the Work Plan still maps only to 🔴/🟡 checks",
+        "Response's verdict is computed only from the check grades and is not changed, softened, or hedged by the loop recommendations",
+        "Every loop the response does recommend cites concrete repo evidence (a path, a command output, or a check id and grade) rather than a general best practice"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Recommend agent loops for this repo, but we will never let automation push to main. Node/TypeScript monorepo, pnpm workspace. AGENTS.md accurate (`pnpm lint`, `pnpm typecheck`, `pnpm test` = `vitest run`, 90s). pnpm-lock.yaml, .nvmrc, .env.example present. CI runs all three on PRs; branch protection requires them plus 1 approval. 600 tests, good coverage. `gh run list -b main -L 5` shows 3 of the last 5 runs failed. spec files contain 9 `it.skip` and the CI config uses `--retry 2`. `.eagerworks/loop-engineering-audit.json` contains {\"loops\": {\"maxRiskLevel\": 1, \"maxRecommended\": 3}}.",
+      "expected_output": "Loops are filtered to L1 Contained only, so the CI-failure triage loop and the flaky-test quarantine loop — both L2 because they change shared state — are excluded and the exclusion is disclosed by count in the footer. At most three loops are recommended, all L1. The flake and CI-failure evidence still shows up as 3.6 / 6.3 findings in the graded report.",
+      "files": [],
+      "expectations": [
+        "Response honours loops.maxRiskLevel: 1 and recommends only L1 Contained loops whose output is a branch, a PR, or a comment a human must merge",
+        "Response excludes the CI-failure triage loop and the flaky-test quarantine loop as above the configured risk ceiling, rather than silently omitting them, and discloses the filtered count in the report footer",
+        "Response recommends at most three loops, honouring loops.maxRecommended",
+        "Response still grades the `--retry 2` wrapper and the 9 `it.skip` occurrences as a 🟡 on check 3.6 with the evidence, independently of which loops are recommended",
+        "Response still reports the failing default-branch runs under dimension 6 rather than dropping them because the matching loop was filtered out"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "What agent loops should we set up on this project? Node service. package.json scripts: {\"start\": \"node index.js\", \"test\": \"echo \\\"no tests\\\" && exit 0\"}. No lockfile committed. No AGENTS.md or CLAUDE.md. No .github/ directory at all. No tests. Two contributors, active commits.",
+      "expected_output": "Zero loops recommended. The write floor is broken in several places — 1.1 (no agent docs), 2.2 (no lockfile), 3.1 (no real test command), 6.1 (no CI) — so no loop has instructions it can trust, a reproducible clone, a check to verify with, or a finish line. The section names the single first loop unlocked and the Work Plan item numbers that unblock it. The verdict is Not ready from the grades alone.",
+      "files": [],
+      "expectations": [
+        "Response recommends zero loops and says so plainly, rather than listing aspirational loops the repo cannot run",
+        "Response explains the reason in terms of the missing prerequisites — no agent instructions file, no committed lockfile, no real test command, no CI — so no loop has a done signal",
+        "Response names the single loop that becomes viable first and references the Work Plan item numbers that unblock it",
+        "Response grades `\"test\": \"echo \\\"no tests\\\" && exit 0\"` as a 🔴 on check 3.1 and does not credit it for exiting 0",
+        "Response's verdict is Not ready, derived from the 🔴 checks alone, and the empty loop section neither adds nor removes a Work Plan row"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Audit this repo, including whether we could run several agent sessions on it in parallel using git worktrees. Rails app, otherwise fully green: AGENTS.md is accurate and documents `bin/lint` and `bin/test`, Gemfile.lock committed, bin/setup works, CI runs the documented commands, branch protection requires 1 approval. But config/database.yml hardcodes `database: app_test` for the test environment. docker-compose.yml pins `container_name: app_db` and `ports: - \"5432:5432\"`. .env is gitignored and there's no .env.example, and bin/setup doesn't generate one. bin/deploy greps for the hardcoded path /Users/maria/projects/app. Nothing in AGENTS.md or CONTRIBUTING.md documents worktrees.",
+      "expected_output": "Dimension 8 (parallel-session readiness) is graded 🟡 on checks 8.1 (.env not reproduced), 8.2 (hardcoded path in bin/deploy), 8.3 (shared test database), 8.4 (fixed port and container name), and 8.7 (undocumented), each with evidence. Verdict stays Partially ready, not Not ready, because no dimension-8 check is ever 🔴. The Work Plan gains rows for the 🟡s. The audit does not run git worktree add. The shared test database is named as the reason parallel test runs would corrupt each other.",
+      "files": [],
+      "expectations": [
+        "Response grades dimension 8 with multiple 🟡 findings (at minimum the shared test database, the fixed port/container name, and the undocumented worktree workflow), each with cited evidence",
+        "Response's verdict is 🟡 Partially ready, not 🔴 Not ready — no dimension-8 check is graded 🔴 regardless of how many 8.x gaps exist",
+        "Response adds Work Plan rows for the dimension-8 gaps (e.g. deriving the test database name from an env var, generating .env via bin/setup, scoping the docker-compose port/container name, adding a Worktrees section to AGENTS.md)",
+        "Response does not run `git worktree add` or otherwise create a worktree to verify these findings — it grades from the setup scripts and config files it read",
+        "Response explains that a shared test database (8.3) would make two sessions' parallel test runs corrupt each other's data, distinguishing this from a merely inconvenient gap"
+      ]
+    }
+  ]
+}
