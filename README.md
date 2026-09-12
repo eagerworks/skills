@@ -9,60 +9,60 @@ Each skill is plain markdown and works with Claude Code, Cursor, GitHub Copilot,
 ### Git workflow & review
 
 <table>
-<tr><td bgcolor="#f6f8fa"><strong><a href="skills/commit/">commit</a></strong></td></tr>
+<tr><td bgcolor="#f6f8fa"><strong><a href="skills/commit/">commit</a></strong><br><sub>v1.0.0 · Updated 2026-09-07</sub></td></tr>
 <tr><td>Commits everything modified or new in the working tree by default, grouped into a series of coherent <a href="https://www.conventionalcommits.org/">Conventional Commits</a> — one commit per logical change, staged by explicit path (never <code>git add -A</code>, never the interactive <code>git add -p</code>) — with the type/scope vocabulary inferred from the repo's own git history rather than assuming the full spec is in use, an exclusion list for secrets/build output/screenshots that's always disclosed when it triggers, and honest handling of pre-commit hooks (a rejection stops the series, a formatter rewrite gets one retry, never <code>--no-verify</code>). Configurable per repo to ask before including new files instead. Stops at the commit — pushing and opening a PR is <code>create-pr</code>'s job.</td></tr>
 </table>
 
 <table>
-<tr><td bgcolor="#f6f8fa"><strong><a href="skills/create-pr/">create-pr</a></strong></td></tr>
+<tr><td bgcolor="#f6f8fa"><strong><a href="skills/create-pr/">create-pr</a></strong><br><sub>v1.2.0 · Updated 2026-09-11</sub></td></tr>
 <tr><td>Opens or updates a pull request: base-branch resolution from evidence, a description structure with no hand-wrapped paragraphs, a verification checklist derived from tooling actually detected in the repo, a <code>Test plan</code> split into <code>Automated</code> results and tickable <code>Manual</code> test scenarios (setup, steps, expected result) for whoever reviews the PR's quality, and screenshots attached via the GitHub CLI's <code>--attach</code> flag (<code>gh</code> ≥ 2.99.0) — the first officially supported way to get an image into a PR body via automation — with an explicit placeholder instead of a fabricated URL or test step when none is available, and the repo's own PR template resolved by asking rather than assuming either side.</td></tr>
 </table>
 
 <table>
-<tr><td bgcolor="#f6f8fa"><strong><a href="skills/pr-review/">pr-review</a></strong></td></tr>
+<tr><td bgcolor="#f6f8fa"><strong><a href="skills/pr-review/">pr-review</a></strong><br><sub>v2.1.0 · Updated 2026-09-01</sub></td></tr>
 <tr><td>Code review for Rails and Node/TypeScript diffs: correctness, security &amp; multi-tenant scoping, repo-convention conformance, test coverage against acceptance criteria, and documentation &amp; decision capture (stale docs, undocumented decisions), with a conservative severity ladder, markdown or machine-parseable output, and an optional review-fix loop. When reviewing a GitHub PR, it also posts the report on the PR as a comment, in English by default — configurable per repo via <code>review.language</code>, regardless of what language the conversation is in.</td></tr>
 </table>
 
 ### Documentation
 
 <table>
-<tr><td bgcolor="#f6f8fa"><strong><a href="skills/decision-record/">decision-record</a></strong></td></tr>
+<tr><td bgcolor="#f6f8fa"><strong><a href="skills/decision-record/">decision-record</a></strong><br><sub>v1.0.0 · Updated 2026-09-08</sub></td></tr>
 <tr><td>Writes or updates an architecture decision record (ADR) as a dated markdown file under <code>docs/decision-records/</code>: a one-sentence declarative title with no leading number and no <code>Status</code> field, and exactly four sections — Context, Decision, Consequences, Related — applied the same way in every repo. Requires the failure mode on both sides of the choice in Context, never invents the "why" (asks or leaves a <code>TODO(author):</code> instead), and treats a changed decision as a new record that links back rather than a rewrite of the old one.</td></tr>
 </table>
 
 ### API design
 
 <table>
-<tr><td bgcolor="#f6f8fa"><strong><a href="skills/rest-api-design/">rest-api-design</a></strong></td></tr>
+<tr><td bgcolor="#f6f8fa"><strong><a href="skills/rest-api-design/">rest-api-design</a></strong><br><sub>v1.0.0 · Updated 2026-08-21</sub></td></tr>
 <tr><td>Design and review REST APIs: resource modeling, HTTP methods &amp; status codes, payload and RFC 9457 error shapes, pagination/filtering, versioning &amp; deprecation, auth, rate limiting, security pitfalls, and OpenAPI 3.1 — with an existing-API survey step so new endpoints match the conventions already in the codebase.</td></tr>
 </table>
 
 ### Deployment
 
 <table>
-<tr><td bgcolor="#f6f8fa"><strong><a href="skills/kamal/">kamal</a></strong></td></tr>
+<tr><td bgcolor="#f6f8fa"><strong><a href="skills/kamal/">kamal</a></strong><br><sub>v1.0.1 · Updated 2026-08-28</sub></td></tr>
 <tr><td>Zero-downtime <a href="https://kamal-deploy.org">Kamal</a> deployments (v2.x + 1.9.x): first-time setup, deploys, rollbacks, rolling deploys, <code>kamal-proxy</code> + Let's Encrypt SSL, secrets &amp; vault adapters, accessories, builders/multiarch, troubleshooting, and the v1→v2 upgrade.</td></tr>
 </table>
 
 ### Audits & compliance
 
 <table>
-<tr><td bgcolor="#f6f8fa"><strong><a href="skills/audit-hipaa/">audit-hipaa</a></strong></td></tr>
+<tr><td bgcolor="#f6f8fa"><strong><a href="skills/audit-hipaa/">audit-hipaa</a></strong><br><sub>v1.0.0 · Updated 2026-09-12</sub></td></tr>
 <tr><td>Audits a codebase and its infrastructure config against the <a href="https://www.hhs.gov/hipaa/for-professionals/security/index.html">HIPAA Security Rule</a>: locates PHI in data models, logs, error trackers, analytics, and outbound LLM/API calls, checks §164.312 technical safeguards (access control, audit controls, integrity, authentication, transmission security), and routes BAA/administrative obligations to a human — output as a severity-graded audit report written to a dated file in the repo.</td></tr>
 </table>
 
 <table>
-<tr><td bgcolor="#f6f8fa"><strong><a href="skills/mobile-store-review/">mobile-store-review</a></strong></td></tr>
+<tr><td bgcolor="#f6f8fa"><strong><a href="skills/mobile-store-review/">mobile-store-review</a></strong><br><sub>v1.0.0 · Updated 2026-08-28</sub></td></tr>
 <tr><td>Audits an Expo/React Native or native mobile app — standalone or inside a Turborepo — against the <a href="https://developer.apple.com/app-store/review/guidelines/">Apple App Review Guidelines</a> and <a href="https://play.google.com/about/developer-content-policy/">Google Play Developer Program Policies</a>: permissions &amp; usage descriptions, privacy manifests &amp; App Tracking Transparency, App Privacy vs. Data safety, account deletion, IAP &amp; external payments, SDK/target-API floors, versioning &amp; credentials, and EAS/monorepo build config — output as a severity-graded audit report.</td></tr>
 </table>
 
 <table>
-<tr><td bgcolor="#f6f8fa"><strong><a href="skills/loop-engineering-audit/">loop-engineering-audit</a></strong></td></tr>
+<tr><td bgcolor="#f6f8fa"><strong><a href="skills/loop-engineering-audit/">loop-engineering-audit</a></strong><br><sub>v1.1.0 · Updated 2026-09-12</sub></td></tr>
 <tr><td>Audits a repository for loop-engineering readiness — whether an AI coding agent can take a task, implement it, verify it with the project's own checks, and hand off a PR unattended: agent-facing docs, reproducible setup, fast non-interactive verification, test safety net, task/PR conventions, CI gates, guardrails, and parallel-session readiness (worktrees that don't collide) — graded 🔴/🟡/🟢/⚪ with an ordered Work Plan, printed in chat and saved to <code>docs/loop-engineering-audit.md</code>. Then, as advisory output that never enters the Work Plan or the verdict: a map of which delivery stages are Automated / Assisted / Manual / Human by design / Absent, and up to five concrete agent loops the project could actually create and maintain — each with its blast-radius risk level (L1 contained → L3 external-effect), the prerequisites and guardrails it needs, and what to configure to stand it up.</td></tr>
 </table>
 
 <table>
-<tr><td bgcolor="#f6f8fa"><strong><a href="skills/repo-handoff/">repo-handoff</a></strong></td></tr>
+<tr><td bgcolor="#f6f8fa"><strong><a href="skills/repo-handoff/">repo-handoff</a></strong><br><sub>v1.0.0 · Updated 2026-09-12</sub></td></tr>
 <tr><td>Prepares the handoff of a codebase inherited from another team: reads architecture, setup, build/test, infrastructure &amp; deploy, data, third-party services &amp; credentials, security &amp; access, code health, process/history, and operations — graded 🔴/🟡/🟢/⚪ — and turns every gap into a prioritized (P0/P1/P2) list of <strong>questions for the previous team</strong> plus an access &amp; ownership transfer checklist, printed in chat and saved to <code>docs/repo-handoff.md</code> (answers preserved across re-runs).</td></tr>
 </table>
 
