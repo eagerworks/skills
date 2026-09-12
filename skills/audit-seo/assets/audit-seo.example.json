@@ -1,0 +1,27 @@
+{
+  "$comment": "Copy to .eagerworks/audit-seo.json at your repo root. Every field is optional — delete what you don't need. Schema: references/config.md",
+  "reportDir": "docs/seo-audits",
+  "site": {
+    "baseUrl": "https://your.domain.com",
+    "sampleUrls": ["/", "/pricing", "/blog/a-representative-post"]
+  },
+  "crawl": {
+    "maxPages": 20,
+    "requestDelayMs": 1000,
+    "respectRobotsTxt": true
+  },
+  "language": "en",
+  "dimensions": {
+    "crawlability": { "enabled": true },
+    "metadata": { "enabled": true },
+    "content": { "enabled": true },
+    "structuredData": { "enabled": true },
+    "architecture": { "enabled": true },
+    "rendering": { "enabled": true },
+    "performance": { "enabled": true },
+    "measurement": { "enabled": true }
+  },
+  "known": {
+    "searchConsoleVerified": true
+  }
+}
