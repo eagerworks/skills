@@ -12,6 +12,9 @@ description: >
   pre-submission or release-readiness check on a mobile app. Also use when the user says things
   like "will this get rejected?", "audit my app before I ship it", or "review my app for the
   stores" — even if they don't name a specific guideline.
+metadata:
+  author: eagerworks
+  version: "1.0.0"
 ---
 
 # Mobile Store Review Skill

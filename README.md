@@ -197,6 +197,7 @@ skills/
     references/                 # in-depth docs, loaded on demand
     assets/                     # copyable starter files / templates
     README.md                   # human-facing overview of the skill
+    CHANGELOG.md                # per-version history + what config/files to update
 evals/
   kamal/
     evals.json                  # per-skill eval cases (repo-level harness, not shipped)
@@ -204,16 +205,19 @@ evals/
 
 ## Adding a new skill
 
-1. Create `skills/<name>/SKILL.md` with `name` and `description` frontmatter (the `description` is what agents match against — make it specific about when to use the skill).
+1. Create `skills/<name>/SKILL.md` with `name` and `description` frontmatter (the `description` is what agents match against — make it specific about when to use the skill), plus `metadata.version: "1.0.0"`.
 2. Add `references/` and `assets/` inside `skills/<name>/` as needed; keep `SKILL.md` lean and push depth into `references/`.
-3. Add eval cases at `evals/<name>/evals.json`.
-4. Add a row to the **Available skills** table above.
+3. Add `skills/<name>/CHANGELOG.md` with an initial `[1.0.0]` entry.
+4. Add eval cases at `evals/<name>/evals.json`.
+5. Add a row to the **Available skills** table above.
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for authoring conventions.
 
 ## How it stays in sync
 
 Every tool reads the same `SKILL.md` and `references/` files. Re-run `npx skills add eagerworks/skills --skill <name>` to pull the latest version (or, on a manual install, update your vendored copy) and every agent picks up the changes — there is no per-tool content to keep in sync.
+
+Each skill also carries a `CHANGELOG.md` and a semver `metadata.version` in `SKILL.md`'s frontmatter. Before or after updating, check the skill's `CHANGELOG.md` (in your vendored copy, or on GitHub) for anything landed between the version you had and the one you're pulling — entries call out, under a **Config** heading, any `.eagerworks/<name>.json` key or other file you need to add or change for the new behavior to apply.
 
 The progressive-disclosure design means the agent loads only `SKILL.md` up front, while the full knowledge base is always available to open on demand.
 

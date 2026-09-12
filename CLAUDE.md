@@ -16,6 +16,7 @@ skills/<name>/      # SHIPPED to users — the skills.sh CLI copies this whole d
   references/*.md    # in-depth docs, loaded by the agent ON DEMAND
   assets/           # copyable starter files / templates (e.g. deploy.yml)
   README.md         # human-facing overview
+  CHANGELOG.md      # per-version history: what changed + what config/files a consumer must touch
 evals/<name>/       # NOT shipped — repo-level test harness
   evals.json        # question/answer + expectations pairs that verify skill quality
 ```
@@ -49,13 +50,24 @@ Beyond readiness it also answers "what should we automate here" as strictly **ad
 - **Code blocks for everything**: fence all commands/config with the right language tag (`bash`, `yaml`, `ruby`).
 - Keep `SKILL.md`'s frontmatter `description` specific about *when* to use the skill — agents match against it.
 
+## Versioning & changelogs
+
+Every skill carries `metadata.version` (semver) in `SKILL.md`'s frontmatter and a `skills/<name>/CHANGELOG.md` — shipped, unlike `evals/`, because it's the only place a consuming repo can see what changed between the version it has and the version it's pulling. Bump the version whenever a change to `SKILL.md`, `references/`, or `assets/` would be visible to a consumer, and add a changelog entry in the same commit:
+
+- **patch** — a correction with no behavior or config change (wrong command, outdated flag, typo).
+- **minor** — new optional behavior, a new optional config key, new reference coverage — backward compatible, nothing existing breaks.
+- **major** — a config key renamed/removed, a default flipped, or a new file the consumer must create for the skill to keep working.
+
+Every entry that touches config or requires creating/editing a file in the consumer's repo says so explicitly under a **Config** (or **Migration**) heading — never leave it to be inferred from the diff. This is what `references/config.md` documents in schema form; the changelog documents it in "what changed and why you'd notice" form. See any existing `skills/*/CHANGELOG.md` for the format.
+
 ## Adding a new skill
 
-1. `skills/<name>/SKILL.md` with `name` + `description` frontmatter.
+1. `skills/<name>/SKILL.md` with `name` + `description` frontmatter, plus `metadata.version: "1.0.0"`.
 2. `references/` and `assets/` inside `skills/<name>/`; keep `SKILL.md` lean.
 3. `skills/<name>/README.md` human overview.
-4. `evals/<name>/evals.json` with cases.
-5. Add a row to the **Available skills** table in `README.md`.
+4. `skills/<name>/CHANGELOG.md` with an initial `[1.0.0]` entry.
+5. `evals/<name>/evals.json` with cases.
+6. Add a row to the **Available skills** table in `README.md`.
 
 ## Commits
 
