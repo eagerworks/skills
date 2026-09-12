@@ -15,7 +15,7 @@ description: >
   enterprise deal", or "what security policies do we need?" — even if they don't name SOC 2.
 metadata:
   author: eagerworks
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # SOC 2 Readiness Skill
@@ -59,6 +59,17 @@ answers, ask sensible follow-ups, and move to the next group. Once the blocking 
 (scope, deadline, infrastructure, existing controls) are answered, stop interviewing and produce
 the plan — note anything still unanswered as an explicit **assumption** in the output rather than
 stalling on it.
+
+**If the opening message already answers several blocking questions, don't file that away and ask
+for the rest in isolation.** A deadline, a rough infrastructure list, and a one-line description of
+current controls are exactly the kind of detail a user volunteers when they want a plan, not an
+interview — treat that as intake already partially done. In the same response that asks whatever
+groups are genuinely still open, give the preliminary read that detail already supports: the Type
+I vs. Type II call the deadline implies, and any gap it already reveals (e.g. "PR review on most
+repos, not all" is a CC8 gap, not something to defer to a later turn). Everything still unknown
+becomes a stated assumption, not a blocker — asking more questions is never a substitute for
+saying what's already knowable. Producing zero plan content while only asking questions is the
+failure mode this note exists to prevent.
 
 The condensed groups below are enough to produce a first plan. The full bank — with the reason
 each question matters and which Trust Services criterion the answer feeds — is in
