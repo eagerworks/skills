@@ -334,6 +334,31 @@
         "Response's fix directs sourcing orgId from the session/current user context, not from req.body",
         "Response does not claim the language was inferred from, or depends on, the language the prompt was written in"
       ]
+    },
+    {
+      "id": 27,
+      "prompt": "Review this diff from our Rails app. This repo's .eagerworks/pr-review.json contains `{ \"review\": { \"ignorePaths\": [\"package-lock.json\", \"db/schema.rb\"] } }`. The diff touches three files: package-lock.json (a routine dependency bump, dozens of lines), db/schema.rb (a new `add_column :invoices, :status, :text, null: false` with no default, and this table already has rows in production per a comment above it), and app/controllers/invoices_controller.rb, which adds an unscoped `def show; @invoice = Invoice.find(params[:id]); end` next to an existing #index that scopes through current_user.organization.",
+      "expected_output": "package-lock.json matches ignorePaths and is genuinely skipped — excluded from the full-file read, no findings from it, and the report discloses the skip (e.g. '_Skipped by ignorePaths: package-lock.json_'). db/schema.rb also matches the configured pattern, but a schema/migration file is exactly the case the skill reviews anyway despite a matching pattern: the response reads it, flags the NOT NULL column with no default on a populated table as a finding, and names this as a mismatch between the configured ignorePaths pattern and a file that shouldn't have been excluded, rather than silently skipping it. Separately, the response also flags the unscoped Invoice#show as a critical/high finding, unaffected by ignorePaths.",
+      "files": [],
+      "expectations": [
+        "Response skips package-lock.json entirely and discloses that skip by name in the report, not silently",
+        "Response does NOT skip db/schema.rb despite it matching the configured ignorePaths pattern, because it's a schema/migration file",
+        "Response flags the NOT NULL column with no default on a populated table in db/schema.rb as a finding",
+        "Response explicitly names the ignorePaths pattern matching db/schema.rb as a mismatch that was overridden, rather than silently reviewing it with no explanation",
+        "Response separately flags the unscoped Invoice#show as a critical or high finding, unaffected by the ignorePaths config"
+      ]
+    },
+    {
+      "id": 28,
+      "prompt": "Review PR #42 on GitHub. commentStyle defaults to inline (no .eagerworks/pr-review.json), gh auth status succeeds. The diff adds a service object that scopes correctly through current_user.organization and matches the repo's documented conventions — there is nothing to flag.",
+      "expected_output": "The response finds zero findings and still posts a review to PR #42, since postToPr defaults to true — it does not skip posting just because there's nothing to report. The posted review has an empty comments array and a summary body with the same two-line '0 findings' verdict shown in the console report (verdict plus the one-sentence reason), never an empty comment or a skipped post.",
+      "files": [],
+      "expectations": [
+        "Response posts a review to PR #42 despite finding zero findings, rather than skipping the post because there's nothing to report",
+        "Response's posted review has an empty comments array, not a fabricated inline comment",
+        "Response's summary body carries the same two-line '0 findings' verdict shown in the console report, not an empty body",
+        "Response does not claim posting was skipped or that zero findings means nothing gets posted"
+      ]
     }
   ]
 }
