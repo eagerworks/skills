@@ -55,3 +55,10 @@ Never run bare `pnpm vitest` or `jest --watch` — they start watch mode and nev
 - New behaviour has a test that asserts it.
 - Docs updated when behaviour or commands change (`README.md`, this file, `docs/`).
 - PR template filled in; PR targets `main`.
+
+## Worktrees / parallel sessions
+
+- Create: `git worktree add ../app-<task> -b <branch>` (worktrees live beside the repo, never inside it).
+- Then: `bin/setup` — it writes `.env` from `.env.example` and creates a database named after the worktree directory.
+- Ports: `PORT=3001 bin/dev` — pick an unused port per session.
+- Conflict surface: `db/schema.rb` and `pnpm-lock.yaml` are touched by most branches — rebase and regenerate rather than hand-merging.

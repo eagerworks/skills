@@ -17,6 +17,7 @@ Dimension 1 grades the project's agent instructions file against this checklist.
 4. **Conventions** — where new code goes (services in `app/services`, one class per file), test style (RSpec request specs over controller specs; Vitest with Testing Library), naming, error handling, how migrations are created, commit message format, branch naming and base branch.
 5. **Never do this** — the fence list: `db:reset`/`db:drop`, editing `db/schema.rb` by hand, touching `vendor/` or generated dirs, deploy/publish commands, force-pushing, committing `.env`.
 6. **Definition of done** — what a PR must include: tests for new behaviour, docs updated, lint/typecheck/tests green, PR template filled.
+7. **Worktrees / parallel sessions** (graded by dimension 8, check 8.7) — how to create one, what to run in it, and the collision rules: where worktrees live, the per-worktree database/port convention, and the files most branches touch (a lockfile, `db/schema.rb`, a generated bundle) with how to resolve them.
 
 ## Quality bar (checks 1.6–1.7)
 

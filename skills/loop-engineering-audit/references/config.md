@@ -40,15 +40,37 @@ All fields optional.
   "runCommands": true,
 
   // Disable a dimension that doesn't apply (e.g. a library with no CI yet by
-  // policy). Always disclosed in the report footer — never a silent omission.
+  // policy, or a repo whose policy is a single clone, never worktrees).
+  // Always disclosed in the report footer — never a silent omission.
   "dimensions": {
-    "agentContext":   { "enabled": true },
-    "environment":    { "enabled": true },
-    "verification":   { "enabled": true },
-    "testCoverage":   { "enabled": true },
-    "taskDefinition": { "enabled": true },
-    "ciAndGates":     { "enabled": true },
-    "guardrails":     { "enabled": true }
+    "agentContext":     { "enabled": true },
+    "environment":      { "enabled": true },
+    "verification":     { "enabled": true },
+    "testCoverage":     { "enabled": true },
+    "taskDefinition":   { "enabled": true },
+    "ciAndGates":       { "enabled": true },
+    "guardrails":       { "enabled": true },
+    "parallelSessions": { "enabled": true }
+  },
+
+  // Advisory loop recommendations (references/loop-catalog.md). They never add a
+  // Work Plan row and never move the verdict, so nothing here changes a grade.
+  "loops": {
+    // On by default. false ⇒ the automation map and the recommended-loops
+    // sections are not produced at all, and the footer says
+    // `loops: disabled by config` — never a silent omission.
+    "enabled": true,
+
+    // Cap on recommended loops. Candidates removed by the cap are disclosed by
+    // count in the footer. Set 1–2 when the team wants exactly one next step.
+    "maxRecommended": 5,
+
+    // Highest risk level that may be recommended, per the ladder in
+    // references/loop-catalog.md: 1 Contained · 2 Shared-state · 3 External-effect.
+    // Default 2 — L3 loops reach production and are never proposed by default.
+    // Set 1 for an org that will never let a loop touch the default branch.
+    // Filtered candidates are disclosed by count, never silently dropped.
+    "maxRiskLevel": 2
   }
 }
 ```
@@ -58,5 +80,8 @@ All fields optional.
 - A disabled dimension appears in the footer as `dimensions disabled by config: taskDefinition` and is excluded from the scorecard and verdict.
 - `commands.*` entries are still verified (exist, non-interactive, exit code) — config is input, not evidence.
 - `runCommands: false` never downgrades a check to 🟡; it turns runtime checks ⚪ with "set `runCommands: true` or run `<command>` and report the time" as the question.
+- `loops.enabled: false` omits the automation map and the recommended-loops sections and is disclosed in the footer as `loops: disabled by config` — the same non-silent-skip rule as a disabled dimension. It cannot change a grade or the verdict, because loop output never feeds either.
+- `loops.maxRecommended` and `loops.maxRiskLevel` are caps, and every candidate they remove is reported by count in the footer.
+- `loops.maxRiskLevel: 3` permits an L3 recommendation; it does not make one viable. The prerequisites in `references/loop-catalog.md` still decide — config is input, not evidence, exactly as with `commands.*`.
 
 Starter: `assets/loop-engineering-audit.example.json`.
