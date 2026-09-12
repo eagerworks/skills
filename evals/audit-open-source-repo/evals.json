@@ -1,0 +1,122 @@
+{
+  "skill_name": "audit-open-source-repo",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Audit this open-source repo for contributor readiness. It's a public Node/TypeScript CLI tool. Root has README.md (a good one: what it does, quickstart, screenshot), LICENSE (MIT, filled in), package.json with a pinned engines.node, package-lock.json committed, .env.example matching what the code reads, docker-compose.yml for the one dependency (Redis). There is no CONTRIBUTING.md anywhere (root, .github/, docs/), no CODE_OF_CONDUCT.md, and no .github/workflows at all — nothing runs on pull requests.",
+      "expected_output": "Verdict 🔴 Closed to contributors, driven by 2.1 (no CONTRIBUTING.md) and 9.1 (no CI on pull_request). Dimension 1 and 4 grade mostly 🟢 given the good README, LICENSE, pinned engine, lockfile, and env template. The Contributor Readiness Plan lists adding CONTRIBUTING.md and a CI workflow as P0 rows, in journey order (dimension 2 before dimension 9). Report printed in full and saved to a new dated file under docs/open-source-audits/.",
+      "files": [],
+      "expectations": [
+        "Response grades 2.1 (no CONTRIBUTING.md) and 9.1 (no CI on pull_request) as 🔴 Barrier and the overall verdict as 🔴 Closed to contributors",
+        "Response does not invent 🔴s for dimension 1 or 4 given the good README, filled-in MIT LICENSE, pinned engines.node, committed lockfile, and matching .env.example",
+        "Response's Contributor Readiness Plan lists a CONTRIBUTING.md row before a CI workflow row, since dimension 2 is earlier in the journey than dimension 9",
+        "Response's Plan points the CONTRIBUTING.md row at assets/CONTRIBUTING.template.md as the starting point",
+        "Response states the report is printed in chat and saved to a new dated file under docs/open-source-audits/ without committing it"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Audit this repo. Rails app, otherwise strong: README, LICENSE (Apache-2.0), CONTRIBUTING.md with an accurate fork-based flow, CODE_OF_CONDUCT.md, SECURITY.md with a private disclosure email, CI on pull_request with no secrets needed for the test job, bin/setup documented and working on paper, .env.example complete. But there is no .rubocop.yml, no ESLint/Prettier equivalent, no .editorconfig, and no formatter of any kind — the README says \"we care about clean code\" but nothing enforces it.",
+      "expected_output": "Dimension 7 (guidelines as an executable spec) is graded 🔴 on check 7.2 — no linter and no formatter for the primary language. Verdict is 🔴 Closed to contributors driven by that single check, since every other dimension is otherwise clear. The Plan's top row adds RuboCop (or equivalent) with a committed config and a documented check command. The enforcement matrix in Findings shows every standard row empty.",
+      "files": [],
+      "expectations": [
+        "Response grades check 7.2 as 🔴 Barrier because there is no linter and no formatter of any kind for the primary language, and the verdict is 🔴 Closed to contributors",
+        "Response does not grade the missing linter as merely 🟡, and does not treat \"we care about clean code\" in the README as satisfying the check",
+        "Response's findings for dimension 7 include the enforcement matrix table even though most of its cells are empty",
+        "Response's Contributor Readiness Plan row for this gap closes check 7.2 and names a concrete artifact (a linter config file) to add, not a vague \"improve code quality\" task",
+        "Response does not invent additional 🔴s in dimensions 1-6 or 8-10 given how strong the rest of the repo is described as being"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Audit this repo for contributor readiness, and also tell us whether we should add a CLA before opening it up more broadly. It's a mid-size Python library, well-documented, CI green on forks, good CONTRIBUTING.md. Nobody has ever mentioned a CLA or DCO in any document, and there's no CLA-bot or DCO check in CI.",
+      "expected_output": "The audit grades check 2.6 🟢 (no agreement required is a complete answer, consistent with what's documented and what's enforced). When asked about adding a CLA, the skill explicitly declines to recommend one, citing that CLAs deter contributors and require an entity to hold copyright, and states this is a legal/political decision for the maintainers, not something the audit prescribes.",
+      "files": [],
+      "expectations": [
+        "Response grades check 2.6 as 🟢, treating the absence of any CLA/DCO requirement as a complete and correct state, not a gap",
+        "Response explicitly declines to recommend adopting a CLA, explaining that it deters contributors and is a legal/political choice outside this audit's scope",
+        "Response does not add a Contributor Readiness Plan row suggesting a CLA or DCO be introduced",
+        "Response distinguishes the consistency check (documented vs. enforced) from a recommendation to adopt an agreement, making clear the audit only ever checks the former",
+        "Response still completes the rest of the requested audit rather than treating the CLA question as blocking the whole response"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Audit this repo. Everything about setup, guidelines enforcement, tests, and CI is fully green. But there are zero issues labeled 'good first issue' or 'help wanted' (the labels don't even exist), there's no roadmap, and of the last 20 issues only 3 have ever gotten a maintainer response.",
+      "expected_output": "Dimension 5 (task surface) grades multiple 🟡 findings (5.5 missing labels, 5.7 no roadmap, 5.8 poor triage) but the verdict stays 🟢 Contributor-ready is wrong — since dimension 5 findings are 🟡 the verdict should be 🟡 Open with friction, never 🔴, because no check in dimension 5 is ever 🔴 regardless of how many gaps exist.",
+      "files": [],
+      "expectations": [
+        "Response grades dimension 5 with multiple 🟡 findings (missing entry-point labels, no roadmap, poor issue triage) and never grades any dimension-5 check 🔴",
+        "Response's verdict is 🟡 Open with friction, not 🔴 Closed to contributors, since every other dimension is described as fully green",
+        "Response explains that dimension 5 caps invitation, not possibility, and that a contributor bringing their own itch could still contribute despite the empty task surface",
+        "Response adds Contributor Readiness Plan rows for the dimension-5 gaps (creating the labels, adding a roadmap, improving triage) prioritized P2",
+        "Response does not fabricate a specific 'good first issue' number or describe an issue it did not actually find, given the labels don't exist"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Audit this repo. Node/TypeScript app. CI runs on pull_request. But the test job in .github/workflows/ci.yml includes a step `env: { API_KEY: ${{ secrets.THIRD_PARTY_API_KEY }} }` that the test suite reads to run its integration tests, and there's no separate job or skip for fork PRs.",
+      "expected_output": "Check 9.2 is graded 🔴 — the basic verification job needs a secret, which is empty on a fork PR, so the gate fails for a reason a contributor can't fix. Verdict is 🔴 Closed to contributors. The Plan recommends splitting the secret-dependent integration tests into a separate job guarded against running on fork PRs, or mocking the third-party API for the default test job.",
+      "files": [],
+      "expectations": [
+        "Response grades check 9.2 as 🔴 Barrier because the basic verification job reads a secret that will be empty on a fork PR",
+        "Response's verdict is 🔴 Closed to contributors",
+        "Response's Contributor Readiness Plan row proposes either splitting the secret-dependent tests into a guarded separate job or removing the dependency on the live API for the default test run, citing check 9.2",
+        "Response includes the fork-gate table in the dimension 9 findings, showing the workflow's secret usage",
+        "Response does not conflate this with a 9.3 finding (pull_request_target checking out fork code), since the workflow trigger described is plain pull_request"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Audit this repo. It's an internal company monorepo that occasionally takes contributions from other teams via feature branches, not forks. Set project.audience to internal in .eagerworks/audit-open-source-repo.json. There is no LICENSE file, no public CODE_OF_CONDUCT.md, and the repo isn't publicly discoverable — all expected, since it's internal-only. CONTRIBUTING.md exists and documents a branch-based flow.",
+      "expected_output": "Checks 1.3 (LICENSE), 1.8 (repo topics), and 3.1 (public code of conduct) are marked n/a given audience: internal, excluded from grading and disclosed in the footer rather than graded 🔴. Check 2.2 is graded against the branch-based flow described, not the fork-based flow. The footer names the exact n/a check ids.",
+      "files": [],
+      "expectations": [
+        "Response marks checks 1.3, 1.8, and 3.1 as n/a rather than 🔴, because project.audience is internal",
+        "Response's footer discloses the audience as internal and lists the exact check ids made n/a",
+        "Response grades check 2.2 against a branch-based contribution flow rather than requiring a fork-based one",
+        "Response does not otherwise relax dimensions 2, 4, 6, 7, 8, 9, or 10, which apply the same way regardless of audience",
+        "Response does not treat 'internal' as meaning the audit should be skipped or produce no report"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Audit this repo. Well-documented, good CONTRIBUTING.md, enforced linting, green CI, clear task surface. But of the last 20 merged PRs, none were from outside the 3 core maintainers despite 8 external PRs having been opened and closed unmerged, median time to first review across those 8 was 34 days, and 2 of them are still open with no maintainer response after 4 months.",
+      "expected_output": "Dimension 10 grades 🟡 on checks 10.1, 10.2, and 10.3, each reported as numbers. Verdict is 🟡 Open with friction, never 🔴, since dimension 10 is capped. The report's lead paragraph opens with the stewardship numbers (34-day median review time, 0 of 8 external PRs merged, 2 PRs stale over 90 days) rather than the usual three-sentence summary, and the findings never characterize the maintainers' behavior beyond the numbers.",
+      "files": [],
+      "expectations": [
+        "Response grades checks 10.1, 10.2, and 10.3 as 🟡, each reported with the specific numbers given (34-day median, 0/8 external PRs merged, 2 stale PRs), and never grades any dimension-10 check 🔴",
+        "Response's verdict is 🟡 Open with friction, not 🔴 Closed to contributors, because dimension 10 is a capped dimension",
+        "Response's lead paragraph opens with the stewardship numbers before any other summary sentence, per the rule that a 🟡 in dimension 10 must lead with the numbers",
+        "Response reports the finding as a factual measurement (e.g. 'median time to first review is 34 days across 8 external PRs') and does not characterize the maintainers as unresponsive or uncommitted",
+        "Response includes the stewardship metrics table in the dimension 10 findings with the given values"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Run the first contribution dry run as part of the audit. CONTRIBUTING.md says to run `make bootstrap` to set up the project. The repo's Makefile only has targets `setup`, `lint`, and `test` — there is no `bootstrap` target anywhere. Everything before that step (README, LICENSE, CONTRIBUTING being linked) checks out fine.",
+      "expected_output": "The dry run clears stage 1 (Land) and stage 2 (Decide it's alive), then stops at stage 3 (Set up) because CONTRIBUTING.md's documented `make bootstrap` command does not exist as a Makefile target — a 🔴 on check 2.8. The first-break sentence names stage 3 explicitly. Stages 4 onward are not graded as if they were reached.",
+      "files": [],
+      "expectations": [
+        "Response's dry run result for stage 3 (Set up) is 'Stops here', citing that `make bootstrap` from CONTRIBUTING.md does not exist as a Makefile target (check 2.8)",
+        "Response's required first-break sentence names stage 3 specifically, not a later stage",
+        "Response grades check 2.8 as 🔴 with the same evidence (CONTRIBUTING.md's command vs. the actual Makefile targets)",
+        "Response does not claim stages 4 through 8 'Clear' or 'Cost them' as if they were actually reached, since the trace stops at the first break",
+        "Response does not simulate fixing the Makefile or opening a PR to add the missing target — it only reports where the documented path breaks"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Re-run the contributor readiness audit. docs/open-source-audits/2026-08-01-full-audit.md already exists from last month and graded check 2.1 (no CONTRIBUTING.md) as 🔴 and check 7.2 (no linter) as 🔴. Since then, the team added a CONTRIBUTING.md and an ESLint config with a documented lint script; nothing else changed.",
+      "expected_output": "The new report grades 2.1 and 7.2 as 🟢 now, opens with a 'Progress since 2026-08-01' line noting 2 checks improved, and is saved as a new dated file (e.g. docs/open-source-audits/<today>-full-audit.md) without overwriting or deleting the August report.",
+      "files": [],
+      "expectations": [
+        "Response grades checks 2.1 and 7.2 as 🟢 based on the new CONTRIBUTING.md and ESLint config, updating the verdict accordingly",
+        "Response includes a 'Progress since 2026-08-01' line stating that 2 checks improved",
+        "Response saves the new report as a new dated file under docs/open-source-audits/ rather than overwriting the existing 2026-08-01 file",
+        "Response re-grades every dimension from scratch rather than only diffing the two known checks, since an unrelated regression could have occurred elsewhere",
+        "Response does not commit either report file and confirms the new file is left unstaged"
+      ]
+    }
+  ]
+}
