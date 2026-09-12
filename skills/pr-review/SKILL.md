@@ -1,10 +1,10 @@
 ---
 name: pr-review
 description: >-
-  Reviews a branch, PR, staged, or working-tree diff for correctness, security, repo-convention, test-coverage, and documentation gaps, returning severity-rated findings without editing code. Use when asked to "review my branch/PR", "is this ready to merge", "check this diff before I push", "does this need an ADR", or to apply fixes for findings from a previous review round. When the target is a GitHub PR, the same report is also posted on the PR as a comment so the whole team can read it.
+  Reviews a branch, PR, staged, or working-tree diff for correctness, security, repo-convention, test-coverage, and documentation gaps, returning severity-rated findings without editing code. Use when asked to "review my branch/PR", "is this ready to merge", "check this diff before I push", "does this need an ADR", or to apply fixes for findings from a previous review round. When the target is a GitHub PR, the same report is also posted to the PR — as inline comments on each finding's line plus a summary, by default — so the whole team can read it.
 metadata:
   author: eagerworks
-  version: "1.0.0"
+  version: "2.1.0"
 ---
 
 # PR Review Skill
@@ -13,7 +13,7 @@ Reviews a diff — a branch, a PR, staged changes, or working-tree changes — a
 
 By default this is a **read-only** review: no file is edited, no commit is made, nothing is pushed. See `references/workflow.md` if the user explicitly wants findings fixed automatically.
 
-When the review targets a GitHub PR (`review PR #N`, or the branch under review has an open PR), the report is printed to the console **and** posted on the PR as a comment so it stays with the PR and the whole team can read it. If `gh` isn't installed or authenticated, the report is still printed and the skill offers to post it once the user sets up the GitHub CLI. See `references/workflow.md` → "Posting to a PR".
+When the review targets a GitHub PR (`review PR #N`, or the branch under review has an open PR), the report is printed to the console **and** posted to the PR so it stays with the PR and the whole team can read it — by default as a GitHub review with inline comments on each finding's line plus a summary body, or as a single plain comment when `.eagerworks/pr-review.json` sets `review.commentStyle: "summary"`. If `gh` isn't installed or authenticated, the report is still printed and the skill offers to post it once the user sets up the GitHub CLI. See `references/workflow.md` → "Posting to a PR". The report is written in English by default, regardless of what language the conversation is in — set `review.language` per repo to change it (`references/config.md`).
 
 ## Scope Detection — Do This First
 
@@ -79,7 +79,7 @@ Copyable templates live in `assets/`:
 
 ## Critical Gotchas
 
-1. **Read-only, with exactly two exceptions.** Never edit, create, or delete a file, and never `git commit`, `git push`, or open a PR on your own initiative. `git`/`gh` are for inspection only, except for: the optional fix loop (only on an explicit user request), and `gh pr comment` on the PR under review (automatic when the scope is a GitHub PR; opt-out with "don't post" or `review.postToPr: false`). Both are documented in `references/workflow.md`. No other mutation, ever.
+1. **Read-only, with exactly two exceptions.** Never edit, create, or delete a file, and never `git commit`, `git push`, or open a PR on your own initiative. `git`/`gh` are for inspection only, except for: the optional fix loop (only on an explicit user request), and posting the report to the PR under review — a `gh api` review with inline comments by default, or `gh pr comment` when `commentStyle: "summary"` (automatic when the scope is a GitHub PR; opt-out with "don't post" or `review.postToPr: false`). Both are documented in `references/workflow.md`. No other mutation, ever.
 
 2. **A finding needs evidence — see `references/rubric.md` → Conservatism.** No concrete failure scenario or cited convention means it's not a finding, no matter how confident the preference.
 
@@ -96,3 +96,5 @@ Copyable templates live in `assets/`:
 8. **Never pad the list to look thorough.** Zero findings is a valid, correct result.
 
 9. **A documentation suggestion (Lens 5B) is never a merge blocker and never counted as a finding** — keep it in its own report section, out of the verdict. And never fabricate a rationale for a decision you can't source from the PR, issue, commits, or code — an unsourced "why" is written as `TODO(author):`, never guessed.
+
+10. **Report language is configured, not inferred.** Write the report in `review.language` (default English) — never in whatever language the conversation happens to be in. The `### FINDINGS` / `### DOCUMENTATION` keys and severity values are never translated. See `references/config.md`.

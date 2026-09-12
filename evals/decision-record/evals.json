@@ -1,0 +1,79 @@
+{
+  "skill_name": "decision-record",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We just merged a PR that switches SeatReservation from optimistic locking (lock_version, which every other model in the app uses) to a pessimistic lock (with_lock). The PR description says: 'Switched to a pessimistic lock — optimistic retries were thrashing under the checkout-page burst, 40% retry rate at peak.' There's already a docs/decision-records/ directory with a few entries named like 2026-06-30--evals-separate-from-skills.md. Write a decision record for this.",
+      "expected_output": "The skill writes docs/decision-records/YYYY-MM-DD--<slug>.md (slug names the decision, e.g. pessimistic-locking-on-checkout, not the model or a number). The title is one declarative sentence with no leading number. There's a '- **Date:**' line, no Status field, and exactly the four sections Context, Decision, Consequences, Related in order. Context explains the failure mode on both sides (thrashing under optimistic locking vs. serialized checkout under pessimistic locking), sourced from the PR description rather than invented. Decision is a numbered, checkable list. Consequences states the scope boundary explicitly (this covers SeatReservation only, other models keep lock_version). It's committed (or proposed to be committed) with a docs: prefix.",
+      "files": [],
+      "expectations": [
+        "Response creates a file at docs/decision-records/ with a dated, kebab-slug filename",
+        "The title is a single declarative sentence with no leading number like '# 8.'",
+        "The record has no Status field",
+        "The record has exactly four ## sections: Context, Decision, Consequences, Related, in that order",
+        "Context states the failure mode of both optimistic and pessimistic locking, not just why optimistic locking was bad",
+        "Consequences states that this decision is scoped to SeatReservation and does not change other models",
+        "Response proposes or uses a docs: commit prefix for this file"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "This repo's docs/adr/ directory has existing records named 0001-use-postgres.md, 0002-async-jobs.md, each with a 'Status: Accepted' field near the top and an '## Alternatives Considered' section. Write a new record for the decision we just made: switching from Sidekiq to Solid Queue because we wanted to drop the Redis dependency.",
+      "expected_output": "The response writes the new record in the skill's own fixed shape (dated filename, no leading number, no Status field, exactly Context/Decision/Consequences/Related) rather than silently matching the existing 0001/0002 numbered-with-Status convention. It says explicitly that it's using a different shape than the repo's existing records and that the author can ask for the numbered/Status convention instead if they'd rather match. It puts the new file in docs/adr/ (the existing location) rather than creating a new docs/decision-records/ directory.",
+      "files": [],
+      "expectations": [
+        "Response does not add a Status field to the new record",
+        "Response does not add a leading number to the new record's title",
+        "Response does not add an 'Alternatives Considered' section — alternatives go in Context",
+        "Response explicitly states that it is using a different format than the repo's existing 0001/0002 records",
+        "Response places the new file in the existing docs/adr/ directory rather than creating docs/decision-records/"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write a decision record for this: we added an idempotency-key table so that calls to the partner payments API are safe to retry. I don't remember exactly why we picked a database table for this instead of, say, a Redis SETNX lock — that call happened a while back and I don't have the context anymore.",
+      "expected_output": "The response drafts the record using the rationale it does have (a database table for exactly-once delivery against a partner API that isn't safe to call twice), and for the specific sub-question with no available source — why a table over a Redis-based approach — it does not invent a plausible-sounding justification. It either asks the user directly or leaves an explicit TODO(author): line naming exactly what's missing.",
+      "files": [],
+      "expectations": [
+        "Response does not fabricate a reason for choosing a database table over a Redis-based approach",
+        "Response either asks the user for the missing rationale or writes an explicit TODO(author): line naming the gap",
+        "Response still writes the parts of the record it does have evidence for (the exactly-once/idempotency rationale)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I just fixed a typo in the README and renamed a local variable from `tmp` to `result` for clarity. Should we write a decision record for this?",
+      "expected_output": "The response says no record is warranted — this is a routine edit/wording fix with no real alternative anyone would have picked instead, not a judgment call. It does not produce a decision record file.",
+      "files": [],
+      "expectations": [
+        "Response states that no decision record is needed for this change",
+        "Response does not create a file under docs/decision-records/ or any ADR directory",
+        "Response explains that a typo fix and a variable rename are not judgment calls with a real alternative"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Six months ago we wrote docs/decision-records/2026-03-01--use-polling-for-status-updates.md, deciding to poll every 5 seconds instead of using websockets because our infra didn't support long-lived connections at the time. We've since migrated infra and switched to websockets. Update the record to reflect that we now use websockets.",
+      "expected_output": "The response does not rewrite the Context/Decision of the existing 2026-03-01 record to describe websockets — that would erase the honest account of what was true and decided in March. Instead it writes a new record (dated today, e.g. docs/decision-records/<today>--switch-to-websockets-for-status-updates.md) that supersedes the old one, and adds a line to the new record's Related section linking back to 2026-03-01--use-polling-for-status-updates.md. The old record is left as-is, or at most gets a Related-style pointer forward, but its Context and Decision text are not changed to match the new reality.",
+      "files": [],
+      "expectations": [
+        "Response does not rewrite the Context or Decision sections of the 2026-03-01 polling record to describe websockets",
+        "Response creates a new, separately dated record for the switch to websockets",
+        "The new record's Related section links back to 2026-03-01--use-polling-for-status-updates.md by relative filename",
+        "Response does not renumber or rename the old record"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Write the decision record for switching our rate limiter from a fixed window to a sliding window, then push it and open a PR for it.",
+      "expected_output": "The response writes the decision record file and stops there — it does not run git push or create a pull request itself, since writing the record is this skill's whole mandate. It can say that pushing/opening a PR is a separate step for the user (or another tool/skill) to take, and it commits the record with a docs: prefix if it commits at all.",
+      "files": [],
+      "expectations": [
+        "Response writes the decision record file",
+        "Response does not run git push",
+        "Response does not create or claim to create a pull request",
+        "If the response commits the file, it uses a docs: commit type"
+      ]
+    }
+  ]
+}

@@ -8,6 +8,19 @@ For most settings: `.eagerworks/pr-review.json` → conventions stated in `AGENT
 
 `baseBranch` is the one exception: an open PR's actual base (`gh pr view --json baseRefName`) outranks `baseBranch` when the branch under review already has one. See `references/base-branch.md` for the full ladder.
 
+## Report Language
+
+`review.language` picks the language of the report artifact — the console report, the inline comments, the review summary body, and every disclosure line. It has its own ladder, separate from Resolution Order above:
+
+1. An explicit instruction in the user's request for this run (e.g. "write the review in Spanish") — wins, once, without touching the config file.
+2. `review.language` in `.eagerworks/pr-review.json`.
+3. A stated convention in the target repo's `AGENTS.md`/`CLAUDE.md` (e.g. "PR reviews are written in Spanish").
+4. Built-in default: **English.**
+
+**The language the user is chatting in is never an input to this ladder.** A developer reviewing in Spanish still gets an English report unless step 2 or 3 says otherwise — the report is a team-facing artifact posted to GitHub, not a reply to the user, and its language must be deterministic regardless of which language happens to drive the conversation. See `references/output-format.md` → "Report Language" for exactly what does and doesn't get translated once a non-default language is resolved.
+
+If the resolved value isn't a language the agent can confidently write in, fall back to English and disclose the fallback in one line under the console report — a skip here is never silent, same rule `ignorePaths` already follows.
+
 ## Schema
 
 All fields optional.
@@ -53,11 +66,25 @@ All fields optional.
       "maxSuggestions": 2
     },
 
-    // Post the report as a comment on the PR under review (see references/workflow.md
+    // Post the report to the PR under review (see references/workflow.md
     // → "Posting to a PR"). On by default; only relevant when the scope is a GitHub PR.
     // Set false to keep the review in the console only — the skip is disclosed in the
     // report, never silent.
-    "postToPr": true
+    "postToPr": true,
+
+    // How the report is posted, when postToPr is true. "inline" (default) posts a
+    // GitHub review that comments directly on each finding's line, with a summary
+    // body for the verdict and any finding that can't be anchored to a diff line.
+    // "summary" posts one plain issue comment with the full report, same as this
+    // skill's original behavior — also the automatic fallback if an inline review
+    // fails to post (references/workflow.md → "Handle a 422").
+    "commentStyle": "inline",
+
+    // Language the report, inline comments, and summary body are written in — a
+    // BCP-47 tag or a plain language name ("en", "es", "pt-BR", "Spanish"). Default
+    // "en", always, regardless of what language the conversation is in — see
+    // "Report Language" above.
+    "language": "en"
   },
 
   // Commands this repo uses to verify a fix during the optional fix loop. Run as-is, in order.
@@ -77,7 +104,9 @@ All fields optional.
     ],
     "ignorePaths": ["db/schema.rb"],
     "documentation": { "enabled": true, "decisionRecordsPath": "docs/adr/" },
-    "postToPr": true
+    "postToPr": true,
+    "commentStyle": "inline",
+    "language": "es"
   },
   "localChecks": ["bundle exec rspec", "bundle exec rubocop"]
 }

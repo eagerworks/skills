@@ -4,7 +4,7 @@ description: >-
   Sets up, runs, and troubleshoots Kamal deployments (v1 and v2) — zero-downtime Docker deploys to VPS or bare-metal servers. Use when the user mentions Kamal, kamal-proxy, or Traefik, edits config/deploy.yml or .kamal/secrets, or asks to deploy an app to their own server, roll back, add accessories like Postgres or Redis, fix a failed deploy or healthcheck, or upgrade from Kamal 1 to 2.
 metadata:
   author: eagerworks
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Kamal Deployment Skill

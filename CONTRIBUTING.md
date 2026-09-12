@@ -19,15 +19,27 @@ See [`README.md`](README.md) for the full layout. Each skill is a self-contained
 - **`skills/<name>/references/*.md`** files are loaded on demand — each covers a single domain in depth. Add detail here rather than expanding `SKILL.md`.
 - **`skills/<name>/assets/`** holds copyable starter files — templates and executable samples.
 - **`skills/<name>/README.md`** is the human-facing overview of the skill.
+- **`skills/<name>/CHANGELOG.md`** is the per-version history of what changed — shipped, since it's how a repo that already installed this skill finds out what's different and what it needs to update.
 - **`evals/<name>/evals.json`** is the repo-level test harness — question/answer pairs used to verify quality (kept outside `skills/<name>/` so it isn't shipped to users).
 
 ## Adding a new skill
 
-1. Create `skills/<name>/SKILL.md` with `name` and `description` frontmatter. The `description` is what agents match against — be specific about *when* to use the skill.
+1. Create `skills/<name>/SKILL.md` with `name` and `description` frontmatter, plus a `metadata.version: "1.0.0"` field. The `description` is what agents match against — be specific about *when* to use the skill.
 2. Add `references/` and `assets/` inside `skills/<name>/` as needed; keep `SKILL.md` lean and push depth into `references/`.
 3. Add a `skills/<name>/README.md` human overview.
-4. Add eval cases at `evals/<name>/evals.json`.
-5. Add a row to the **Available skills** table in [`README.md`](README.md).
+4. Add `skills/<name>/CHANGELOG.md` with an initial `[1.0.0]` entry (see [Versioning & changelogs](#versioning--changelogs) below).
+5. Add eval cases at `evals/<name>/evals.json`.
+6. Add a row to the **Available skills** table in [`README.md`](README.md).
+
+## Versioning & changelogs
+
+Every skill carries a semver `metadata.version` in `SKILL.md`'s frontmatter and a `CHANGELOG.md`. Bump the version and add a changelog entry, in the same commit, whenever a change to `SKILL.md`, `references/`, or `assets/` would be visible to someone who already installed the skill:
+
+- **patch** (`1.0.0` → `1.0.1`) — a correction with no behavior or config change: a wrong command, an outdated flag, a typo.
+- **minor** (`1.0.0` → `1.1.0`) — new optional behavior, a new optional config key, new reference coverage. Backward compatible — nothing that already worked stops working.
+- **major** (`1.0.0` → `2.0.0`) — a config key renamed or removed, a default behavior flipped, or a new file the consumer must create for the skill to keep working.
+
+Every changelog entry that touches `.eagerworks/<name>.json` (or requires creating/editing any other file in the consumer's repo) says so explicitly under a **Config** heading — for example "new optional key `foo.bar`, default `x`" or "requires creating `docs/loops/`". Never leave that to be inferred from the entry's prose or from the diff. Follow the format already used in any `skills/*/CHANGELOG.md`.
 
 ## Content guidelines
 

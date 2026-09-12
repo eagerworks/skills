@@ -1,0 +1,239 @@
+{
+  "skill_name": "create-pr",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm on branch `feature/rate-limits`, ran `git reflog show feature/rate-limits` and see one line: `feature/rate-limits@{0}: branch: Created from develop`. There's no .eagerworks/create-pr.json and no open PR yet. What base branch should I open the PR against?",
+      "expected_output": "The skill resolves the base branch to `develop` from the fork-point reflog line, without asking the user, since the reflog gives exactly one unambiguous candidate branch name. It should not assume `main` just because that's a common default, and it should not stop to ask since the reflog rung already resolved it.",
+      "files": [],
+      "expectations": [
+        "Response resolves the base branch to develop",
+        "Response does not assume main or any other branch without evidence",
+        "Response cites the reflog 'Created from develop' line as the evidence",
+        "Response does not ask the user a question here, since the fork point resolved unambiguously",
+        "Response does not skip straight to git branch -a --contains without first checking the reflog line"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I'm opening a PR for branch `hotfix/login`. `git reflog show hotfix/login | grep 'branch: Created from'` returns nothing, and `git branch -a --contains <sha>` for the fork-point commit returns three branches: `origin/main`, `origin/release/v2`, and `origin/staging`. There's no .eagerworks/create-pr.json. What should I do?",
+      "expected_output": "The skill should not guess among the three candidates or default to main. It should ask the user which branch to open the PR against, listing the three real candidates found (main, release/v2, staging) rather than silently picking one, per the base-branch resolution ladder.",
+      "files": [],
+      "expectations": [
+        "Response does not silently pick main or any single branch as the base",
+        "Response asks the user to choose the base branch",
+        "Response lists the actual candidates found: main, release/v2, and staging",
+        "Response does not claim git branch -a --contains returning multiple branches is itself an answer",
+        "Response does not proceed to push or create the PR before the base branch question is answered"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "My gh version is 2.83.2. I need to attach a screenshot (./screenshots/dashboard.png) to a new PR I'm opening with gh pr create. How do I do it?",
+      "expected_output": "The skill should recognize that gh's --attach flag requires gh >= 2.99.0, and 2.83.2 is below that. It should tell the user to upgrade gh (e.g. brew upgrade gh) and then use --attach, rather than falling back to any other upload mechanism like the undocumented uploads.github.com endpoint or asking the user to manually upload the image through the web UI as the primary recommendation.",
+      "files": [],
+      "expectations": [
+        "Response identifies that gh 2.83.2 is older than the 2.99.0 version required for --attach",
+        "Response's primary recommendation is to upgrade gh (e.g. brew upgrade gh or the platform equivalent)",
+        "Response does not recommend the undocumented uploads.github.com/user-attachments/assets endpoint as a solution",
+        "Response does not fabricate an image URL or claim the screenshot was attached without actually running --attach",
+        "Response shows the --attach command to use once gh is upgraded"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I'm opening a PR that changes the settings page UI, but I don't have a screenshot yet, there are no Playwright or Cypress artifacts on disk, and the app isn't currently running anywhere I can capture from. What should I do about the Screenshots section?",
+      "expected_output": "The skill should not fabricate an image URL or omit the Screenshots section silently. It should leave an explicit placeholder in the description (e.g. a TODO comment naming what screenshot is needed) and ask the user to provide one or confirm how to capture it, rather than skipping the section or inventing a plausible-looking link.",
+      "files": [],
+      "expectations": [
+        "Response does not invent or fabricate an image URL",
+        "Response does not silently drop the Screenshots section from the description",
+        "Response includes an explicit placeholder (e.g. a TODO comment) in the Screenshots section",
+        "Response asks the user for a screenshot or how they'd like one captured",
+        "Response does not attempt to boot the app or start unrelated infrastructure just to get a screenshot without confirming with the user first"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "This repo has a .github/pull_request_template.md with sections for 'Change type', 'Rollback plan', and 'Reviewer checklist'. There's no .eagerworks/create-pr.json. Should I use the repo's template or this skill's Summary/Problem/Solution/Test plan/Checklist structure?",
+      "expected_output": "The skill should not silently choose either the repo's template or its own default structure. It should ask the user which one to use for this PR, since a repo's template may encode requirements (compliance, a specific reviewer step) the skill can't verify are safe to drop, and a thin template might be exactly what the user wants replaced.",
+      "files": [],
+      "expectations": [
+        "Response detects the existing .github/pull_request_template.md",
+        "Response does not silently default to using the repo's template",
+        "Response does not silently default to overriding the repo's template with its own structure",
+        "Response asks the user which structure to use for this PR",
+        "Response does not proceed to write the PR body before this question is resolved"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "This is a small internal Python CLI tool with no package.json, no Rakefile, no Makefile, and just a couple of pytest files run manually with `pytest`. There's no .eagerworks/create-pr.json. What should the PR checklist look like?",
+      "expected_output": "The skill should derive a short, honest checklist from what's actually detectable — likely just a pytest line with the observed result and a no-secrets line — rather than including a fixed set of items like lint, typecheck, or E2E tests that this repo doesn't have. It should not tick boxes for tooling that doesn't exist, and should not force in a Screenshots requirement since this is a CLI tool with no UI.",
+      "files": [],
+      "expectations": [
+        "Response does not include a lint or typecheck checklist item when no such tooling was found",
+        "Response does not include an E2E or Playwright/Cypress checklist item for this repo",
+        "Response does not require a Screenshots section, since this is a CLI tool with no UI path touched",
+        "Response's checklist item for tests references the actual pytest command and asks for or reports a real observed result",
+        "Response does not pad the checklist with a fixed boilerplate set of items unrelated to this repo's actual tooling"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "I already have an open PR #42 for my current branch (gh pr view confirms it, base is main). I just want to fix the title to follow Conventional Commits and add the missing Test plan section. What should I do?",
+      "expected_output": "The skill should recognize this is an edit to an existing PR, not a new one, and use `gh pr edit 42` to update the title and body, never calling `gh pr create` again. It should touch only what was asked (title and Test plan section) rather than rewriting the entire description or re-deriving the whole checklist unprompted.",
+      "files": [],
+      "expectations": [
+        "Response uses gh pr edit 42 rather than gh pr create",
+        "Response does not attempt to create a second PR for the same branch",
+        "Response updates the title to follow Conventional Commits format",
+        "Response adds the missing Test plan section",
+        "Response does not unnecessarily rewrite unrelated sections of the existing description that weren't part of the request"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Here's a paragraph I'm about to put in the PR body:\n\n\"This change refactors the payment retry logic so that a transient\ndecline from the processor triggers one automatic retry after 30\nseconds instead of immediately failing the whole checkout flow.\"\n\nIs this ready to pass to --body-file?",
+      "expected_output": "The skill should flag this as a hand-wrapped paragraph — two consecutive non-empty prose lines, neither starting with a list marker, heading, table pipe, or code fence — and should join it into a single line before it goes into the PR body, since GitHub wraps prose for display and a hardcoded wrap breaks reflow.",
+      "files": [],
+      "expectations": [
+        "Response identifies the paragraph as hardcoded/hand-wrapped rather than ready to use as-is",
+        "Response explains that each paragraph should be a single line in the source since GitHub wraps it for display",
+        "Response provides the corrected version joined into one line",
+        "Response confirms --body-file is still the right way to pass the body, not --body with escaped newlines",
+        "Response does not claim the original multi-line version is fine to ship unchanged"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "This repo's .eagerworks/create-pr.json sets `\"pr\": {\"language\": \"es\"}`. I'm chatting with the assistant in English right now, but I want to open a PR. What language should the title and description be written in?",
+      "expected_output": "The skill should write the PR title and description in Spanish, per the configured pr.language, regardless of the fact that the conversation with the user is happening in English. The language of the conversation is never the input to this decision — only the config (or an explicit per-run instruction, or the repo's documented convention) decides it.",
+      "files": [],
+      "expectations": [
+        "Response writes the PR title and description content in Spanish",
+        "Response does not use English for the PR body just because the conversation is in English",
+        "Response explicitly notes that pr.language, not the conversation language, determines the PR's written language",
+        "Response would still honor an explicit one-off instruction like 'write this PR in English' if the user gave one, overriding config for that run only",
+        "Response does not silently fall back to a different language without disclosing why"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "I want you to draft a PR description for me to review before we actually do anything on GitHub — don't push or open anything yet.",
+      "expected_output": "The skill should draft the description without pushing the branch or calling gh pr create/edit, respecting that opening/pushing wasn't actually requested yet. It should still do the description work (resolve structure, checklist, etc.) but stop short of any mutating git/gh command until the user confirms they want it opened.",
+      "files": [],
+      "expectations": [
+        "Response does not run git push",
+        "Response does not run gh pr create or gh pr edit",
+        "Response produces a drafted PR description for review",
+        "Response asks or confirms before taking any mutating action once the draft is ready",
+        "Response does not claim a PR was opened when it wasn't"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "This repo's .eagerworks/create-pr.json sets `\"pr\": {\"language\": \"es\"}`, but for this one PR only, please write the title and description in English instead — the reviewer for this specific change doesn't read Spanish.",
+      "expected_output": "The skill should honor the one-off, explicit per-run instruction and write this PR's title and description in English, overriding the configured pr.language for this run only. It should not treat pr.language as an unconditional rule that can never be overridden, and it should not silently ignore the explicit request and default back to the configured Spanish.",
+      "files": [],
+      "expectations": [
+        "Response writes (or commits to writing) the PR title and description in English for this PR",
+        "Response explains that the explicit one-off instruction overrides the configured pr.language for this run only",
+        "Response does not insist on writing in Spanish just because pr.language is configured that way",
+        "Response does not claim this override changes the repo's configured default for future PRs",
+        "Response does not silently ignore the request without acknowledging the override"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "I'm opening a PR for a UI change and don't have gh 2.99.0 available yet. Someone on the team suggested just committing the screenshot PNG into the repo (e.g. under a screenshots/ folder) and linking to it via a raw.githubusercontent.com URL in the PR body, so it shows up without needing --attach. Is that a good approach?",
+      "expected_output": "The skill should reject committing the screenshot into the repo's git history as a way to work around not having --attach. It should explain this permanently adds a review-only binary to the project's history for a problem gh --attach is meant to solve, and should not endorse the raw.githubusercontent.com workaround as a good default. The recommended path is to upgrade gh (or wait until it's available) and use --attach, or leave an explicit placeholder and ask, not commit the image to version control.",
+      "files": [],
+      "expectations": [
+        "Response does not endorse committing the screenshot into the repo's git history as a good approach",
+        "Response explains that this permanently adds a review-only binary/image to the project's git history",
+        "Response's recommended path is upgrading gh and using --attach, or a placeholder, not the raw.githubusercontent.com workaround",
+        "Response does not claim committing the image is required or the only way to get it into the PR",
+        "Response does not fabricate or assume a URL for an image that hasn't actually been committed anywhere yet"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "My diff adds a `role` check so that only Admins can see the \"Delete project\" button on `/projects/:id/settings`, and the DELETE /api/projects/:id endpoint now returns 403 for non-admins. There's no .eagerworks/create-pr.json. Write the Test plan -> Manual subsection for this PR.",
+      "expected_output": "The skill should write one or more concrete, tickable scenarios under ### Manual, each with a one-line Setup (environment, actor/role), individual unchecked steps naming the exact route/endpoint, and a final Expected step with a precise pass condition (e.g. the button absent and a 403 with a JSON body, not just \"it's blocked\"). Every checkbox ships unticked, and no step assumes the reader has seen the diff.",
+      "files": [],
+      "expectations": [
+        "Response writes at least one scenario under a ### Manual subsection with a numbered #### heading",
+        "Response includes a one-line Setup stating the actor/role and environment for each scenario",
+        "Response's steps name the exact route or endpoint (e.g. /projects/:id/settings, DELETE /api/projects/:id) rather than vague instructions like 'go to settings'",
+        "Response's final step is an Expected step with a precise pass condition, not a vague 'works correctly'",
+        "Response leaves every checkbox unticked ([ ], not [x]), since the scenarios have not actually been run"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "My diff is a pure internal refactor: I extracted the OrderSerializer's formatting logic into a private method with no behavior change, and the existing specs already cover it. There's no .eagerworks/create-pr.json. What should the Test plan -> Manual subsection say?",
+      "expected_output": "The skill should not fabricate manual test scenarios for a change with no observable behavior difference. It should write the ### Manual subsection with a one-line explanation of why there's nothing to test manually (a behavior-preserving refactor covered by existing specs), rather than inventing scenarios to fill the section or omitting the subsection entirely.",
+      "files": [],
+      "expectations": [
+        "Response does not fabricate manual test scenarios for this refactor",
+        "Response still includes a ### Manual subsection rather than omitting it entirely",
+        "Response's ### Manual subsection states a concrete reason nothing applies (e.g. behavior-preserving refactor covered by existing specs)",
+        "Response does not pad the section with generic or unrelated scenarios just to have something to show",
+        "Response does not claim the refactor was manually verified when it wasn't"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "My diff only changes the API: POST /api/invoices now validates that `amount` is a positive integer and returns a 422 with a field-level error otherwise. Nothing in the UI touches this endpoint yet, and no apps/web or resources/views directories are touched by the diff. There's no .eagerworks/create-pr.json. Should the Test plan -> Manual subsection have anything in it?",
+      "expected_output": "The skill should still produce manual test scenarios, since this is observable behavior (an API contract change) even though no UI path is touched. It should not treat 'no UI path touched' as equivalent to 'nothing to test manually' — the gate for manual test cases is broader than the UI-visibility gate used for the Screenshots section.",
+      "files": [],
+      "expectations": [
+        "Response produces at least one manual test scenario for this change despite no UI path being touched",
+        "Response's scenario exercises the actual endpoint (e.g. via curl or an HTTP client) with both a valid and an invalid amount",
+        "Response does not conclude 'nothing to test manually' solely because no UI path was touched",
+        "Response's Expected step distinguishes the 422 field-level error case from a generic failure",
+        "Response does not require or reference a Screenshots section as a precondition for writing manual test cases"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "This repo's .eagerworks/create-pr.json sets `\"pr\": {\"manualTestCases\": {\"enabled\": false}}`. My diff changes UI behavior that would otherwise get manual test scenarios. What should the Test plan section look like?",
+      "expected_output": "The skill should omit the ### Manual subsection's scenarios per the config, but should not silently drop it without a trace — it should disclose in the description that manual test cases are disabled by config, consistent with this repo's non-silent-skip convention for other opt-outs.",
+      "files": [],
+      "expectations": [
+        "Response does not write manual test scenarios, honoring manualTestCases.enabled: false",
+        "Response's description includes a visible disclosure that manual test cases are disabled by config",
+        "Response does not silently omit any mention of the Manual subsection without explanation",
+        "Response still writes the ### Automated subsection normally, unaffected by this setting",
+        "Response does not claim manual testing was performed or is unnecessary for reasons other than the config setting"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "My diff adds an Admin-only bulk-export feature that requires signing in as a user with the Admin role, but this repo has no documented seed data or test accounts anywhere (no seeds.rb, no fixtures, no README section about test users). There's no .eagerworks/create-pr.json. Write the manual test scenario's Setup line and first step.",
+      "expected_output": "The skill should not invent a plausible-looking test account, email, or password for the Admin role. Since no test account is documented anywhere in the repo, it should leave an explicit TODO(author) line asking the author which account to use, rather than fabricating credentials like admin@acme.com / a guessed password.",
+      "files": [],
+      "expectations": [
+        "Response does not invent a specific email, username, or password for the Admin test account",
+        "Response includes an explicit TODO(author) line naming what's missing (an Admin test account)",
+        "Response does not claim a seed file or fixture exists when none was found",
+        "Response's step still names the actual feature or route being tested, only the account detail is flagged as unknown",
+        "Response does not skip writing the scenario entirely just because one detail is missing"
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "This repo's .eagerworks/create-pr.json sets `\"pr\": {\"manualTestCases\": {\"maxScenarios\": 3}}`. My diff is large and plausibly has six distinct manual scenarios: a permissions check, a data-integrity check on a migration, a regression on an existing search filter, a UI copy change, a tooltip hover state, and a button color change. Write the ### Manual subsection.",
+      "expected_output": "The skill should cap the subsection at 3 scenarios, keeping the highest-risk ones (permissions, data integrity, and the search regression) over the cosmetic ones (copy, tooltip, button color), and should disclose in one line that scenarios were cut and on what basis, rather than silently dropping three of them or padding/splitting scenarios to land exactly on the cap.",
+      "files": [],
+      "expectations": [
+        "Response includes at most 3 scenarios in the ### Manual subsection",
+        "Response prioritizes the permissions and data-integrity scenarios over the purely cosmetic ones (copy, tooltip, button color)",
+        "Response discloses in the description that scenarios were capped, stating how many were kept versus dropped",
+        "Response does not split or artificially multiply scenarios just to reach or stay under the numeric cap",
+        "Response does not silently omit the cut scenarios without any mention of the cap"
+      ]
+    }
+  ]
+}
