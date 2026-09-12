@@ -14,7 +14,7 @@ report. A worked example is shown below each section header; replace with the re
 > - **Date:** 2026-08-28
 > - **Scope:** Full technical safeguards audit (§164.312)
 > - **Role classification:** Business associate (customer is a covered entity clinic network)
-> - **Reviewer:** Claude, via the `hipaa` skill
+> - **Reviewer:** Claude, via the `audit-hipaa` skill
 
 - Repo: [PLACEHOLDER]
 - Date: [PLACEHOLDER]

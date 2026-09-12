@@ -1,5 +1,5 @@
 ---
-name: hipaa
+name: audit-hipaa
 description: >-
   Audits a codebase and its infrastructure config for HIPAA Security Rule compliance — locates
   PHI in data models, logs, error trackers, analytics, and outbound LLM/API calls, then reports
