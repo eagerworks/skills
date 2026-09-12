@@ -21,7 +21,7 @@ security team later asked "when did you last audit for X, and what did it find."
 
 There's a second, more practical reason: HIPAA audits recur — a codebase changes, PHI-handling
 features get added, and re-auditing periodically is expected practice (the same principle
-`soc2`'s evidence-and-monitoring reference applies to recurring controls). If every run overwrites
+`audit-soc2`'s evidence-and-monitoring reference applies to recurring controls). If every run overwrites
 the same file, there's no way to see that drift, or to prove the org has actually been auditing on
 a cadence rather than doing it once for a sales conversation and never again.
 

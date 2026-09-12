@@ -1,4 +1,4 @@
-# soc2
+# audit-soc2
 
 A portable agent skill for planning and running a SOC 2 readiness effort — intake through gap
 analysis to a phased, audit-ready roadmap. Works with Claude Code, Cursor, GitHub Copilot,
@@ -56,5 +56,5 @@ platform) substitutes for that. See `references/audit-process.md` for selecting 
 See the [collection README](../../README.md#install). In short:
 
 ```bash
-npx skills add eagerworks/skills --skill soc2
+npx skills add eagerworks/skills --skill audit-soc2
 ```

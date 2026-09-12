@@ -1,5 +1,5 @@
 ---
-name: soc2
+name: audit-soc2
 description: >
   Expert guide for planning and running a SOC 2 readiness effort — the AICPA attestation report
   that proves an organization's security controls actually operate. Use this skill whenever the
@@ -13,6 +13,9 @@ description: >
   platform (Vanta, Drata, Secureframe) versus doing it manually. Also use when the user says
   things like "a customer is asking for our SOC 2", "we need to get compliant to close this
   enterprise deal", or "what security policies do we need?" — even if they don't name SOC 2.
+metadata:
+  author: eagerworks
+  version: "1.0.0"
 ---
 
 # SOC 2 Readiness Skill
