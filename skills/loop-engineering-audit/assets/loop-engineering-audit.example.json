@@ -22,6 +22,12 @@
     "testCoverage": { "enabled": true },
     "taskDefinition": { "enabled": true },
     "ciAndGates": { "enabled": true },
-    "guardrails": { "enabled": true }
+    "guardrails": { "enabled": true },
+    "parallelSessions": { "enabled": true }
+  },
+  "loops": {
+    "enabled": true,
+    "maxRecommended": 5,
+    "maxRiskLevel": 2
   }
 }

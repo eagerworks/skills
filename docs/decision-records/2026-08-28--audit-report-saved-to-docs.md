@@ -55,5 +55,5 @@ copy-paste it every time is the same outcome with extra steps.
 
 ## Related
 
-- [`skills/loop-engineering-audit/references/audit-workflow.md`](../../skills/loop-engineering-audit/references/audit-workflow.md) — Phase 5, delivery.
+- [`skills/loop-engineering-audit/references/audit-workflow.md`](../../skills/loop-engineering-audit/references/audit-workflow.md) — the delivery phase.
 - [`2026-08-21--optional-fix-loop-and-round-cap.md`](2026-08-21--optional-fix-loop-and-round-cap.md) — `pr-review`'s read-only default, which this record deliberately deviates from.
